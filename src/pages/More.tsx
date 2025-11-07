@@ -5,8 +5,12 @@ const More = () => {
   return (
     <Layout>
       <div className="page-container">
-        <h1 className="page-title">More</h1>
-        <p className="page-content">Coming Soon...</p>
+        <h1 className="page-title">Timeline</h1>
+        <a href="https://or-six.vercel.app/" target="_blank" rel="noopener noreferrer" className="page-content">
+          The OR (beta)
+        </a>
+        <p className="page-content">The DO (alpha)</p>
+        <p className="page-content">More Coming Soon...</p>
       </div>
     </Layout>
   )
