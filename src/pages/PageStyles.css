@@ -63,12 +63,31 @@
 }
 
 @media (max-width: 768px) {
+  .page-container {
+    padding: 1.5rem;
+  }
+  
   .page-title {
     font-size: 2rem;
   }
   
   .page-content {
     font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-container {
+    padding: 1rem;
+  }
+  
+  .page-title {
+    font-size: 1.75rem;
+  }
+  
+  .page-content {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
   }
 }
 

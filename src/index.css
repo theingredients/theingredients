@@ -21,6 +21,7 @@ body {
   background-color: #ffffff;
   color: rgba(0, 0, 0, 0.87);
   transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
 }
 
 body.theme-dark {
@@ -32,6 +33,8 @@ body.theme-dark {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 button {
