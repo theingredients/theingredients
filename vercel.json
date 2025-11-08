@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/bored/:path*",
+      "destination": "https://bored-api.appbrewery.com/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

@@ -34,10 +34,8 @@ const Bored = () => {
     setLoading(true)
     setError(null)
     try {
-      // Use proxy in development, direct API in production
-      const apiBase = import.meta.env.DEV 
-        ? '/api/bored' 
-        : 'https://bored-api.appbrewery.com'
+      // Use proxy for both development and production (Vercel handles proxy in production)
+      const apiBase = '/api/bored'
       
       let url = `${apiBase}/random`
       
