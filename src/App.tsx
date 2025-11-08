@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import Contact from './pages/Contact'
 import About from './pages/About'
 import More from './pages/More'
+import Bored from './pages/Bored'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/more" element={<More />} />
+          <Route path="/bored" element={<Bored />} />
         </Routes>
       </Router>
     </ThemeProvider>

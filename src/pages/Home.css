@@ -58,6 +58,17 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
+.clickable-title {
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.1s ease, opacity 0.3s ease;
+}
+
+.clickable-title:active {
+  transform: scale(0.98);
+  opacity: 0.8;
+}
+
 @media (max-width: 768px) {
   .title-line {
     font-size: 3rem;

@@ -10,6 +10,7 @@ const More = () => {
           The OR (beta)
         </a>
         <p className="page-content">The DO (alpha)</p>
+        <p className="page-content">The GO (concept)</p>
         <p className="page-content">The Future</p>
       </div>
     </Layout>
