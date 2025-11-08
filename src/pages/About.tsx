@@ -7,6 +7,8 @@ const About = () => {
       <div className="page-container">
         <h1 className="page-title">About</h1>
         <p className="page-content">We love to create, share, and collaborate.</p>
+        <p className="page-content">Let's learn about <a href="https://developer.mozilla.org/en-US/docs/Web/API" target="_blank" rel="noopener noreferrer" className="inline-link">Web APIs</a> together!</p>
+        <p className="page-content">Got some UX ideas? Let's <a href="mailto:theingredientscollective@gmail.com?subject=Let's chat!" className="inline-link">chat!</a></p>
       </div>
     </Layout>
   )
