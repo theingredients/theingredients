@@ -10,7 +10,7 @@ const More = () => {
           The OR (beta)
         </a>
         <p className="page-content">The DO (alpha)</p>
-        <p className="page-content">More Coming Soon...</p>
+        <p className="page-content">The Future</p>
       </div>
     </Layout>
   )

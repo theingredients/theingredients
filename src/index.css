@@ -24,6 +24,23 @@ body {
   overflow-x: hidden;
 }
 
+@media (max-width: 768px) {
+  html {
+    height: 100%;
+    height: -webkit-fill-available;
+  }
+  
+  body {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    height: -webkit-fill-available;
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+}
+
 body.theme-dark {
   background-color: #1a1a1a;
   color: rgba(255, 255, 255, 0.87);
@@ -35,6 +52,15 @@ body.theme-dark {
   flex-direction: column;
   width: 100%;
   overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  #root {
+    height: 100%;
+    height: -webkit-fill-available;
+    max-height: 100%;
+    overflow: hidden;
+  }
 }
 
 button {
