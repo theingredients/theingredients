@@ -194,18 +194,7 @@ const Home = () => {
             onClick={handleClockClick}
           >
             {showWeather ? (
-              <div 
-                className="weather-display"
-                onClick={(e) => {
-                  // Allow clicking to go back to time when weather is loaded
-                  // Let the click bubble up to parent which handles the toggle
-                  if (!weather || loading || error) {
-                    // Only stop propagation during loading/error states
-                    e.stopPropagation()
-                  }
-                  // When weather is loaded, let it bubble to parent's handleClockClick
-                }}
-              >
+              <div className="weather-display">
                 {loading && <div className="weather-loading">Loading...</div>}
                 {error && (
                   <div className="weather-error">
