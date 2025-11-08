@@ -17,6 +17,33 @@
   text-align: center;
 }
 
+.clock {
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: rgba(0, 0, 0, 0.6);
+  letter-spacing: 1px;
+  margin-top: 2rem;
+  transition: color 0.3s ease;
+}
+
+.theme-dark .clock {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 768px) {
+  .clock {
+    font-size: 1.2rem;
+    margin-top: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .clock {
+    font-size: 1rem;
+    margin-top: 1rem;
+  }
+}
+
 .title-line {
   font-size: 5rem;
   font-weight: 400;

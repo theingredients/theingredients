@@ -25,6 +25,8 @@
 
 .footer {
   height: 80px;
+  min-height: 80px;
+  max-height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,7 +35,7 @@
   padding: 0 2rem;
   transition: border-color 0.3s ease;
   flex-wrap: wrap;
-  min-height: 80px;
+  flex-shrink: 0;
 }
 
 .theme-dark .footer {
@@ -90,8 +92,9 @@
   .footer {
     gap: 1.5rem;
     padding: 0.75rem 1rem;
-    height: auto;
+    height: 60px;
     min-height: 60px;
+    max-height: 60px;
     flex-shrink: 0;
     width: 100%;
     margin-top: auto;
@@ -124,7 +127,9 @@
   .footer {
     gap: 1rem;
     padding: 0.75rem 0.75rem;
+    height: 60px;
     min-height: 60px;
+    max-height: 60px;
     flex-shrink: 0;
     width: 100%;
     margin-top: auto;
