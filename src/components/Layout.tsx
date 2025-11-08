@@ -1,5 +1,4 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
 import { useTheme } from '../contexts/ThemeContext'
 import './Layout.css'
 
@@ -11,10 +10,6 @@ const Layout = ({ children }: LayoutProps) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { theme, toggleTheme } = useTheme()
-
-  useEffect(() => {
-    document.body.className = `theme-${theme}`
-  }, [theme])
 
   const handleNavigation = (path: string) => {
     if (location.pathname === path) {

@@ -8,6 +8,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <title>The Ingredients</title>
+    <script>
+      // Apply theme immediately to prevent white flash
+      (function() {
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        document.body.className = `theme-${theme}`;
+      })();
+    </script>
   </head>
   <body>
     <div id="root">
