@@ -5,6 +5,10 @@
       "destination": "https://bored-api.appbrewery.com/:path*"
     },
     {
+      "source": "/api/jokeapi/:path*",
+      "destination": "https://v2.jokeapi.dev/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

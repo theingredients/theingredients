@@ -12,6 +12,7 @@ const More = () => {
         <a href="https://thego-navy.vercel.app/" target="_blank" rel="noopener noreferrer" className="page-content">
           The GO (beta) - geotrack to text
         </a>
+        <p className="page-content">The MIDI (alpha) - MIDI fun</p>
         <p className="page-content">The DO (alpha) - digital organizing</p>
         <p className="page-content">The Future</p>
       </div>

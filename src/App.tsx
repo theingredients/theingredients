@@ -5,6 +5,7 @@ import Contact from './pages/Contact'
 import About from './pages/About'
 import More from './pages/More'
 import Bored from './pages/Bored'
+import Jokes from './pages/Jokes'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/more" element={<More />} />
           <Route path="/bored" element={<Bored />} />
+          <Route path="/jokes" element={<Jokes />} />
         </Routes>
       </Router>
     </ThemeProvider>

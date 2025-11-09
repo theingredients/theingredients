@@ -12,6 +12,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/bored/, ''),
       },
+      '/api/jokeapi': {
+        target: 'https://v2.jokeapi.dev',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/jokeapi/, ''),
+      },
     },
   },
 })

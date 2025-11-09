@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import './PageStyles.css'
 import './Bored.css'
@@ -22,7 +23,9 @@ const Bored = () => {
   const [error, setError] = useState<string | null>(null)
   const [filterType, setFilterType] = useState<string>('')
   const [filterParticipants, setFilterParticipants] = useState<string>('')
+  const [clickCount, setClickCount] = useState(0)
   const isFetchingRef = useRef(false)
+  const navigate = useNavigate()
 
   const fetchRandomActivity = async () => {
     // Prevent multiple simultaneous requests
@@ -113,6 +116,16 @@ const Bored = () => {
     fetchRandomActivity()
   }, [])
 
+  useEffect(() => {
+    if (clickCount >= 4) {
+      navigate('/jokes')
+    }
+  }, [clickCount, navigate])
+
+  const handleTitleClick = () => {
+    setClickCount(prev => prev + 1)
+  }
+
   const activityTypes = [
     'education',
     'recreational',
@@ -128,7 +141,7 @@ const Bored = () => {
   return (
     <Layout>
       <div className="page-container">
-        <h1 className="page-title">Bored?</h1>
+        <h1 className="page-title" onClick={handleTitleClick} style={{ cursor: 'pointer' }}>Bored?</h1>
         
         <div className="bored-filters">
           <div className="filter-group">
