@@ -20,7 +20,7 @@ const Home = () => {
   const [error, setError] = useState<string | null>(null)
   const [isFallingApart, setIsFallingApart] = useState(false)
   const [animationVariant, setAnimationVariant] = useState<string>('')
-  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const longPressTimerRef = useRef<number | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -210,7 +210,7 @@ const Home = () => {
   }
 
   const handleThePressStart = () => {
-    const timer = setTimeout(() => {
+    const timer = window.setTimeout(() => {
       // Randomly select an animation variant
       const variants = ['shake', 'spin', 'explode', 'glitch', 'wobble', 'chaos', 'disintegrate', 'float']
       const randomVariant = variants[Math.floor(Math.random() * variants.length)]
