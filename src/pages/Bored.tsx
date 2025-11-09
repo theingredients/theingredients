@@ -57,12 +57,12 @@ const Bored = () => {
           params.append('participants', filterParticipants)
         }
         if (params.toString()) {
-          url = `${apiBase}/filter?${params.toString()}`
+        url = `${apiBase}/filter?${params.toString()}`
         }
       }
       
       if (import.meta.env.DEV) {
-        console.log('Fetching from:', url)
+      console.log('Fetching from:', url)
       }
       
       const response = await fetch(url, {
@@ -75,7 +75,7 @@ const Bored = () => {
       if (!response.ok) {
         const errorText = await response.text()
         if (import.meta.env.DEV) {
-          console.error('Response error:', errorText)
+        console.error('Response error:', errorText)
         }
         throw new Error(`HTTP error! status: ${response.status}`)
       }
@@ -118,7 +118,7 @@ const Bored = () => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       if (import.meta.env.DEV) {
-        console.error('Error fetching activity:', err)
+      console.error('Error fetching activity:', err)
       }
       setError(`Failed to fetch activity: ${errorMessage}. Please try again.`)
       setActivity(null)

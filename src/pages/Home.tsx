@@ -251,6 +251,11 @@ const Home = () => {
     handleThePressEnd()
   }
 
+  const handleTheTouchCancel = () => {
+    // Handle touch cancellation (e.g., when scrolling starts)
+    handleThePressEnd()
+  }
+
   return (
     <Layout>
       <div className={`home-container ${isFallingApart ? `falling-apart variant-${animationVariant}` : ''}`}>
@@ -262,6 +267,7 @@ const Home = () => {
             onMouseLeave={handleTheMouseLeave}
             onTouchStart={handleTheTouchStart}
             onTouchEnd={handleTheTouchEnd}
+            onTouchCancel={handleTheTouchCancel}
             aria-label="Hold to activate easter egg"
             title="Hold to activate easter egg"
           >
@@ -304,8 +310,8 @@ const Home = () => {
                 <span className="clock-char-container">
                   {splitIntoCharacters(formatTime(time), 'clock-char')}
                 </span>
-              ) : (
-                formatTime(time)
+            ) : (
+              formatTime(time)
               )
             )}
           </div>

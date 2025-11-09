@@ -12,7 +12,7 @@ if (rootElement) {
   )
 } else {
   if (import.meta.env.DEV) {
-    console.error('Root element not found')
+  console.error('Root element not found')
   }
 }
 

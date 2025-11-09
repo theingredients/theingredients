@@ -129,6 +129,10 @@ const Layout = ({ children }: LayoutProps) => {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     const touch = e.touches[0]
+    if (touch.clientX < 100 && touch.clientY < 100) {
+      // Only prevent default if starting in drag zone
+      e.preventDefault()
+    }
     handleDragStart(touch.clientX, touch.clientY)
   }
 
@@ -140,6 +144,8 @@ const Layout = ({ children }: LayoutProps) => {
       setIsInDragZone(inZone)
       
       if (isDraggingRef.current && dragStartRef.current) {
+        // Prevent scrolling when dragging
+        e.preventDefault()
         // Update flip progress in real-time
         const progress = calculateFlipProgress(touch.clientX, touch.clientY)
         if (progress > 0) {
@@ -165,6 +171,17 @@ const Layout = ({ children }: LayoutProps) => {
     }
   }
 
+  const handleTouchCancel = () => {
+    // Handle touch cancellation (e.g., when scrolling starts)
+    setIsInDragZone(false)
+    if (isDraggingRef.current) {
+      setFlipProgress(0)
+      setIsFlipping(false)
+    }
+    dragStartRef.current = null
+    isDraggingRef.current = false
+  }
+
   // Calculate rotation angle from progress (0 to 90 degrees)
   const rotationAngle = flipProgress * 90
 
@@ -182,6 +199,7 @@ const Layout = ({ children }: LayoutProps) => {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchCancel}
     >
       <header className="header">
         {/* Empty header for now */}

@@ -11,18 +11,18 @@ import Jokes from './pages/Jokes'
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/more" element={<More />} />
-            <Route path="/bored" element={<Bored />} />
+    <ThemeProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/more" element={<More />} />
+          <Route path="/bored" element={<Bored />} />
             <Route path="/jokes" element={<Jokes />} />
-          </Routes>
-        </Router>
-      </ThemeProvider>
+        </Routes>
+      </Router>
+    </ThemeProvider>
     </ErrorBoundary>
   )
 }

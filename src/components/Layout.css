@@ -9,6 +9,8 @@
   transform-style: preserve-3d;
   --flip-rotation: 0deg;
   --flip-progress: 0;
+  /* Allow touch actions for drag gestures */
+  touch-action: pan-y pinch-zoom;
 }
 
 /* Apply real-time transform during drag */

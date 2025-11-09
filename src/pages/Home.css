@@ -201,6 +201,8 @@
   letter-spacing: 2px;
   transition: color 0.3s ease, font-size 0.5s ease;
   user-select: none;
+  /* Allow touch interactions for long press */
+  touch-action: manipulation;
 }
 
 .title-line:first-child {
