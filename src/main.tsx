@@ -11,6 +11,8 @@ if (rootElement) {
     </React.StrictMode>,
   )
 } else {
-  console.error('Root element not found')
+  if (import.meta.env.DEV) {
+    console.error('Root element not found')
+  }
 }
 

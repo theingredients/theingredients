@@ -5,6 +5,68 @@
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  position: relative;
+  transform-style: preserve-3d;
+  --flip-rotation: 0deg;
+  --flip-progress: 0;
+}
+
+/* Apply real-time transform during drag */
+.layout.page-flipping {
+  transform: perspective(2000px) rotateY(var(--flip-rotation));
+  transform-origin: top left;
+  transition: transform 0.1s ease-out; /* Smooth but responsive */
+}
+
+/* Drag zone cursor - shows grab cursor in top-left corner */
+.layout.drag-zone-active {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 11.5V9a2 2 0 0 0-2-2h-1a2 2 0 0 0-2 2v2.5'/%3E%3Cpath d='M6 11.5V9a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v2.5'/%3E%3Cpath d='M18 11.5a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2z'/%3E%3Cpath d='M6 11.5a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-1a2 2 0 0 0-2-2z'/%3E%3C/svg%3E") 12 12, grab;
+}
+
+.theme-dark .layout.drag-zone-active {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 11.5V9a2 2 0 0 0-2-2h-1a2 2 0 0 0-2 2v2.5'/%3E%3Cpath d='M6 11.5V9a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v2.5'/%3E%3Cpath d='M18 11.5a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2z'/%3E%3Cpath d='M6 11.5a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-1a2 2 0 0 0-2-2z'/%3E%3C/svg%3E") 12 12, grab;
+}
+
+.layout.drag-zone-active:active {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 11.5V9a2 2 0 0 0-2-2h-1a2 2 0 0 0-2 2v2.5'/%3E%3Cpath d='M6 11.5V9a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v2.5'/%3E%3Cpath d='M18 11.5a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2z'/%3E%3Cpath d='M6 11.5a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-1a2 2 0 0 0-2-2z'/%3E%3C/svg%3E") 12 12, grabbing;
+}
+
+.theme-dark .layout.drag-zone-active:active {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 11.5V9a2 2 0 0 0-2-2h-1a2 2 0 0 0-2 2v2.5'/%3E%3Cpath d='M6 11.5V9a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v2.5'/%3E%3Cpath d='M18 11.5a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2z'/%3E%3Cpath d='M6 11.5a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-1a2 2 0 0 0-2-2z'/%3E%3C/svg%3E") 12 12, grabbing;
+}
+
+/* Page Flip Animation - only used for completion snap */
+@keyframes pageFlipComplete {
+  0% {
+    transform: perspective(2000px) rotateY(var(--flip-rotation));
+  }
+  100% {
+    transform: perspective(2000px) rotateY(90deg);
+  }
+}
+
+/* Opposite theme overlay that peels away - follows drag in real-time */
+.layout.page-flipping::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+  transform-origin: top left;
+  transform: perspective(2000px) rotateY(calc(var(--flip-rotation) + 90deg)) scaleX(calc(1 - var(--flip-progress) * 0.5));
+  opacity: calc(var(--flip-progress) * 0.8);
+  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+}
+
+.theme-light.layout.page-flipping::before {
+  background: #1a1a1a; /* Dark theme color */
+}
+
+.theme-dark.layout.page-flipping::before {
+  background: #ffffff; /* Light theme color */
 }
 
 .header {

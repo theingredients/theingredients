@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import './Home.css'
@@ -18,6 +18,9 @@ const Home = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isFallingApart, setIsFallingApart] = useState(false)
+  const [animationVariant, setAnimationVariant] = useState<string>('')
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -34,7 +37,7 @@ const Home = () => {
     }
   }, [clickCount, navigate])
 
-  const fetchWeather = async () => {
+  const fetchWeather = useCallback(async () => {
     setLoading(true)
     setError(null)
     
@@ -139,14 +142,13 @@ const Home = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (showWeather && !weather && !loading) {
       fetchWeather()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showWeather])
+  }, [showWeather, weather, loading, fetchWeather])
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', {
@@ -155,6 +157,32 @@ const Home = () => {
       second: '2-digit',
       hour12: false
     })
+  }
+
+  const splitIntoCharacters = (text: string, className: string = '') => {
+    return text.split('').map((char, index) => (
+      <span key={index} className={char === ' ' ? 'char-space' : `char-${index} ${className}`}>
+        {char === ' ' ? '\u00A0' : char}
+      </span>
+    ))
+  }
+
+  const getWeatherCursorClass = (description: string): string => {
+    const desc = description.toLowerCase()
+    if (desc.includes('clear') || desc.includes('sunny')) {
+      return 'weather-cursor-sunny'
+    } else if (desc.includes('rain') || desc.includes('drizzle') || desc.includes('shower')) {
+      return 'weather-cursor-rainy'
+    } else if (desc.includes('snow')) {
+      return 'weather-cursor-snowy'
+    } else if (desc.includes('thunder') || desc.includes('storm')) {
+      return 'weather-cursor-stormy'
+    } else if (desc.includes('fog') || desc.includes('mist')) {
+      return 'weather-cursor-foggy'
+    } else if (desc.includes('cloud') || desc.includes('overcast')) {
+      return 'weather-cursor-cloudy'
+    }
+    return 'weather-cursor-default'
   }
 
   const handleIngredientsClick = () => {
@@ -181,16 +209,69 @@ const Home = () => {
     fetchWeather()
   }
 
+  const handleThePressStart = () => {
+    const timer = setTimeout(() => {
+      // Randomly select an animation variant
+      const variants = ['shake', 'spin', 'explode', 'glitch', 'wobble', 'chaos', 'disintegrate', 'float']
+      const randomVariant = variants[Math.floor(Math.random() * variants.length)]
+      setAnimationVariant(randomVariant)
+      setIsFallingApart(true)
+    }, 500) // 500ms hold duration
+    
+    longPressTimerRef.current = timer
+  }
+
+  const handleThePressEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current)
+      longPressTimerRef.current = null
+    }
+    setIsFallingApart(false)
+    setAnimationVariant('')
+  }
+
+  const handleTheMouseDown = () => {
+    handleThePressStart()
+  }
+
+  const handleTheMouseUp = () => {
+    handleThePressEnd()
+  }
+
+  const handleTheMouseLeave = () => {
+    handleThePressEnd()
+  }
+
+  const handleTheTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault()
+    handleThePressStart()
+  }
+
+  const handleTheTouchEnd = () => {
+    handleThePressEnd()
+  }
+
   return (
     <Layout>
-      <div className="home-container">
+      <div className={`home-container ${isFallingApart ? `falling-apart variant-${animationVariant}` : ''}`}>
         <div className="title-stack">
-          <h1 className="title-line">The</h1>
+          <h1 
+            className="title-line"
+            onMouseDown={handleTheMouseDown}
+            onMouseUp={handleTheMouseUp}
+            onMouseLeave={handleTheMouseLeave}
+            onTouchStart={handleTheTouchStart}
+            onTouchEnd={handleTheTouchEnd}
+            aria-label="Hold to activate easter egg"
+            title="Hold to activate easter egg"
+          >
+            {isFallingApart ? splitIntoCharacters('The', 'title-char') : 'The'}
+          </h1>
           <h1 className="title-line clickable-title" onClick={handleIngredientsClick}>
-            Ingredients
+            {isFallingApart ? splitIntoCharacters('Ingredients', 'title-char') : 'Ingredients'}
           </h1>
           <div 
-            className={`clock ${showWeather ? 'weather-view' : ''}`}
+            className={`clock ${showWeather ? 'weather-view' : ''} ${loading ? 'weather-loading-state' : ''}`}
             onClick={handleClockClick}
           >
             {showWeather ? (
@@ -210,11 +291,22 @@ const Home = () => {
                   </div>
                 )}
                 {weather && !loading && !error && (
-                  <>{weather.temp}°F / {weather.tempC ?? Math.round((weather.temp - 32) * 5/9)}°C {weather.city}</>
+                  <>
+                    <span className={`weather-temp ${getWeatherCursorClass(weather.description)}`}>
+                      {weather.temp}°F / {weather.tempC ?? Math.round((weather.temp - 32) * 5/9)}°C
+                    </span>
+                    <span className="weather-location">{weather.city}</span>
+                  </>
                 )}
               </div>
             ) : (
-              formatTime(time)
+              isFallingApart ? (
+                <span className="clock-char-container">
+                  {splitIntoCharacters(formatTime(time), 'clock-char')}
+                </span>
+              ) : (
+                formatTime(time)
+              )
             )}
           </div>
         </div>

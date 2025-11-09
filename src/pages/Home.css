@@ -24,13 +24,104 @@
   letter-spacing: 1px;
   margin-top: 2rem;
   transition: color 0.3s ease;
-  cursor: pointer;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16 14'/%3E%3C/svg%3E") 12 12, pointer;
   user-select: none;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .theme-dark .clock {
   color: rgba(255, 255, 255, 0.6);
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16 14'/%3E%3C/svg%3E") 12 12, pointer;
 }
+
+/* Loading State - Loader Cursor */
+.clock.weather-loading-state {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10' stroke-dasharray='20 11.416'/%3E%3C/svg%3E") 12 12, wait;
+}
+
+.theme-dark .clock.weather-loading-state {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10' stroke-dasharray='20 11.416'/%3E%3C/svg%3E") 12 12, wait;
+}
+
+.weather-temp {
+  margin-right: 0.5rem;
+}
+
+/* Sunny/Clear Weather Cursor */
+.weather-cursor-sunny {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cline x1='12' y1='1' x2='12' y2='3'/%3E%3Cline x1='12' y1='21' x2='12' y2='23'/%3E%3Cline x1='4.22' y1='4.22' x2='5.64' y2='5.64'/%3E%3Cline x1='18.36' y1='18.36' x2='19.78' y2='19.78'/%3E%3Cline x1='1' y1='12' x2='3' y2='12'/%3E%3Cline x1='21' y1='12' x2='23' y2='12'/%3E%3Cline x1='4.22' y1='19.78' x2='5.64' y2='18.36'/%3E%3Cline x1='18.36' y1='5.64' x2='19.78' y2='4.22'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+.theme-dark .weather-cursor-sunny {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cline x1='12' y1='1' x2='12' y2='3'/%3E%3Cline x1='12' y1='21' x2='12' y2='23'/%3E%3Cline x1='4.22' y1='4.22' x2='5.64' y2='5.64'/%3E%3Cline x1='18.36' y1='18.36' x2='19.78' y2='19.78'/%3E%3Cline x1='1' y1='12' x2='3' y2='12'/%3E%3Cline x1='21' y1='12' x2='23' y2='12'/%3E%3Cline x1='4.22' y1='19.78' x2='5.64' y2='18.36'/%3E%3Cline x1='18.36' y1='5.64' x2='19.78' y2='4.22'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+/* Cloudy Weather Cursor */
+.weather-cursor-cloudy {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+/* Rainy Weather Cursor */
+.weather-cursor-rainy {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z'/%3E%3Cpath d='M12 13v6'/%3E%3Cpath d='M8 15v6'/%3E%3Cpath d='M16 15v6'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+.theme-dark .weather-cursor-cloudy {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+.theme-dark .weather-cursor-rainy {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z'/%3E%3Cpath d='M12 13v6'/%3E%3Cpath d='M8 15v6'/%3E%3Cpath d='M16 15v6'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+/* Snowy Weather Cursor */
+.weather-cursor-snowy {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z'/%3E%3Cpath d='M12 12v6'/%3E%3Cpath d='M8 14l4-4 4 4'/%3E%3Cpath d='M16 14l-4-4-4 4'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+.theme-dark .weather-cursor-snowy {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z'/%3E%3Cpath d='M12 12v6'/%3E%3Cpath d='M8 14l4-4 4 4'/%3E%3Cpath d='M16 14l-4-4-4 4'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+/* Stormy/Thunderstorm Cursor */
+.weather-cursor-stormy {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z'/%3E%3Cpath d='M13 11l-4 6h4l-2 4'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+.theme-dark .weather-cursor-stormy {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z'/%3E%3Cpath d='M13 11l-4 6h4l-2 4'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+/* Foggy Weather Cursor */
+.weather-cursor-foggy {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z'/%3E%3Cline x1='4' y1='14' x2='20' y2='14'/%3E%3Cline x1='4' y1='18' x2='20' y2='18'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+.theme-dark .weather-cursor-foggy {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z'/%3E%3Cline x1='4' y1='14' x2='20' y2='14'/%3E%3Cline x1='4' y1='18' x2='20' y2='18'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+/* Default Weather Cursor (fallback) */
+.weather-cursor-default {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z'/%3E%3Cpath d='M12 9v6'/%3E%3Cpath d='M9 12h6'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+.theme-dark .weather-cursor-default {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z'/%3E%3Cpath d='M12 9v6'/%3E%3Cpath d='M9 12h6'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+.weather-location {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E") 12 12, pointer;
+  margin-left: 0.5rem;
+}
+
+.theme-dark .weather-location {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
 
 .weather-display {
   font-size: 1.5rem;
@@ -108,11 +199,389 @@
   margin: 0;
   color: rgba(0, 0, 0, 0.85);
   letter-spacing: 2px;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, font-size 0.5s ease;
+  user-select: none;
+}
+
+.title-line:first-child {
+  cursor: default;
 }
 
 .theme-dark .title-line {
   color: rgba(255, 255, 255, 0.85);
+}
+
+/* Falling Apart Animations - Random Variants */
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  10% { transform: translate(-15px, -10px) rotate(-5deg); }
+  20% { transform: translate(15px, 10px) rotate(5deg); }
+  30% { transform: translate(-10px, 15px) rotate(-3deg); }
+  40% { transform: translate(10px, -15px) rotate(3deg); }
+  50% { transform: translate(-20px, 10px) rotate(-5deg); }
+  60% { transform: translate(20px, -10px) rotate(5deg); }
+  70% { transform: translate(-10px, -20px) rotate(-3deg); }
+  80% { transform: translate(10px, 20px) rotate(3deg); }
+  90% { transform: translate(-15px, -10px) rotate(-5deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(90deg) scale(1.1); }
+  50% { transform: rotate(180deg) scale(0.9); }
+  75% { transform: rotate(270deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes explode {
+  0% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-80px, -60px) scale(1.5); }
+  50% { transform: translate(80px, 60px) scale(0.5); }
+  75% { transform: translate(-60px, 80px) scale(1.3); }
+  100% { transform: translate(60px, -80px) scale(0.7); }
+}
+
+@keyframes glitch {
+  0%, 100% { transform: translate(0, 0); filter: hue-rotate(0deg); }
+  10% { transform: translate(-30px, 0); filter: hue-rotate(90deg); }
+  20% { transform: translate(30px, 0); filter: hue-rotate(180deg); }
+  30% { transform: translate(0, -30px); filter: hue-rotate(270deg); }
+  40% { transform: translate(0, 30px); filter: hue-rotate(360deg); }
+  50% { transform: translate(-25px, -25px); filter: hue-rotate(45deg); }
+  60% { transform: translate(25px, 25px); filter: hue-rotate(135deg); }
+  70% { transform: translate(-25px, 25px); filter: hue-rotate(225deg); }
+  80% { transform: translate(25px, -25px); filter: hue-rotate(315deg); }
+}
+
+@keyframes wobble {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  25% { transform: rotate(-20deg) translateY(-40px); }
+  50% { transform: rotate(20deg) translateY(40px); }
+  75% { transform: rotate(-15deg) translateY(-20px); }
+}
+
+@keyframes chaos {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  12.5% { transform: translate(-100px, 60px) rotate(-30deg) scale(1.3); }
+  25% { transform: translate(100px, -60px) rotate(30deg) scale(0.6); }
+  37.5% { transform: translate(-80px, -100px) rotate(-20deg) scale(1.2); }
+  50% { transform: translate(80px, 100px) rotate(20deg) scale(0.7); }
+  62.5% { transform: translate(-120px, 40px) rotate(-40deg) scale(1.4); }
+  75% { transform: translate(120px, -40px) rotate(40deg) scale(0.5); }
+  87.5% { transform: translate(-60px, 120px) rotate(-25deg) scale(1.25); }
+  100% { transform: translate(60px, -120px) rotate(25deg) scale(0.75); }
+}
+
+@keyframes disintegrate {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  25% { transform: translate(-50px, -50px) scale(0.6); opacity: 0.6; }
+  50% { transform: translate(50px, 50px) scale(1.4); opacity: 0.4; }
+  75% { transform: translate(-40px, 50px) scale(0.7); opacity: 0.5; }
+  100% { transform: translate(40px, -50px) scale(1.2); opacity: 0.7; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-60px) rotate(-10deg); }
+  66% { transform: translateY(60px) rotate(10deg); }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Character-by-character base styles */
+.title-char,
+.clock-char {
+  display: inline-block;
+  transition: none;
+}
+
+.clock-char-container {
+  display: inline-block;
+}
+
+/* Variant: Shake - Character by character */
+.variant-shake .title-char,
+.variant-shake .clock-char {
+  animation: shake 0.1s infinite;
+}
+
+.variant-shake .title-char:nth-of-type(1),
+.variant-shake .clock-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-shake .title-char:nth-of-type(2),
+.variant-shake .clock-char:nth-of-type(2) {
+  animation-delay: 0.02s;
+}
+
+.variant-shake .title-char:nth-of-type(3),
+.variant-shake .clock-char:nth-of-type(3) {
+  animation-delay: 0.04s;
+}
+
+.variant-shake .title-char:nth-of-type(4),
+.variant-shake .clock-char:nth-of-type(4) {
+  animation-delay: 0.06s;
+}
+
+.variant-shake .title-char:nth-of-type(5),
+.variant-shake .clock-char:nth-of-type(5) {
+  animation-delay: 0.08s;
+}
+
+.variant-shake .title-char:nth-of-type(6),
+.variant-shake .clock-char:nth-of-type(6) {
+  animation-delay: 0.1s;
+}
+
+.variant-shake .title-char:nth-of-type(7),
+.variant-shake .clock-char:nth-of-type(7) {
+  animation-delay: 0.12s;
+}
+
+.variant-shake .title-char:nth-of-type(8),
+.variant-shake .clock-char:nth-of-type(8) {
+  animation-delay: 0.14s;
+}
+
+.variant-shake .title-char:nth-of-type(9),
+.variant-shake .clock-char:nth-of-type(9) {
+  animation-delay: 0.16s;
+}
+
+.variant-shake .title-char:nth-of-type(10),
+.variant-shake .clock-char:nth-of-type(10) {
+  animation-delay: 0.18s;
+}
+
+.variant-shake .title-char:nth-of-type(11),
+.variant-shake .clock-char:nth-of-type(11) {
+  animation-delay: 0.2s;
+}
+
+.variant-shake .title-char:nth-of-type(n+12),
+.variant-shake .clock-char:nth-of-type(n+12) {
+  animation-delay: 0.22s;
+}
+
+/* Variant: Spin - Character by character */
+.variant-spin .title-char,
+.variant-spin .clock-char {
+  animation: spin 0.5s infinite;
+  transform-origin: center;
+}
+
+.variant-spin .title-char:nth-of-type(odd) {
+  animation-direction: reverse;
+}
+
+.variant-spin .clock-char:nth-of-type(odd) {
+  animation-direction: reverse;
+}
+
+/* Variant: Explode - Character by character */
+.variant-explode .title-char,
+.variant-explode .clock-char {
+  animation: explode 0.3s infinite;
+  transform-origin: center;
+}
+
+.variant-explode .title-char:nth-of-type(1),
+.variant-explode .clock-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-explode .title-char:nth-of-type(2),
+.variant-explode .clock-char:nth-of-type(2) {
+  animation-delay: 0.05s;
+}
+
+.variant-explode .title-char:nth-of-type(3),
+.variant-explode .clock-char:nth-of-type(3) {
+  animation-delay: 0.1s;
+}
+
+.variant-explode .title-char:nth-of-type(4),
+.variant-explode .clock-char:nth-of-type(4) {
+  animation-delay: 0.15s;
+}
+
+.variant-explode .title-char:nth-of-type(5),
+.variant-explode .clock-char:nth-of-type(5) {
+  animation-delay: 0.2s;
+}
+
+.variant-explode .title-char:nth-of-type(n+6),
+.variant-explode .clock-char:nth-of-type(n+6) {
+  animation-delay: 0.25s;
+}
+
+/* Variant: Glitch - Character by character */
+.variant-glitch .title-char,
+.variant-glitch .clock-char {
+  animation: glitch 0.2s infinite;
+}
+
+.variant-glitch .title-char:nth-of-type(odd),
+.variant-glitch .clock-char:nth-of-type(odd) {
+  animation-delay: 0s;
+}
+
+.variant-glitch .title-char:nth-of-type(even),
+.variant-glitch .clock-char:nth-of-type(even) {
+  animation-delay: 0.1s;
+}
+
+/* Variant: Wobble - Character by character */
+.variant-wobble .title-char,
+.variant-wobble .clock-char {
+  animation: wobble 0.4s infinite;
+  transform-origin: center bottom;
+}
+
+.variant-wobble .title-char:nth-of-type(1),
+.variant-wobble .clock-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-wobble .title-char:nth-of-type(2),
+.variant-wobble .clock-char:nth-of-type(2) {
+  animation-delay: 0.05s;
+}
+
+.variant-wobble .title-char:nth-of-type(3),
+.variant-wobble .clock-char:nth-of-type(3) {
+  animation-delay: 0.1s;
+}
+
+.variant-wobble .title-char:nth-of-type(4),
+.variant-wobble .clock-char:nth-of-type(4) {
+  animation-delay: 0.15s;
+}
+
+.variant-wobble .title-char:nth-of-type(5),
+.variant-wobble .clock-char:nth-of-type(5) {
+  animation-delay: 0.2s;
+}
+
+.variant-wobble .title-char:nth-of-type(n+6),
+.variant-wobble .clock-char:nth-of-type(n+6) {
+  animation-delay: 0.25s;
+}
+
+/* Variant: Chaos - Character by character */
+.variant-chaos .title-char,
+.variant-chaos .clock-char {
+  animation: chaos 0.6s infinite;
+  transform-origin: center;
+}
+
+.variant-chaos .title-char:nth-of-type(1),
+.variant-chaos .clock-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-chaos .title-char:nth-of-type(2),
+.variant-chaos .clock-char:nth-of-type(2) {
+  animation-delay: 0.1s;
+}
+
+.variant-chaos .title-char:nth-of-type(3),
+.variant-chaos .clock-char:nth-of-type(3) {
+  animation-delay: 0.2s;
+}
+
+.variant-chaos .title-char:nth-of-type(4),
+.variant-chaos .clock-char:nth-of-type(4) {
+  animation-delay: 0.3s;
+}
+
+.variant-chaos .title-char:nth-of-type(5),
+.variant-chaos .clock-char:nth-of-type(5) {
+  animation-delay: 0.4s;
+}
+
+.variant-chaos .title-char:nth-of-type(n+6),
+.variant-chaos .clock-char:nth-of-type(n+6) {
+  animation-delay: 0.5s;
+}
+
+/* Variant: Disintegrate - Character by character */
+.variant-disintegrate .title-char,
+.variant-disintegrate .clock-char {
+  animation: disintegrate 0.5s infinite, flicker 0.2s infinite;
+  transform-origin: center;
+}
+
+.variant-disintegrate .title-char:nth-of-type(1),
+.variant-disintegrate .clock-char:nth-of-type(1) {
+  animation-delay: 0s, 0s;
+}
+
+.variant-disintegrate .title-char:nth-of-type(2),
+.variant-disintegrate .clock-char:nth-of-type(2) {
+  animation-delay: 0.1s, 0.05s;
+}
+
+.variant-disintegrate .title-char:nth-of-type(3),
+.variant-disintegrate .clock-char:nth-of-type(3) {
+  animation-delay: 0.2s, 0.1s;
+}
+
+.variant-disintegrate .title-char:nth-of-type(4),
+.variant-disintegrate .clock-char:nth-of-type(4) {
+  animation-delay: 0.3s, 0.15s;
+}
+
+.variant-disintegrate .title-char:nth-of-type(5),
+.variant-disintegrate .clock-char:nth-of-type(5) {
+  animation-delay: 0.4s, 0.2s;
+}
+
+.variant-disintegrate .title-char:nth-of-type(n+6),
+.variant-disintegrate .clock-char:nth-of-type(n+6) {
+  animation-delay: 0.5s, 0.25s;
+}
+
+/* Variant: Float - Character by character */
+.variant-float .title-char,
+.variant-float .clock-char {
+  animation: float 1s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.variant-float .title-char:nth-of-type(1),
+.variant-float .clock-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-float .title-char:nth-of-type(2),
+.variant-float .clock-char:nth-of-type(2) {
+  animation-delay: 0.1s;
+}
+
+.variant-float .title-char:nth-of-type(3),
+.variant-float .clock-char:nth-of-type(3) {
+  animation-delay: 0.2s;
+}
+
+.variant-float .title-char:nth-of-type(4),
+.variant-float .clock-char:nth-of-type(4) {
+  animation-delay: 0.3s;
+}
+
+.variant-float .title-char:nth-of-type(5),
+.variant-float .clock-char:nth-of-type(5) {
+  animation-delay: 0.4s;
+}
+
+.variant-float .title-char:nth-of-type(n+6),
+.variant-float .clock-char:nth-of-type(n+6) {
+  animation-delay: 0.5s;
 }
 
 .clickable-title {
@@ -130,6 +599,7 @@
   .title-line {
     font-size: 3rem;
   }
+
 }
 
 @media (max-width: 480px) {
@@ -137,5 +607,6 @@
     font-size: 2rem;
     letter-spacing: 1px;
   }
+
 }
 

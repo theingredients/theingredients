@@ -23,8 +23,10 @@ const Bored = () => {
   const [error, setError] = useState<string | null>(null)
   const [filterType, setFilterType] = useState<string>('')
   const [filterParticipants, setFilterParticipants] = useState<string>('')
-  const [clickCount, setClickCount] = useState(0)
+  const [isInputMode, setIsInputMode] = useState(false)
+  const [inputValue, setInputValue] = useState('')
   const isFetchingRef = useRef(false)
+  const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
 
   const fetchRandomActivity = async () => {
@@ -44,12 +46,25 @@ const Bored = () => {
       
       if (filterType || filterParticipants) {
         const params = new URLSearchParams()
-        if (filterType) params.append('type', filterType)
-        if (filterParticipants) params.append('participants', filterParticipants)
-        url = `${apiBase}/filter?${params.toString()}`
+        // Validate filterType against whitelist
+        const validTypes = ['education', 'recreational', 'social', 'charity', 'cooking', 'relaxation', 'busywork']
+        if (filterType && validTypes.includes(filterType)) {
+          params.append('type', filterType)
+        }
+        // Validate participants is a valid number
+        const participantsNum = parseInt(filterParticipants, 10)
+        if (filterParticipants && !isNaN(participantsNum) && participantsNum > 0 && participantsNum <= 8) {
+          params.append('participants', filterParticipants)
+        }
+        if (params.toString()) {
+          url = `${apiBase}/filter?${params.toString()}`
+        }
       }
       
-      console.log('Fetching from:', url)
+      if (import.meta.env.DEV) {
+        console.log('Fetching from:', url)
+      }
+      
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -57,16 +72,15 @@ const Bored = () => {
         },
       })
       
-      console.log('Response status:', response.status, response.statusText)
-      
       if (!response.ok) {
         const errorText = await response.text()
-        console.error('Response error:', errorText)
+        if (import.meta.env.DEV) {
+          console.error('Response error:', errorText)
+        }
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       
       const data = await response.json()
-      console.log('Response data:', data)
       
       // Check if API returned an error object (according to docs, filter endpoint returns {"error": "..."} when no results)
       if (data.error) {
@@ -103,7 +117,9 @@ const Bored = () => {
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      console.error('Error fetching activity:', err)
+      if (import.meta.env.DEV) {
+        console.error('Error fetching activity:', err)
+      }
       setError(`Failed to fetch activity: ${errorMessage}. Please try again.`)
       setActivity(null)
     } finally {
@@ -117,13 +133,44 @@ const Bored = () => {
   }, [])
 
   useEffect(() => {
-    if (clickCount >= 4) {
+    if (isInputMode && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [isInputMode])
+
+  // Sanitize input to prevent XSS and other attacks
+  const sanitizeInput = (input: string): string => {
+    // Remove any potentially dangerous characters
+    // Allow only alphanumeric, spaces, and basic punctuation
+    return input.replace(/[<>\"'&]/g, '').slice(0, 100) // Max 100 characters
+  }
+
+  useEffect(() => {
+    if (!inputValue.trim()) return
+
+    const sanitized = sanitizeInput(inputValue)
+    const normalizedInput = sanitized.toLowerCase().trim()
+    const jokeKeywords = ['joke', 'tell me a joke', 'jokes', 'make me laugh', 'funny', 'humor']
+    
+    if (jokeKeywords.some(keyword => normalizedInput.includes(keyword))) {
       navigate('/jokes')
     }
-  }, [clickCount, navigate])
+  }, [inputValue, navigate])
 
   const handleTitleClick = () => {
-    setClickCount(prev => prev + 1)
+    setIsInputMode(true)
+  }
+
+  const handleInputBlur = () => {
+    setIsInputMode(false)
+    setInputValue('')
+  }
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      setIsInputMode(false)
+      setInputValue('')
+    }
   }
 
   const activityTypes = [
@@ -141,7 +188,41 @@ const Bored = () => {
   return (
     <Layout>
       <div className="page-container">
-        <h1 className="page-title" onClick={handleTitleClick} style={{ cursor: 'pointer' }}>Bored?</h1>
+        {isInputMode ? (
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={(e) => {
+              const sanitized = sanitizeInput(e.target.value)
+              setInputValue(sanitized)
+            }}
+            maxLength={100}
+            onBlur={handleInputBlur}
+            onKeyDown={handleInputKeyDown}
+            className="page-title-input"
+            placeholder="Type something..."
+            autoFocus
+            aria-label="Easter egg input - try typing 'joke'"
+          />
+        ) : (
+          <h1 
+            className="page-title" 
+            onClick={handleTitleClick} 
+            style={{ cursor: 'pointer' }}
+            role="button"
+            aria-label="Click to reveal easter egg"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                handleTitleClick()
+              }
+            }}
+          >
+            Bored?
+          </h1>
+        )}
         
         <div className="bored-filters">
           <div className="filter-group">

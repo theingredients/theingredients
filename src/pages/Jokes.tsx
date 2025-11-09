@@ -45,21 +45,33 @@ const Jokes = () => {
       // Use proxy for both development and production (Vercel handles proxy in production)
       const apiBase = '/api/jokeapi'
       
-      let url = `${apiBase}/joke/${filterCategory}`
+      // Validate category against whitelist to prevent path traversal
+      const validCategories = ['Any', 'Programming', 'Misc', 'Dark', 'Pun', 'Spooky', 'Christmas']
+      const safeCategory = validCategories.includes(filterCategory) ? filterCategory : 'Any'
+      
+      let url = `${apiBase}/joke/${encodeURIComponent(safeCategory)}`
       
       const params = new URLSearchParams()
-      if (filterType) {
+      // Validate filterType
+      const validTypes = ['single', 'twopart']
+      if (filterType && validTypes.includes(filterType)) {
         params.append('type', filterType)
       }
-      if (blacklistFlags.length > 0) {
-        params.append('blacklistFlags', blacklistFlags.join(','))
+      // Validate blacklistFlags against whitelist
+      const validFlags = ['nsfw', 'religious', 'political', 'racist', 'sexist', 'explicit']
+      const safeFlags = blacklistFlags.filter(flag => validFlags.includes(flag))
+      if (safeFlags.length > 0) {
+        params.append('blacklistFlags', safeFlags.join(','))
       }
       
       if (params.toString()) {
         url += `?${params.toString()}`
       }
       
-      console.log('Fetching from:', url)
+      if (import.meta.env.DEV) {
+        console.log('Fetching from:', url)
+      }
+      
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -67,16 +79,15 @@ const Jokes = () => {
         },
       })
       
-      console.log('Response status:', response.status, response.statusText)
-      
       if (!response.ok) {
         const errorText = await response.text()
-        console.error('Response error:', errorText)
+        if (import.meta.env.DEV) {
+          console.error('Response error:', errorText)
+        }
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       
       const data = await response.json()
-      console.log('Response data:', data)
       
       // Check if API returned an error object
       if (data.error) {
@@ -89,7 +100,9 @@ const Jokes = () => {
       setError(null)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      console.error('Error fetching joke:', err)
+      if (import.meta.env.DEV) {
+        console.error('Error fetching joke:', err)
+      }
       setError(`Failed to fetch joke: ${errorMessage}. Please try again.`)
       setJoke(null)
     } finally {
