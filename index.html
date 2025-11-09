@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     
     <!-- Primary Meta Tags -->
-    <title>The Ingredients - Create, Share, and Collaborate</title>
-    <meta name="title" content="The Ingredients - Create, Share, and Collaborate" />
-    <meta name="description" content="The Ingredients is a creative collective that loves to create, share, and collaborate. We explore Web APIs, UX ideas, and build innovative projects together." />
-    <meta name="keywords" content="The Ingredients, creative collective, web development, Web APIs, UX design, collaboration, innovation" />
+    <title>The Ingredients Design Site - Creative Collective & Web Design</title>
+    <meta name="title" content="The Ingredients Design Site - Creative Collective & Web Design" />
+    <meta name="description" content="The Ingredients design site - A creative collective specializing in web design, UX/UI, and innovative digital experiences. Explore our design portfolio and creative projects." />
+    <meta name="keywords" content="the ingredients design site, the ingredients, design site, web design, UX design, UI design, creative collective, web development, design portfolio, digital design, creative agency, design studio" />
     <meta name="author" content="The Ingredients Collective" />
     <meta name="robots" content="index, follow" />
     <meta name="language" content="English" />
@@ -18,16 +18,16 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://theingredients.vercel.app/" />
-    <meta property="og:title" content="The Ingredients - Create, Share, and Collaborate" />
-    <meta property="og:description" content="The Ingredients is a creative collective that loves to create, share, and collaborate. We explore Web APIs, UX ideas, and build innovative projects together." />
+    <meta property="og:title" content="The Ingredients Design Site - Creative Collective & Web Design" />
+    <meta property="og:description" content="The Ingredients design site - A creative collective specializing in web design, UX/UI, and innovative digital experiences. Explore our design portfolio and creative projects." />
     <meta property="og:image" content="https://theingredients.vercel.app/og-image.png" />
-    <meta property="og:site_name" content="The Ingredients" />
+    <meta property="og:site_name" content="The Ingredients Design Site" />
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://theingredients.vercel.app/" />
-    <meta property="twitter:title" content="The Ingredients - Create, Share, and Collaborate" />
-    <meta property="twitter:description" content="The Ingredients is a creative collective that loves to create, share, and collaborate. We explore Web APIs, UX ideas, and build innovative projects together." />
+    <meta property="twitter:title" content="The Ingredients Design Site - Creative Collective & Web Design" />
+    <meta property="twitter:description" content="The Ingredients design site - A creative collective specializing in web design, UX/UI, and innovative digital experiences. Explore our design portfolio and creative projects." />
     <meta property="twitter:image" content="https://theingredients.vercel.app/og-image.png" />
     
     <!-- Canonical URL -->
@@ -42,18 +42,60 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "The Ingredients",
-      "url": "https://theingredients.vercel.app/",
-      "logo": "https://theingredients.vercel.app/vite.svg",
-      "description": "A creative collective that loves to create, share, and collaborate. We explore Web APIs, UX ideas, and build innovative projects together.",
-      "email": "theingredientscollective@gmail.com",
-      "sameAs": [],
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "email": "theingredientscollective@gmail.com",
-        "contactType": "General Inquiry"
-      }
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://theingredients.vercel.app/#website",
+          "url": "https://theingredients.vercel.app/",
+          "name": "The Ingredients Design Site",
+          "description": "The Ingredients design site - A creative collective specializing in web design, UX/UI, and innovative digital experiences.",
+          "publisher": {
+            "@id": "https://theingredients.vercel.app/#organization"
+          },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://theingredients.vercel.app/?s={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://theingredients.vercel.app/#organization",
+          "name": "The Ingredients",
+          "alternateName": "The Ingredients Design Site",
+          "url": "https://theingredients.vercel.app/",
+          "logo": "https://theingredients.vercel.app/vite.svg",
+          "description": "The Ingredients design site - A creative collective specializing in web design, UX/UI, and innovative digital experiences. We explore Web APIs, UX ideas, and build innovative projects together.",
+          "email": "theingredientscollective@gmail.com",
+          "sameAs": [],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "theingredientscollective@gmail.com",
+            "contactType": "General Inquiry"
+          },
+          "knowsAbout": ["Web Design", "UX Design", "UI Design", "Web Development", "Creative Design", "Digital Design"]
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://theingredients.vercel.app/#webpage",
+          "url": "https://theingredients.vercel.app/",
+          "name": "The Ingredients Design Site - Creative Collective & Web Design",
+          "description": "The Ingredients design site - A creative collective specializing in web design, UX/UI, and innovative digital experiences.",
+          "isPartOf": {
+            "@id": "https://theingredients.vercel.app/#website"
+          },
+          "about": {
+            "@id": "https://theingredients.vercel.app/#organization"
+          },
+          "primaryImageOfPage": {
+            "@type": "ImageObject",
+            "url": "https://theingredients.vercel.app/og-image.png"
+          }
+        }
+      ]
     }
     </script>
     
@@ -71,7 +113,8 @@
       <noscript>
         <div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: 'Playfair Display', serif; text-align: center; padding: 2rem;">
           <div>
-            <h1>The Ingredients</h1>
+            <h1>The Ingredients Design Site</h1>
+            <p>A creative collective specializing in web design, UX/UI, and innovative digital experiences.</p>
             <p>Please enable JavaScript to view this site.</p>
           </div>
         </div>
