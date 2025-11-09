@@ -16,6 +16,9 @@ const Layout = ({ children }: LayoutProps) => {
   const [flipProgress, setFlipProgress] = useState(0) // 0 to 1, represents rotation from 0 to 90 degrees
   const dragStartRef = useRef<{ x: number; y: number } | null>(null)
   const isDraggingRef = useRef(false)
+  
+  // Detect if device is mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
 
   const handleNavigation = (path: string) => {
     if (location.pathname === path) {
@@ -26,10 +29,19 @@ const Layout = ({ children }: LayoutProps) => {
   }
 
   const handleDragStart = (clientX: number, clientY: number) => {
-    // Check if starting near top-left corner (within 100px)
-    if (clientX < 100 && clientY < 100) {
-      dragStartRef.current = { x: clientX, y: clientY }
-      isDraggingRef.current = true
+    if (isMobile) {
+      // On mobile: check if starting near right edge (within 50px from right)
+      const windowWidth = window.innerWidth
+      if (clientX > windowWidth - 50) {
+        dragStartRef.current = { x: clientX, y: clientY }
+        isDraggingRef.current = true
+      }
+    } else {
+      // On desktop: check if starting near top-left corner (within 100px)
+      if (clientX < 100 && clientY < 100) {
+        dragStartRef.current = { x: clientX, y: clientY }
+        isDraggingRef.current = true
+      }
     }
   }
 
@@ -38,19 +50,29 @@ const Layout = ({ children }: LayoutProps) => {
 
     const startX = dragStartRef.current.x
     const startY = dragStartRef.current.y
-    const deltaX = clientX - startX
-    const deltaY = clientY - startY
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
     
-    // Check if diagonal swipe from top-left to bottom-right
-    if (deltaX > 0 && deltaY > 0) {
-      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
-      // Angle should be between 30-60 degrees for diagonal
-      if (angle > 30 && angle < 60) {
-        // Calculate progress: 0 to 1 based on distance (max at 400px)
-        const maxDistance = 400
-        const progress = Math.min(distance / maxDistance, 1)
-        return progress
+    if (isMobile) {
+      // On mobile: horizontal swipe from right to left
+      const deltaX = startX - clientX // Negative because we're going right to left
+      if (deltaX > 0) {
+        // Calculate progress: 0 to 1 based on horizontal distance (max at 300px)
+        const maxDistance = 300
+        return Math.min(deltaX / maxDistance, 1)
+      }
+    } else {
+      // On desktop: diagonal swipe from top-left to bottom-right
+      const deltaX = clientX - startX
+      const deltaY = clientY - startY
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+      
+      if (deltaX > 0 && deltaY > 0) {
+        const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
+        // Angle should be between 30-60 degrees for diagonal
+        if (angle > 30 && angle < 60) {
+          // Calculate progress: 0 to 1 based on distance (max at 400px)
+          const maxDistance = 400
+          return Math.min(distance / maxDistance, 1)
+        }
       }
     }
     
@@ -95,8 +117,14 @@ const Layout = ({ children }: LayoutProps) => {
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    // Check if mouse is in the drag zone (top-left corner)
-    const inZone = e.clientX < 100 && e.clientY < 100
+    // Check if mouse is in the drag zone
+    let inZone = false
+    if (isMobile) {
+      const windowWidth = window.innerWidth
+      inZone = e.clientX > windowWidth - 50
+    } else {
+      inZone = e.clientX < 100 && e.clientY < 100
+    }
     setIsInDragZone(inZone)
     
     if (isDraggingRef.current && dragStartRef.current) {
@@ -129,7 +157,13 @@ const Layout = ({ children }: LayoutProps) => {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     const touch = e.touches[0]
-    if (touch.clientX < 100 && touch.clientY < 100) {
+    const windowWidth = window.innerWidth
+    // On mobile: check right edge, on desktop: check top-left corner
+    const inDragZone = isMobile 
+      ? touch.clientX > windowWidth - 50
+      : touch.clientX < 100 && touch.clientY < 100
+    
+    if (inDragZone) {
       // Only prevent default if starting in drag zone
       e.preventDefault()
     }
@@ -139,8 +173,11 @@ const Layout = ({ children }: LayoutProps) => {
   const handleTouchMove = (e: React.TouchEvent) => {
     if (e.touches.length > 0) {
       const touch = e.touches[0]
-      // Check if touch is in the drag zone (top-left corner)
-      const inZone = touch.clientX < 100 && touch.clientY < 100
+      // Check if touch is in the drag zone
+      const windowWidth = window.innerWidth
+      const inZone = isMobile
+        ? touch.clientX > windowWidth - 50
+        : touch.clientX < 100 && touch.clientY < 100
       setIsInDragZone(inZone)
       
       if (isDraggingRef.current && dragStartRef.current) {
