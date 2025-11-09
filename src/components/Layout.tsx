@@ -68,15 +68,18 @@ const Layout = ({ children }: LayoutProps) => {
     
     // If progress is significant (at least 50%), complete the flip
     if (progress >= 0.5) {
-      // Complete the animation
+      // Complete the animation to 90 degrees
       setFlipProgress(1)
+      // Wait for the flip animation to complete, then toggle theme
+      // This ensures the page is fully flipped before showing the new theme
       setTimeout(() => {
         toggleTheme()
+        // Keep the flipped state briefly to show the new theme underneath, then reset
         setTimeout(() => {
           setFlipProgress(0)
           setIsFlipping(false)
-        }, 100)
-      }, 100)
+        }, 400)
+      }, 400)
     } else {
       // Snap back if not enough progress
       setFlipProgress(0)
