@@ -9,7 +9,7 @@
   transform-style: preserve-3d;
   --flip-rotation: 0deg;
   --flip-progress: 0;
-  /* Allow touch actions for drag gestures */
+  /* Allow touch actions for drag gestures - allow vertical scrolling but prevent horizontal when in drag zone */
   touch-action: pan-y pinch-zoom;
 }
 

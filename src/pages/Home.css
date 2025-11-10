@@ -4,6 +4,8 @@
   justify-content: center;
   width: 100%;
   min-height: calc(100vh - 140px);
+  transform-style: preserve-3d;
+  perspective: 1000px;
 }
 
 @media (max-width: 768px) {
@@ -216,76 +218,76 @@
 /* Falling Apart Animations - Random Variants */
 @keyframes shake {
   0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  10% { transform: translate(-15px, -10px) rotate(-5deg); }
-  20% { transform: translate(15px, 10px) rotate(5deg); }
-  30% { transform: translate(-10px, 15px) rotate(-3deg); }
-  40% { transform: translate(10px, -15px) rotate(3deg); }
-  50% { transform: translate(-20px, 10px) rotate(-5deg); }
-  60% { transform: translate(20px, -10px) rotate(5deg); }
-  70% { transform: translate(-10px, -20px) rotate(-3deg); }
-  80% { transform: translate(10px, 20px) rotate(3deg); }
-  90% { transform: translate(-15px, -10px) rotate(-5deg); }
+  10% { transform: translate(-40px, -30px) rotate(-12deg); }
+  20% { transform: translate(40px, 30px) rotate(12deg); }
+  30% { transform: translate(-30px, 40px) rotate(-8deg); }
+  40% { transform: translate(30px, -40px) rotate(8deg); }
+  50% { transform: translate(-50px, 30px) rotate(-12deg); }
+  60% { transform: translate(50px, -30px) rotate(12deg); }
+  70% { transform: translate(-30px, -50px) rotate(-8deg); }
+  80% { transform: translate(30px, 50px) rotate(8deg); }
+  90% { transform: translate(-40px, -30px) rotate(-12deg); }
 }
 
 @keyframes spin {
   0% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(90deg) scale(1.1); }
-  50% { transform: rotate(180deg) scale(0.9); }
-  75% { transform: rotate(270deg) scale(1.1); }
+  25% { transform: rotate(90deg) scale(1.8); }
+  50% { transform: rotate(180deg) scale(0.4); }
+  75% { transform: rotate(270deg) scale(1.8); }
   100% { transform: rotate(360deg) scale(1); }
 }
 
 @keyframes explode {
   0% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(-80px, -60px) scale(1.5); }
-  50% { transform: translate(80px, 60px) scale(0.5); }
-  75% { transform: translate(-60px, 80px) scale(1.3); }
-  100% { transform: translate(60px, -80px) scale(0.7); }
+  25% { transform: translate(-150px, -120px) scale(2.5); }
+  50% { transform: translate(150px, 120px) scale(0.3); }
+  75% { transform: translate(-120px, 150px) scale(2.2); }
+  100% { transform: translate(120px, -150px) scale(0.4); }
 }
 
 @keyframes glitch {
   0%, 100% { transform: translate(0, 0); filter: hue-rotate(0deg); }
-  10% { transform: translate(-30px, 0); filter: hue-rotate(90deg); }
-  20% { transform: translate(30px, 0); filter: hue-rotate(180deg); }
-  30% { transform: translate(0, -30px); filter: hue-rotate(270deg); }
-  40% { transform: translate(0, 30px); filter: hue-rotate(360deg); }
-  50% { transform: translate(-25px, -25px); filter: hue-rotate(45deg); }
-  60% { transform: translate(25px, 25px); filter: hue-rotate(135deg); }
-  70% { transform: translate(-25px, 25px); filter: hue-rotate(225deg); }
-  80% { transform: translate(25px, -25px); filter: hue-rotate(315deg); }
+  10% { transform: translate(-80px, 0) scale(1.3); filter: hue-rotate(90deg); }
+  20% { transform: translate(80px, 0) scale(1.3); filter: hue-rotate(180deg); }
+  30% { transform: translate(0, -80px) scale(1.3); filter: hue-rotate(270deg); }
+  40% { transform: translate(0, 80px) scale(1.3); filter: hue-rotate(360deg); }
+  50% { transform: translate(-60px, -60px) scale(1.5); filter: hue-rotate(45deg); }
+  60% { transform: translate(60px, 60px) scale(1.5); filter: hue-rotate(135deg); }
+  70% { transform: translate(-60px, 60px) scale(1.5); filter: hue-rotate(225deg); }
+  80% { transform: translate(60px, -60px) scale(1.5); filter: hue-rotate(315deg); }
 }
 
 @keyframes wobble {
-  0%, 100% { transform: rotate(0deg) translateY(0); }
-  25% { transform: rotate(-20deg) translateY(-40px); }
-  50% { transform: rotate(20deg) translateY(40px); }
-  75% { transform: rotate(-15deg) translateY(-20px); }
+  0%, 100% { transform: rotate(0deg) translateY(0) scale(1); }
+  25% { transform: rotate(-35deg) translateY(-100px) scale(1.5); }
+  50% { transform: rotate(35deg) translateY(100px) scale(1.5); }
+  75% { transform: rotate(-25deg) translateY(-60px) scale(1.3); }
 }
 
 @keyframes chaos {
   0% { transform: translate(0, 0) rotate(0deg) scale(1); }
-  12.5% { transform: translate(-100px, 60px) rotate(-30deg) scale(1.3); }
-  25% { transform: translate(100px, -60px) rotate(30deg) scale(0.6); }
-  37.5% { transform: translate(-80px, -100px) rotate(-20deg) scale(1.2); }
-  50% { transform: translate(80px, 100px) rotate(20deg) scale(0.7); }
-  62.5% { transform: translate(-120px, 40px) rotate(-40deg) scale(1.4); }
-  75% { transform: translate(120px, -40px) rotate(40deg) scale(0.5); }
-  87.5% { transform: translate(-60px, 120px) rotate(-25deg) scale(1.25); }
-  100% { transform: translate(60px, -120px) rotate(25deg) scale(0.75); }
+  12.5% { transform: translate(-180px, 120px) rotate(-45deg) scale(2.2); }
+  25% { transform: translate(180px, -120px) rotate(45deg) scale(0.3); }
+  37.5% { transform: translate(-150px, -180px) rotate(-35deg) scale(2.0); }
+  50% { transform: translate(150px, 180px) rotate(35deg) scale(0.4); }
+  62.5% { transform: translate(-200px, 80px) rotate(-55deg) scale(2.4); }
+  75% { transform: translate(200px, -80px) rotate(55deg) scale(0.2); }
+  87.5% { transform: translate(-120px, 200px) rotate(-40deg) scale(2.1); }
+  100% { transform: translate(120px, -200px) rotate(40deg) scale(0.5); }
 }
 
 @keyframes disintegrate {
   0% { transform: translate(0, 0) scale(1); opacity: 1; }
-  25% { transform: translate(-50px, -50px) scale(0.6); opacity: 0.6; }
-  50% { transform: translate(50px, 50px) scale(1.4); opacity: 0.4; }
-  75% { transform: translate(-40px, 50px) scale(0.7); opacity: 0.5; }
-  100% { transform: translate(40px, -50px) scale(1.2); opacity: 0.7; }
+  25% { transform: translate(-120px, -120px) scale(0.3); opacity: 0.4; }
+  50% { transform: translate(120px, 120px) scale(2.2); opacity: 0.2; }
+  75% { transform: translate(-100px, 120px) scale(0.4); opacity: 0.3; }
+  100% { transform: translate(100px, -120px) scale(1.8); opacity: 0.5; }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  33% { transform: translateY(-60px) rotate(-10deg); }
-  66% { transform: translateY(60px) rotate(10deg); }
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+  33% { transform: translateY(-120px) rotate(-20deg) scale(1.4); }
+  66% { transform: translateY(120px) rotate(20deg) scale(1.4); }
 }
 
 @keyframes flicker {
@@ -293,91 +295,280 @@
   50% { opacity: 0.5; }
 }
 
+@keyframes bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  25% { transform: translateY(-150px) scale(1.3); }
+  50% { transform: translateY(0) scale(0.8); }
+  75% { transform: translateY(-80px) scale(1.1); }
+}
+
+@keyframes wave {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-100px) rotate(15deg); }
+  50% { transform: translateY(0) rotate(0deg); }
+  75% { transform: translateY(100px) rotate(-15deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  25% { transform: scale(2.2); opacity: 0.7; }
+  50% { transform: scale(0.4); opacity: 0.3; }
+  75% { transform: scale(1.8); opacity: 0.8; }
+}
+
+@keyframes jitter {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  10% { transform: translate(-60px, 40px) rotate(-25deg); }
+  20% { transform: translate(60px, -40px) rotate(25deg); }
+  30% { transform: translate(-40px, -60px) rotate(-20deg); }
+  40% { transform: translate(40px, 60px) rotate(20deg); }
+  50% { transform: translate(-70px, 30px) rotate(-30deg); }
+  60% { transform: translate(70px, -30px) rotate(30deg); }
+  70% { transform: translate(-30px, 70px) rotate(-15deg); }
+  80% { transform: translate(30px, -70px) rotate(15deg); }
+  90% { transform: translate(-50px, 50px) rotate(-22deg); }
+}
+
+@keyframes stretch {
+  0%, 100% { transform: scaleX(1) scaleY(1); }
+  25% { transform: scaleX(2.5) scaleY(0.3); }
+  50% { transform: scaleX(0.3) scaleY(2.5); }
+  75% { transform: scaleX(1.8) scaleY(0.5); }
+}
+
+@keyframes flip {
+  0%, 100% { transform: rotateY(0deg) scale(1); }
+  25% { transform: rotateY(180deg) scale(1.4); }
+  50% { transform: rotateY(360deg) scale(0.6); }
+  75% { transform: rotateY(540deg) scale(1.2); }
+}
+
+@keyframes slide {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  20% { transform: translateX(-140px) translateY(-80px); }
+  40% { transform: translateX(140px) translateY(80px); }
+  60% { transform: translateX(-120px) translateY(100px); }
+  80% { transform: translateX(120px) translateY(-100px); }
+}
+
+@keyframes zoom {
+  0%, 100% { transform: scale(1) translateZ(0); }
+  25% { transform: scale(2.8) translateZ(100px); }
+  50% { transform: scale(0.2) translateZ(-100px); }
+  75% { transform: scale(2.0) translateZ(50px); }
+}
+
+@keyframes elastic {
+  0%, 100% { transform: scale(1) translateY(0); }
+  10% { transform: scale(1.4) translateY(-80px); }
+  20% { transform: scale(0.6) translateY(60px); }
+  30% { transform: scale(1.3) translateY(-50px); }
+  40% { transform: scale(0.8) translateY(40px); }
+  50% { transform: scale(1.2) translateY(-30px); }
+  60% { transform: scale(0.9) translateY(20px); }
+  70% { transform: scale(1.1) translateY(-15px); }
+  80% { transform: scale(0.95) translateY(10px); }
+  90% { transform: scale(1.05) translateY(-5px); }
+}
+
+@keyframes orbit {
+  0% { transform: rotate(0deg) translateX(120px) rotate(0deg) scale(1); }
+  25% { transform: rotate(90deg) translateX(120px) rotate(-90deg) scale(1.5); }
+  50% { transform: rotate(180deg) translateX(120px) rotate(-180deg) scale(0.5); }
+  75% { transform: rotate(270deg) translateX(120px) rotate(-270deg) scale(1.3); }
+  100% { transform: rotate(360deg) translateX(120px) rotate(-360deg) scale(1); }
+}
+
+@keyframes matrix {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  25% { transform: translateY(150px) scale(0.8); opacity: 0.7; }
+  50% { transform: translateY(300px) scale(0.4); opacity: 0.3; }
+  75% { transform: translateY(450px) scale(0.2); opacity: 0.1; }
+  100% { transform: translateY(600px) scale(0.1); opacity: 0; }
+}
+
+@keyframes blur {
+  0%, 100% { filter: blur(0px); transform: scale(1); opacity: 1; }
+  25% { filter: blur(10px); transform: scale(1.5); opacity: 0.6; }
+  50% { filter: blur(20px); transform: scale(0.5); opacity: 0.3; }
+  75% { filter: blur(15px); transform: scale(1.3); opacity: 0.7; }
+}
+
+@keyframes squash {
+  0%, 100% { transform: scaleX(1) scaleY(1); }
+  25% { transform: scaleX(2.8) scaleY(0.2); }
+  50% { transform: scaleX(0.2) scaleY(2.8); }
+  75% { transform: scaleX(1.5) scaleY(0.4); }
+}
+
+@keyframes twirl {
+  0%, 100% { transform: rotate(0deg) translateY(0) scale(1); }
+  25% { transform: rotate(180deg) translateY(-100px) scale(1.6); }
+  50% { transform: rotate(360deg) translateY(0) scale(0.4); }
+  75% { transform: rotate(540deg) translateY(100px) scale(1.4); }
+}
+
+@keyframes pop {
+  0%, 100% { transform: scale(1); }
+  10% { transform: scale(0.3); }
+  20% { transform: scale(2.5); }
+  30% { transform: scale(0.5); }
+  40% { transform: scale(2.0); }
+  50% { transform: scale(0.7); }
+  60% { transform: scale(1.8); }
+  70% { transform: scale(0.9); }
+  80% { transform: scale(1.3); }
+  90% { transform: scale(1.1); }
+}
+
+@keyframes ripple {
+  0%, 100% { transform: scale(1) translateY(0); }
+  25% { transform: scale(2.0) translateY(-80px); }
+  50% { transform: scale(0.3) translateY(80px); }
+  75% { transform: scale(1.7) translateY(-40px); }
+}
+
+@keyframes tumble {
+  0% { transform: rotate(0deg) translateX(0) translateY(0) scale(1); }
+  12.5% { transform: rotate(45deg) translateX(100px) translateY(-100px) scale(1.4); }
+  25% { transform: rotate(90deg) translateX(150px) translateY(50px) scale(0.6); }
+  37.5% { transform: rotate(135deg) translateX(80px) translateY(150px) scale(1.6); }
+  50% { transform: rotate(180deg) translateX(-80px) translateY(150px) scale(0.4); }
+  62.5% { transform: rotate(225deg) translateX(-150px) translateY(50px) scale(1.5); }
+  75% { transform: rotate(270deg) translateX(-100px) translateY(-100px) scale(0.5); }
+  87.5% { transform: rotate(315deg) translateX(-50px) translateY(-150px) scale(1.7); }
+  100% { transform: rotate(360deg) translateX(0) translateY(0) scale(1); }
+}
+
+@keyframes rainbow {
+  0% { filter: hue-rotate(0deg) saturate(1) brightness(1); transform: scale(1); }
+  16.66% { filter: hue-rotate(60deg) saturate(1.5) brightness(1.2); transform: scale(1.3); }
+  33.33% { filter: hue-rotate(120deg) saturate(1.8) brightness(1.4); transform: scale(0.6); }
+  50% { filter: hue-rotate(180deg) saturate(1.5) brightness(1.2); transform: scale(1.5); }
+  66.66% { filter: hue-rotate(240deg) saturate(1.8) brightness(1.4); transform: scale(0.7); }
+  83.33% { filter: hue-rotate(300deg) saturate(1.5) brightness(1.2); transform: scale(1.4); }
+  100% { filter: hue-rotate(360deg) saturate(1) brightness(1); transform: scale(1); }
+}
+
 /* Character-by-character base styles */
 .title-char,
-.clock-char {
+.clock-char,
+.weather-temp-char,
+.weather-location-char {
   display: inline-block;
   transition: none;
 }
 
-.clock-char-container {
+.clock-char-container,
+.weather-temp-char-container,
+.weather-location-char-container {
   display: inline-block;
 }
 
 /* Variant: Shake - Character by character */
 .variant-shake .title-char,
-.variant-shake .clock-char {
+.variant-shake .clock-char,
+.variant-shake .weather-temp-char,
+.variant-shake .weather-location-char {
   animation: shake 0.1s infinite;
 }
 
 .variant-shake .title-char:nth-of-type(1),
-.variant-shake .clock-char:nth-of-type(1) {
+.variant-shake .clock-char:nth-of-type(1),
+.variant-shake .weather-temp-char:nth-of-type(1),
+.variant-shake .weather-location-char:nth-of-type(1) {
   animation-delay: 0s;
 }
 
 .variant-shake .title-char:nth-of-type(2),
-.variant-shake .clock-char:nth-of-type(2) {
+.variant-shake .clock-char:nth-of-type(2),
+.variant-shake .weather-temp-char:nth-of-type(2),
+.variant-shake .weather-location-char:nth-of-type(2) {
   animation-delay: 0.02s;
 }
 
 .variant-shake .title-char:nth-of-type(3),
-.variant-shake .clock-char:nth-of-type(3) {
+.variant-shake .clock-char:nth-of-type(3),
+.variant-shake .weather-temp-char:nth-of-type(3),
+.variant-shake .weather-location-char:nth-of-type(3) {
   animation-delay: 0.04s;
 }
 
 .variant-shake .title-char:nth-of-type(4),
-.variant-shake .clock-char:nth-of-type(4) {
+.variant-shake .clock-char:nth-of-type(4),
+.variant-shake .weather-temp-char:nth-of-type(4),
+.variant-shake .weather-location-char:nth-of-type(4) {
   animation-delay: 0.06s;
 }
 
 .variant-shake .title-char:nth-of-type(5),
-.variant-shake .clock-char:nth-of-type(5) {
+.variant-shake .clock-char:nth-of-type(5),
+.variant-shake .weather-temp-char:nth-of-type(5),
+.variant-shake .weather-location-char:nth-of-type(5) {
   animation-delay: 0.08s;
 }
 
 .variant-shake .title-char:nth-of-type(6),
-.variant-shake .clock-char:nth-of-type(6) {
+.variant-shake .clock-char:nth-of-type(6),
+.variant-shake .weather-temp-char:nth-of-type(6),
+.variant-shake .weather-location-char:nth-of-type(6) {
   animation-delay: 0.1s;
 }
 
 .variant-shake .title-char:nth-of-type(7),
-.variant-shake .clock-char:nth-of-type(7) {
+.variant-shake .clock-char:nth-of-type(7),
+.variant-shake .weather-temp-char:nth-of-type(7),
+.variant-shake .weather-location-char:nth-of-type(7) {
   animation-delay: 0.12s;
 }
 
 .variant-shake .title-char:nth-of-type(8),
-.variant-shake .clock-char:nth-of-type(8) {
+.variant-shake .clock-char:nth-of-type(8),
+.variant-shake .weather-temp-char:nth-of-type(8),
+.variant-shake .weather-location-char:nth-of-type(8) {
   animation-delay: 0.14s;
 }
 
 .variant-shake .title-char:nth-of-type(9),
-.variant-shake .clock-char:nth-of-type(9) {
+.variant-shake .clock-char:nth-of-type(9),
+.variant-shake .weather-temp-char:nth-of-type(9),
+.variant-shake .weather-location-char:nth-of-type(9) {
   animation-delay: 0.16s;
 }
 
 .variant-shake .title-char:nth-of-type(10),
-.variant-shake .clock-char:nth-of-type(10) {
+.variant-shake .clock-char:nth-of-type(10),
+.variant-shake .weather-temp-char:nth-of-type(10),
+.variant-shake .weather-location-char:nth-of-type(10) {
   animation-delay: 0.18s;
 }
 
 .variant-shake .title-char:nth-of-type(11),
-.variant-shake .clock-char:nth-of-type(11) {
+.variant-shake .clock-char:nth-of-type(11),
+.variant-shake .weather-temp-char:nth-of-type(11),
+.variant-shake .weather-location-char:nth-of-type(11) {
   animation-delay: 0.2s;
 }
 
 .variant-shake .title-char:nth-of-type(n+12),
-.variant-shake .clock-char:nth-of-type(n+12) {
+.variant-shake .clock-char:nth-of-type(n+12),
+.variant-shake .weather-temp-char:nth-of-type(n+12),
+.variant-shake .weather-location-char:nth-of-type(n+12) {
   animation-delay: 0.22s;
 }
 
 /* Variant: Spin - Character by character */
 .variant-spin .title-char,
-.variant-spin .clock-char {
+.variant-spin .clock-char,
+.variant-spin .weather-temp-char,
+.variant-spin .weather-location-char {
   animation: spin 0.5s infinite;
   transform-origin: center;
 }
 
-.variant-spin .title-char:nth-of-type(odd) {
+.variant-spin .title-char:nth-of-type(odd),
+.variant-spin .weather-temp-char:nth-of-type(odd),
+.variant-spin .weather-location-char:nth-of-type(odd) {
   animation-direction: reverse;
 }
 
@@ -387,202 +578,1088 @@
 
 /* Variant: Explode - Character by character */
 .variant-explode .title-char,
-.variant-explode .clock-char {
+.variant-explode .clock-char,
+.variant-explode .weather-temp-char,
+.variant-explode .weather-location-char {
   animation: explode 0.3s infinite;
   transform-origin: center;
 }
 
 .variant-explode .title-char:nth-of-type(1),
-.variant-explode .clock-char:nth-of-type(1) {
+.variant-explode .clock-char:nth-of-type(1),
+.variant-explode .weather-temp-char:nth-of-type(1),
+.variant-explode .weather-location-char:nth-of-type(1) {
   animation-delay: 0s;
 }
 
 .variant-explode .title-char:nth-of-type(2),
-.variant-explode .clock-char:nth-of-type(2) {
+.variant-explode .clock-char:nth-of-type(2),
+.variant-explode .weather-temp-char:nth-of-type(2),
+.variant-explode .weather-location-char:nth-of-type(2) {
   animation-delay: 0.05s;
 }
 
 .variant-explode .title-char:nth-of-type(3),
-.variant-explode .clock-char:nth-of-type(3) {
+.variant-explode .clock-char:nth-of-type(3),
+.variant-explode .weather-temp-char:nth-of-type(3),
+.variant-explode .weather-location-char:nth-of-type(3) {
   animation-delay: 0.1s;
 }
 
 .variant-explode .title-char:nth-of-type(4),
-.variant-explode .clock-char:nth-of-type(4) {
+.variant-explode .clock-char:nth-of-type(4),
+.variant-explode .weather-temp-char:nth-of-type(4),
+.variant-explode .weather-location-char:nth-of-type(4) {
   animation-delay: 0.15s;
 }
 
 .variant-explode .title-char:nth-of-type(5),
-.variant-explode .clock-char:nth-of-type(5) {
+.variant-explode .clock-char:nth-of-type(5),
+.variant-explode .weather-temp-char:nth-of-type(5),
+.variant-explode .weather-location-char:nth-of-type(5) {
   animation-delay: 0.2s;
 }
 
 .variant-explode .title-char:nth-of-type(n+6),
-.variant-explode .clock-char:nth-of-type(n+6) {
+.variant-explode .clock-char:nth-of-type(n+6),
+.variant-explode .weather-temp-char:nth-of-type(n+6),
+.variant-explode .weather-location-char:nth-of-type(n+6) {
   animation-delay: 0.25s;
 }
 
 /* Variant: Glitch - Character by character */
 .variant-glitch .title-char,
-.variant-glitch .clock-char {
+.variant-glitch .clock-char,
+.variant-glitch .weather-temp-char,
+.variant-glitch .weather-location-char {
   animation: glitch 0.2s infinite;
 }
 
 .variant-glitch .title-char:nth-of-type(odd),
-.variant-glitch .clock-char:nth-of-type(odd) {
+.variant-glitch .clock-char:nth-of-type(odd),
+.variant-glitch .weather-temp-char:nth-of-type(odd),
+.variant-glitch .weather-location-char:nth-of-type(odd) {
   animation-delay: 0s;
 }
 
 .variant-glitch .title-char:nth-of-type(even),
-.variant-glitch .clock-char:nth-of-type(even) {
+.variant-glitch .clock-char:nth-of-type(even),
+.variant-glitch .weather-temp-char:nth-of-type(even),
+.variant-glitch .weather-location-char:nth-of-type(even) {
   animation-delay: 0.1s;
 }
 
 /* Variant: Wobble - Character by character */
 .variant-wobble .title-char,
-.variant-wobble .clock-char {
+.variant-wobble .clock-char,
+.variant-wobble .weather-temp-char,
+.variant-wobble .weather-location-char {
   animation: wobble 0.4s infinite;
   transform-origin: center bottom;
 }
 
 .variant-wobble .title-char:nth-of-type(1),
-.variant-wobble .clock-char:nth-of-type(1) {
+.variant-wobble .clock-char:nth-of-type(1),
+.variant-wobble .weather-temp-char:nth-of-type(1),
+.variant-wobble .weather-location-char:nth-of-type(1) {
   animation-delay: 0s;
 }
 
 .variant-wobble .title-char:nth-of-type(2),
-.variant-wobble .clock-char:nth-of-type(2) {
+.variant-wobble .clock-char:nth-of-type(2),
+.variant-wobble .weather-temp-char:nth-of-type(2),
+.variant-wobble .weather-location-char:nth-of-type(2) {
   animation-delay: 0.05s;
 }
 
 .variant-wobble .title-char:nth-of-type(3),
-.variant-wobble .clock-char:nth-of-type(3) {
+.variant-wobble .clock-char:nth-of-type(3),
+.variant-wobble .weather-temp-char:nth-of-type(3),
+.variant-wobble .weather-location-char:nth-of-type(3) {
   animation-delay: 0.1s;
 }
 
 .variant-wobble .title-char:nth-of-type(4),
-.variant-wobble .clock-char:nth-of-type(4) {
+.variant-wobble .clock-char:nth-of-type(4),
+.variant-wobble .weather-temp-char:nth-of-type(4),
+.variant-wobble .weather-location-char:nth-of-type(4) {
   animation-delay: 0.15s;
 }
 
 .variant-wobble .title-char:nth-of-type(5),
-.variant-wobble .clock-char:nth-of-type(5) {
+.variant-wobble .clock-char:nth-of-type(5),
+.variant-wobble .weather-temp-char:nth-of-type(5),
+.variant-wobble .weather-location-char:nth-of-type(5) {
   animation-delay: 0.2s;
 }
 
 .variant-wobble .title-char:nth-of-type(n+6),
-.variant-wobble .clock-char:nth-of-type(n+6) {
+.variant-wobble .clock-char:nth-of-type(n+6),
+.variant-wobble .weather-temp-char:nth-of-type(n+6),
+.variant-wobble .weather-location-char:nth-of-type(n+6) {
   animation-delay: 0.25s;
 }
 
 /* Variant: Chaos - Character by character */
 .variant-chaos .title-char,
-.variant-chaos .clock-char {
+.variant-chaos .clock-char,
+.variant-chaos .weather-temp-char,
+.variant-chaos .weather-location-char {
   animation: chaos 0.6s infinite;
   transform-origin: center;
 }
 
 .variant-chaos .title-char:nth-of-type(1),
-.variant-chaos .clock-char:nth-of-type(1) {
+.variant-chaos .clock-char:nth-of-type(1),
+.variant-chaos .weather-temp-char:nth-of-type(1),
+.variant-chaos .weather-location-char:nth-of-type(1) {
   animation-delay: 0s;
 }
 
 .variant-chaos .title-char:nth-of-type(2),
-.variant-chaos .clock-char:nth-of-type(2) {
+.variant-chaos .clock-char:nth-of-type(2),
+.variant-chaos .weather-temp-char:nth-of-type(2),
+.variant-chaos .weather-location-char:nth-of-type(2) {
   animation-delay: 0.1s;
 }
 
 .variant-chaos .title-char:nth-of-type(3),
-.variant-chaos .clock-char:nth-of-type(3) {
+.variant-chaos .clock-char:nth-of-type(3),
+.variant-chaos .weather-temp-char:nth-of-type(3),
+.variant-chaos .weather-location-char:nth-of-type(3) {
   animation-delay: 0.2s;
 }
 
 .variant-chaos .title-char:nth-of-type(4),
-.variant-chaos .clock-char:nth-of-type(4) {
+.variant-chaos .clock-char:nth-of-type(4),
+.variant-chaos .weather-temp-char:nth-of-type(4),
+.variant-chaos .weather-location-char:nth-of-type(4) {
   animation-delay: 0.3s;
 }
 
 .variant-chaos .title-char:nth-of-type(5),
-.variant-chaos .clock-char:nth-of-type(5) {
+.variant-chaos .clock-char:nth-of-type(5),
+.variant-chaos .weather-temp-char:nth-of-type(5),
+.variant-chaos .weather-location-char:nth-of-type(5) {
   animation-delay: 0.4s;
 }
 
 .variant-chaos .title-char:nth-of-type(n+6),
-.variant-chaos .clock-char:nth-of-type(n+6) {
+.variant-chaos .clock-char:nth-of-type(n+6),
+.variant-chaos .weather-temp-char:nth-of-type(n+6),
+.variant-chaos .weather-location-char:nth-of-type(n+6) {
   animation-delay: 0.5s;
 }
 
 /* Variant: Disintegrate - Character by character */
 .variant-disintegrate .title-char,
-.variant-disintegrate .clock-char {
+.variant-disintegrate .clock-char,
+.variant-disintegrate .weather-temp-char,
+.variant-disintegrate .weather-location-char {
   animation: disintegrate 0.5s infinite, flicker 0.2s infinite;
   transform-origin: center;
 }
 
 .variant-disintegrate .title-char:nth-of-type(1),
-.variant-disintegrate .clock-char:nth-of-type(1) {
+.variant-disintegrate .clock-char:nth-of-type(1),
+.variant-disintegrate .weather-temp-char:nth-of-type(1),
+.variant-disintegrate .weather-location-char:nth-of-type(1) {
   animation-delay: 0s, 0s;
 }
 
 .variant-disintegrate .title-char:nth-of-type(2),
-.variant-disintegrate .clock-char:nth-of-type(2) {
+.variant-disintegrate .clock-char:nth-of-type(2),
+.variant-disintegrate .weather-temp-char:nth-of-type(2),
+.variant-disintegrate .weather-location-char:nth-of-type(2) {
   animation-delay: 0.1s, 0.05s;
 }
 
 .variant-disintegrate .title-char:nth-of-type(3),
-.variant-disintegrate .clock-char:nth-of-type(3) {
+.variant-disintegrate .clock-char:nth-of-type(3),
+.variant-disintegrate .weather-temp-char:nth-of-type(3),
+.variant-disintegrate .weather-location-char:nth-of-type(3) {
   animation-delay: 0.2s, 0.1s;
 }
 
 .variant-disintegrate .title-char:nth-of-type(4),
-.variant-disintegrate .clock-char:nth-of-type(4) {
+.variant-disintegrate .clock-char:nth-of-type(4),
+.variant-disintegrate .weather-temp-char:nth-of-type(4),
+.variant-disintegrate .weather-location-char:nth-of-type(4) {
   animation-delay: 0.3s, 0.15s;
 }
 
 .variant-disintegrate .title-char:nth-of-type(5),
-.variant-disintegrate .clock-char:nth-of-type(5) {
+.variant-disintegrate .clock-char:nth-of-type(5),
+.variant-disintegrate .weather-temp-char:nth-of-type(5),
+.variant-disintegrate .weather-location-char:nth-of-type(5) {
   animation-delay: 0.4s, 0.2s;
 }
 
 .variant-disintegrate .title-char:nth-of-type(n+6),
-.variant-disintegrate .clock-char:nth-of-type(n+6) {
+.variant-disintegrate .clock-char:nth-of-type(n+6),
+.variant-disintegrate .weather-temp-char:nth-of-type(n+6),
+.variant-disintegrate .weather-location-char:nth-of-type(n+6) {
   animation-delay: 0.5s, 0.25s;
 }
 
 /* Variant: Float - Character by character */
 .variant-float .title-char,
-.variant-float .clock-char {
+.variant-float .clock-char,
+.variant-float .weather-temp-char,
+.variant-float .weather-location-char {
   animation: float 1s infinite ease-in-out;
   transform-origin: center;
 }
 
 .variant-float .title-char:nth-of-type(1),
-.variant-float .clock-char:nth-of-type(1) {
+.variant-float .clock-char:nth-of-type(1),
+.variant-float .weather-temp-char:nth-of-type(1),
+.variant-float .weather-location-char:nth-of-type(1) {
   animation-delay: 0s;
 }
 
 .variant-float .title-char:nth-of-type(2),
-.variant-float .clock-char:nth-of-type(2) {
+.variant-float .clock-char:nth-of-type(2),
+.variant-float .weather-temp-char:nth-of-type(2),
+.variant-float .weather-location-char:nth-of-type(2) {
   animation-delay: 0.1s;
 }
 
 .variant-float .title-char:nth-of-type(3),
-.variant-float .clock-char:nth-of-type(3) {
+.variant-float .clock-char:nth-of-type(3),
+.variant-float .weather-temp-char:nth-of-type(3),
+.variant-float .weather-location-char:nth-of-type(3) {
   animation-delay: 0.2s;
 }
 
 .variant-float .title-char:nth-of-type(4),
-.variant-float .clock-char:nth-of-type(4) {
+.variant-float .clock-char:nth-of-type(4),
+.variant-float .weather-temp-char:nth-of-type(4),
+.variant-float .weather-location-char:nth-of-type(4) {
   animation-delay: 0.3s;
 }
 
 .variant-float .title-char:nth-of-type(5),
-.variant-float .clock-char:nth-of-type(5) {
+.variant-float .clock-char:nth-of-type(5),
+.variant-float .weather-temp-char:nth-of-type(5),
+.variant-float .weather-location-char:nth-of-type(5) {
   animation-delay: 0.4s;
 }
 
 .variant-float .title-char:nth-of-type(n+6),
-.variant-float .clock-char:nth-of-type(n+6) {
+.variant-float .clock-char:nth-of-type(n+6),
+.variant-float .weather-temp-char:nth-of-type(n+6),
+.variant-float .weather-location-char:nth-of-type(n+6) {
+  animation-delay: 0.5s;
+}
+
+/* Variant: Bounce - Character by character */
+.variant-bounce .title-char,
+.variant-bounce .clock-char,
+.variant-bounce .weather-temp-char,
+.variant-bounce .weather-location-char {
+  animation: bounce 0.6s infinite ease-in-out;
+  transform-origin: center bottom;
+}
+
+.variant-bounce .title-char:nth-of-type(1),
+.variant-bounce .clock-char:nth-of-type(1),
+.variant-bounce .weather-temp-char:nth-of-type(1),
+.variant-bounce .weather-location-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-bounce .title-char:nth-of-type(2),
+.variant-bounce .clock-char:nth-of-type(2),
+.variant-bounce .weather-temp-char:nth-of-type(2),
+.variant-bounce .weather-location-char:nth-of-type(2) {
+  animation-delay: 0.1s;
+}
+
+.variant-bounce .title-char:nth-of-type(3),
+.variant-bounce .clock-char:nth-of-type(3),
+.variant-bounce .weather-temp-char:nth-of-type(3),
+.variant-bounce .weather-location-char:nth-of-type(3) {
+  animation-delay: 0.2s;
+}
+
+.variant-bounce .title-char:nth-of-type(4),
+.variant-bounce .clock-char:nth-of-type(4),
+.variant-bounce .weather-temp-char:nth-of-type(4),
+.variant-bounce .weather-location-char:nth-of-type(4) {
+  animation-delay: 0.3s;
+}
+
+.variant-bounce .title-char:nth-of-type(5),
+.variant-bounce .clock-char:nth-of-type(5),
+.variant-bounce .weather-temp-char:nth-of-type(5),
+.variant-bounce .weather-location-char:nth-of-type(5) {
+  animation-delay: 0.4s;
+}
+
+.variant-bounce .title-char:nth-of-type(n+6),
+.variant-bounce .clock-char:nth-of-type(n+6),
+.variant-bounce .weather-temp-char:nth-of-type(n+6),
+.variant-bounce .weather-location-char:nth-of-type(n+6) {
+  animation-delay: 0.5s;
+}
+
+/* Variant: Wave - Character by character */
+.variant-wave .title-char,
+.variant-wave .clock-char,
+.variant-wave .weather-temp-char,
+.variant-wave .weather-location-char {
+  animation: wave 0.8s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.variant-wave .title-char:nth-of-type(1),
+.variant-wave .clock-char:nth-of-type(1),
+.variant-wave .weather-temp-char:nth-of-type(1),
+.variant-wave .weather-location-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-wave .title-char:nth-of-type(2),
+.variant-wave .clock-char:nth-of-type(2),
+.variant-wave .weather-temp-char:nth-of-type(2),
+.variant-wave .weather-location-char:nth-of-type(2) {
+  animation-delay: 0.1s;
+}
+
+.variant-wave .title-char:nth-of-type(3),
+.variant-wave .clock-char:nth-of-type(3),
+.variant-wave .weather-temp-char:nth-of-type(3),
+.variant-wave .weather-location-char:nth-of-type(3) {
+  animation-delay: 0.2s;
+}
+
+.variant-wave .title-char:nth-of-type(4),
+.variant-wave .clock-char:nth-of-type(4),
+.variant-wave .weather-temp-char:nth-of-type(4),
+.variant-wave .weather-location-char:nth-of-type(4) {
+  animation-delay: 0.3s;
+}
+
+.variant-wave .title-char:nth-of-type(5),
+.variant-wave .clock-char:nth-of-type(5),
+.variant-wave .weather-temp-char:nth-of-type(5),
+.variant-wave .weather-location-char:nth-of-type(5) {
+  animation-delay: 0.4s;
+}
+
+.variant-wave .title-char:nth-of-type(n+6),
+.variant-wave .clock-char:nth-of-type(n+6),
+.variant-wave .weather-temp-char:nth-of-type(n+6),
+.variant-wave .weather-location-char:nth-of-type(n+6) {
+  animation-delay: 0.5s;
+}
+
+/* Variant: Pulse - Character by character */
+.variant-pulse .title-char,
+.variant-pulse .clock-char,
+.variant-pulse .weather-temp-char,
+.variant-pulse .weather-location-char {
+  animation: pulse 0.5s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.variant-pulse .title-char:nth-of-type(odd),
+.variant-pulse .clock-char:nth-of-type(odd),
+.variant-pulse .weather-temp-char:nth-of-type(odd),
+.variant-pulse .weather-location-char:nth-of-type(odd) {
+  animation-delay: 0s;
+}
+
+.variant-pulse .title-char:nth-of-type(even),
+.variant-pulse .clock-char:nth-of-type(even),
+.variant-pulse .weather-temp-char:nth-of-type(even),
+.variant-pulse .weather-location-char:nth-of-type(even) {
+  animation-delay: 0.25s;
+}
+
+/* Variant: Jitter - Character by character */
+.variant-jitter .title-char,
+.variant-jitter .clock-char,
+.variant-jitter .weather-temp-char,
+.variant-jitter .weather-location-char {
+  animation: jitter 0.15s infinite;
+  transform-origin: center;
+}
+
+.variant-jitter .title-char:nth-of-type(1),
+.variant-jitter .clock-char:nth-of-type(1),
+.variant-jitter .weather-temp-char:nth-of-type(1),
+.variant-jitter .weather-location-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-jitter .title-char:nth-of-type(2),
+.variant-jitter .clock-char:nth-of-type(2),
+.variant-jitter .weather-temp-char:nth-of-type(2),
+.variant-jitter .weather-location-char:nth-of-type(2) {
+  animation-delay: 0.02s;
+}
+
+.variant-jitter .title-char:nth-of-type(3),
+.variant-jitter .clock-char:nth-of-type(3),
+.variant-jitter .weather-temp-char:nth-of-type(3),
+.variant-jitter .weather-location-char:nth-of-type(3) {
+  animation-delay: 0.04s;
+}
+
+.variant-jitter .title-char:nth-of-type(4),
+.variant-jitter .clock-char:nth-of-type(4),
+.variant-jitter .weather-temp-char:nth-of-type(4),
+.variant-jitter .weather-location-char:nth-of-type(4) {
+  animation-delay: 0.06s;
+}
+
+.variant-jitter .title-char:nth-of-type(5),
+.variant-jitter .clock-char:nth-of-type(5),
+.variant-jitter .weather-temp-char:nth-of-type(5),
+.variant-jitter .weather-location-char:nth-of-type(5) {
+  animation-delay: 0.08s;
+}
+
+.variant-jitter .title-char:nth-of-type(n+6),
+.variant-jitter .clock-char:nth-of-type(n+6),
+.variant-jitter .weather-temp-char:nth-of-type(n+6),
+.variant-jitter .weather-location-char:nth-of-type(n+6) {
+  animation-delay: 0.1s;
+}
+
+/* Variant: Stretch - Character by character */
+.variant-stretch .title-char,
+.variant-stretch .clock-char,
+.variant-stretch .weather-temp-char,
+.variant-stretch .weather-location-char {
+  animation: stretch 0.4s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.variant-stretch .title-char:nth-of-type(1),
+.variant-stretch .clock-char:nth-of-type(1),
+.variant-stretch .weather-temp-char:nth-of-type(1),
+.variant-stretch .weather-location-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-stretch .title-char:nth-of-type(2),
+.variant-stretch .clock-char:nth-of-type(2),
+.variant-stretch .weather-temp-char:nth-of-type(2),
+.variant-stretch .weather-location-char:nth-of-type(2) {
+  animation-delay: 0.05s;
+}
+
+.variant-stretch .title-char:nth-of-type(3),
+.variant-stretch .clock-char:nth-of-type(3),
+.variant-stretch .weather-temp-char:nth-of-type(3),
+.variant-stretch .weather-location-char:nth-of-type(3) {
+  animation-delay: 0.1s;
+}
+
+.variant-stretch .title-char:nth-of-type(4),
+.variant-stretch .clock-char:nth-of-type(4),
+.variant-stretch .weather-temp-char:nth-of-type(4),
+.variant-stretch .weather-location-char:nth-of-type(4) {
+  animation-delay: 0.15s;
+}
+
+.variant-stretch .title-char:nth-of-type(5),
+.variant-stretch .clock-char:nth-of-type(5),
+.variant-stretch .weather-temp-char:nth-of-type(5),
+.variant-stretch .weather-location-char:nth-of-type(5) {
+  animation-delay: 0.2s;
+}
+
+.variant-stretch .title-char:nth-of-type(n+6),
+.variant-stretch .clock-char:nth-of-type(n+6),
+.variant-stretch .weather-temp-char:nth-of-type(n+6),
+.variant-stretch .weather-location-char:nth-of-type(n+6) {
+  animation-delay: 0.25s;
+}
+
+/* Variant: Flip - Character by character */
+.variant-flip .title-char,
+.variant-flip .clock-char,
+.variant-flip .weather-temp-char,
+.variant-flip .weather-location-char {
+  animation: flip 0.6s infinite;
+  transform-origin: center;
+  transform-style: preserve-3d;
+}
+
+.variant-flip .title-char:nth-of-type(odd),
+.variant-flip .clock-char:nth-of-type(odd),
+.variant-flip .weather-temp-char:nth-of-type(odd),
+.variant-flip .weather-location-char:nth-of-type(odd) {
+  animation-delay: 0s;
+}
+
+.variant-flip .title-char:nth-of-type(even),
+.variant-flip .clock-char:nth-of-type(even),
+.variant-flip .weather-temp-char:nth-of-type(even),
+.variant-flip .weather-location-char:nth-of-type(even) {
+  animation-delay: 0.3s;
+}
+
+/* Variant: Slide - Character by character */
+.variant-slide .title-char,
+.variant-slide .clock-char,
+.variant-slide .weather-temp-char,
+.variant-slide .weather-location-char {
+  animation: slide 0.5s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.variant-slide .title-char:nth-of-type(1),
+.variant-slide .clock-char:nth-of-type(1),
+.variant-slide .weather-temp-char:nth-of-type(1),
+.variant-slide .weather-location-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-slide .title-char:nth-of-type(2),
+.variant-slide .clock-char:nth-of-type(2),
+.variant-slide .weather-temp-char:nth-of-type(2),
+.variant-slide .weather-location-char:nth-of-type(2) {
+  animation-delay: 0.1s;
+}
+
+.variant-slide .title-char:nth-of-type(3),
+.variant-slide .clock-char:nth-of-type(3),
+.variant-slide .weather-temp-char:nth-of-type(3),
+.variant-slide .weather-location-char:nth-of-type(3) {
+  animation-delay: 0.2s;
+}
+
+.variant-slide .title-char:nth-of-type(4),
+.variant-slide .clock-char:nth-of-type(4),
+.variant-slide .weather-temp-char:nth-of-type(4),
+.variant-slide .weather-location-char:nth-of-type(4) {
+  animation-delay: 0.3s;
+}
+
+.variant-slide .title-char:nth-of-type(5),
+.variant-slide .clock-char:nth-of-type(5),
+.variant-slide .weather-temp-char:nth-of-type(5),
+.variant-slide .weather-location-char:nth-of-type(5) {
+  animation-delay: 0.4s;
+}
+
+.variant-slide .title-char:nth-of-type(n+6),
+.variant-slide .clock-char:nth-of-type(n+6),
+.variant-slide .weather-temp-char:nth-of-type(n+6),
+.variant-slide .weather-location-char:nth-of-type(n+6) {
+  animation-delay: 0.5s;
+}
+
+/* Variant: Zoom - Character by character */
+.variant-zoom .title-char,
+.variant-zoom .clock-char,
+.variant-zoom .weather-temp-char,
+.variant-zoom .weather-location-char {
+  animation: zoom 0.5s infinite ease-in-out;
+  transform-origin: center;
+  transform-style: preserve-3d;
+}
+
+.variant-zoom .title-char:nth-of-type(1),
+.variant-zoom .clock-char:nth-of-type(1),
+.variant-zoom .weather-temp-char:nth-of-type(1),
+.variant-zoom .weather-location-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-zoom .title-char:nth-of-type(2),
+.variant-zoom .clock-char:nth-of-type(2),
+.variant-zoom .weather-temp-char:nth-of-type(2),
+.variant-zoom .weather-location-char:nth-of-type(2) {
+  animation-delay: 0.05s;
+}
+
+.variant-zoom .title-char:nth-of-type(3),
+.variant-zoom .clock-char:nth-of-type(3),
+.variant-zoom .weather-temp-char:nth-of-type(3),
+.variant-zoom .weather-location-char:nth-of-type(3) {
+  animation-delay: 0.1s;
+}
+
+.variant-zoom .title-char:nth-of-type(4),
+.variant-zoom .clock-char:nth-of-type(4),
+.variant-zoom .weather-temp-char:nth-of-type(4),
+.variant-zoom .weather-location-char:nth-of-type(4) {
+  animation-delay: 0.15s;
+}
+
+.variant-zoom .title-char:nth-of-type(5),
+.variant-zoom .clock-char:nth-of-type(5),
+.variant-zoom .weather-temp-char:nth-of-type(5),
+.variant-zoom .weather-location-char:nth-of-type(5) {
+  animation-delay: 0.2s;
+}
+
+.variant-zoom .title-char:nth-of-type(n+6),
+.variant-zoom .clock-char:nth-of-type(n+6),
+.variant-zoom .weather-temp-char:nth-of-type(n+6),
+.variant-zoom .weather-location-char:nth-of-type(n+6) {
+  animation-delay: 0.25s;
+}
+
+/* Variant: Elastic - Character by character */
+.variant-elastic .title-char,
+.variant-elastic .clock-char,
+.variant-elastic .weather-temp-char,
+.variant-elastic .weather-location-char {
+  animation: elastic 0.8s infinite ease-in-out;
+  transform-origin: center bottom;
+}
+
+.variant-elastic .title-char:nth-of-type(1),
+.variant-elastic .clock-char:nth-of-type(1),
+.variant-elastic .weather-temp-char:nth-of-type(1),
+.variant-elastic .weather-location-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-elastic .title-char:nth-of-type(2),
+.variant-elastic .clock-char:nth-of-type(2),
+.variant-elastic .weather-temp-char:nth-of-type(2),
+.variant-elastic .weather-location-char:nth-of-type(2) {
+  animation-delay: 0.1s;
+}
+
+.variant-elastic .title-char:nth-of-type(3),
+.variant-elastic .clock-char:nth-of-type(3),
+.variant-elastic .weather-temp-char:nth-of-type(3),
+.variant-elastic .weather-location-char:nth-of-type(3) {
+  animation-delay: 0.2s;
+}
+
+.variant-elastic .title-char:nth-of-type(4),
+.variant-elastic .clock-char:nth-of-type(4),
+.variant-elastic .weather-temp-char:nth-of-type(4),
+.variant-elastic .weather-location-char:nth-of-type(4) {
+  animation-delay: 0.3s;
+}
+
+.variant-elastic .title-char:nth-of-type(5),
+.variant-elastic .clock-char:nth-of-type(5),
+.variant-elastic .weather-temp-char:nth-of-type(5),
+.variant-elastic .weather-location-char:nth-of-type(5) {
+  animation-delay: 0.4s;
+}
+
+.variant-elastic .title-char:nth-of-type(n+6),
+.variant-elastic .clock-char:nth-of-type(n+6),
+.variant-elastic .weather-temp-char:nth-of-type(n+6),
+.variant-elastic .weather-location-char:nth-of-type(n+6) {
+  animation-delay: 0.5s;
+}
+
+/* Variant: Orbit - Character by character */
+.variant-orbit .title-char,
+.variant-orbit .clock-char,
+.variant-orbit .weather-temp-char,
+.variant-orbit .weather-location-char {
+  animation: orbit 1s infinite linear;
+  transform-origin: center center;
+}
+
+.variant-orbit .title-char:nth-of-type(1),
+.variant-orbit .clock-char:nth-of-type(1),
+.variant-orbit .weather-temp-char:nth-of-type(1),
+.variant-orbit .weather-location-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-orbit .title-char:nth-of-type(2),
+.variant-orbit .clock-char:nth-of-type(2),
+.variant-orbit .weather-temp-char:nth-of-type(2),
+.variant-orbit .weather-location-char:nth-of-type(2) {
+  animation-delay: 0.1s;
+}
+
+.variant-orbit .title-char:nth-of-type(3),
+.variant-orbit .clock-char:nth-of-type(3),
+.variant-orbit .weather-temp-char:nth-of-type(3),
+.variant-orbit .weather-location-char:nth-of-type(3) {
+  animation-delay: 0.2s;
+}
+
+.variant-orbit .title-char:nth-of-type(4),
+.variant-orbit .clock-char:nth-of-type(4),
+.variant-orbit .weather-temp-char:nth-of-type(4),
+.variant-orbit .weather-location-char:nth-of-type(4) {
+  animation-delay: 0.3s;
+}
+
+.variant-orbit .title-char:nth-of-type(5),
+.variant-orbit .clock-char:nth-of-type(5),
+.variant-orbit .weather-temp-char:nth-of-type(5),
+.variant-orbit .weather-location-char:nth-of-type(5) {
+  animation-delay: 0.4s;
+}
+
+.variant-orbit .title-char:nth-of-type(n+6),
+.variant-orbit .clock-char:nth-of-type(n+6),
+.variant-orbit .weather-temp-char:nth-of-type(n+6),
+.variant-orbit .weather-location-char:nth-of-type(n+6) {
+  animation-delay: 0.5s;
+}
+
+/* Variant: Matrix - Character by character */
+.variant-matrix .title-char,
+.variant-matrix .clock-char,
+.variant-matrix .weather-temp-char,
+.variant-matrix .weather-location-char {
+  animation: matrix 1.5s infinite ease-in;
+  transform-origin: center;
+}
+
+.variant-matrix .title-char:nth-of-type(1),
+.variant-matrix .clock-char:nth-of-type(1),
+.variant-matrix .weather-temp-char:nth-of-type(1),
+.variant-matrix .weather-location-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-matrix .title-char:nth-of-type(2),
+.variant-matrix .clock-char:nth-of-type(2),
+.variant-matrix .weather-temp-char:nth-of-type(2),
+.variant-matrix .weather-location-char:nth-of-type(2) {
+  animation-delay: 0.1s;
+}
+
+.variant-matrix .title-char:nth-of-type(3),
+.variant-matrix .clock-char:nth-of-type(3),
+.variant-matrix .weather-temp-char:nth-of-type(3),
+.variant-matrix .weather-location-char:nth-of-type(3) {
+  animation-delay: 0.2s;
+}
+
+.variant-matrix .title-char:nth-of-type(4),
+.variant-matrix .clock-char:nth-of-type(4),
+.variant-matrix .weather-temp-char:nth-of-type(4),
+.variant-matrix .weather-location-char:nth-of-type(4) {
+  animation-delay: 0.3s;
+}
+
+.variant-matrix .title-char:nth-of-type(5),
+.variant-matrix .clock-char:nth-of-type(5),
+.variant-matrix .weather-temp-char:nth-of-type(5),
+.variant-matrix .weather-location-char:nth-of-type(5) {
+  animation-delay: 0.4s;
+}
+
+.variant-matrix .title-char:nth-of-type(n+6),
+.variant-matrix .clock-char:nth-of-type(n+6),
+.variant-matrix .weather-temp-char:nth-of-type(n+6),
+.variant-matrix .weather-location-char:nth-of-type(n+6) {
+  animation-delay: 0.5s;
+}
+
+/* Variant: Blur - Character by character */
+.variant-blur .title-char,
+.variant-blur .clock-char,
+.variant-blur .weather-temp-char,
+.variant-blur .weather-location-char {
+  animation: blur 0.6s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.variant-blur .title-char:nth-of-type(odd),
+.variant-blur .clock-char:nth-of-type(odd),
+.variant-blur .weather-temp-char:nth-of-type(odd),
+.variant-blur .weather-location-char:nth-of-type(odd) {
+  animation-delay: 0s;
+}
+
+.variant-blur .title-char:nth-of-type(even),
+.variant-blur .clock-char:nth-of-type(even),
+.variant-blur .weather-temp-char:nth-of-type(even),
+.variant-blur .weather-location-char:nth-of-type(even) {
+  animation-delay: 0.3s;
+}
+
+/* Variant: Squash - Character by character */
+.variant-squash .title-char,
+.variant-squash .clock-char,
+.variant-squash .weather-temp-char,
+.variant-squash .weather-location-char {
+  animation: squash 0.5s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.variant-squash .title-char:nth-of-type(1),
+.variant-squash .clock-char:nth-of-type(1),
+.variant-squash .weather-temp-char:nth-of-type(1),
+.variant-squash .weather-location-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-squash .title-char:nth-of-type(2),
+.variant-squash .clock-char:nth-of-type(2),
+.variant-squash .weather-temp-char:nth-of-type(2),
+.variant-squash .weather-location-char:nth-of-type(2) {
+  animation-delay: 0.08s;
+}
+
+.variant-squash .title-char:nth-of-type(3),
+.variant-squash .clock-char:nth-of-type(3),
+.variant-squash .weather-temp-char:nth-of-type(3),
+.variant-squash .weather-location-char:nth-of-type(3) {
+  animation-delay: 0.16s;
+}
+
+.variant-squash .title-char:nth-of-type(4),
+.variant-squash .clock-char:nth-of-type(4),
+.variant-squash .weather-temp-char:nth-of-type(4),
+.variant-squash .weather-location-char:nth-of-type(4) {
+  animation-delay: 0.24s;
+}
+
+.variant-squash .title-char:nth-of-type(5),
+.variant-squash .clock-char:nth-of-type(5),
+.variant-squash .weather-temp-char:nth-of-type(5),
+.variant-squash .weather-location-char:nth-of-type(5) {
+  animation-delay: 0.32s;
+}
+
+.variant-squash .title-char:nth-of-type(n+6),
+.variant-squash .clock-char:nth-of-type(n+6),
+.variant-squash .weather-temp-char:nth-of-type(n+6),
+.variant-squash .weather-location-char:nth-of-type(n+6) {
+  animation-delay: 0.4s;
+}
+
+/* Variant: Twirl - Character by character */
+.variant-twirl .title-char,
+.variant-twirl .clock-char,
+.variant-twirl .weather-temp-char,
+.variant-twirl .weather-location-char {
+  animation: twirl 0.7s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.variant-twirl .title-char:nth-of-type(odd),
+.variant-twirl .clock-char:nth-of-type(odd),
+.variant-twirl .weather-temp-char:nth-of-type(odd),
+.variant-twirl .weather-location-char:nth-of-type(odd) {
+  animation-delay: 0s;
+  animation-direction: normal;
+}
+
+.variant-twirl .title-char:nth-of-type(even),
+.variant-twirl .clock-char:nth-of-type(even),
+.variant-twirl .weather-temp-char:nth-of-type(even),
+.variant-twirl .weather-location-char:nth-of-type(even) {
+  animation-delay: 0.35s;
+  animation-direction: reverse;
+}
+
+/* Variant: Pop - Character by character */
+.variant-pop .title-char,
+.variant-pop .clock-char,
+.variant-pop .weather-temp-char,
+.variant-pop .weather-location-char {
+  animation: pop 0.4s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.variant-pop .title-char:nth-of-type(1),
+.variant-pop .clock-char:nth-of-type(1),
+.variant-pop .weather-temp-char:nth-of-type(1),
+.variant-pop .weather-location-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-pop .title-char:nth-of-type(2),
+.variant-pop .clock-char:nth-of-type(2),
+.variant-pop .weather-temp-char:nth-of-type(2),
+.variant-pop .weather-location-char:nth-of-type(2) {
+  animation-delay: 0.05s;
+}
+
+.variant-pop .title-char:nth-of-type(3),
+.variant-pop .clock-char:nth-of-type(3),
+.variant-pop .weather-temp-char:nth-of-type(3),
+.variant-pop .weather-location-char:nth-of-type(3) {
+  animation-delay: 0.1s;
+}
+
+.variant-pop .title-char:nth-of-type(4),
+.variant-pop .clock-char:nth-of-type(4),
+.variant-pop .weather-temp-char:nth-of-type(4),
+.variant-pop .weather-location-char:nth-of-type(4) {
+  animation-delay: 0.15s;
+}
+
+.variant-pop .title-char:nth-of-type(5),
+.variant-pop .clock-char:nth-of-type(5),
+.variant-pop .weather-temp-char:nth-of-type(5),
+.variant-pop .weather-location-char:nth-of-type(5) {
+  animation-delay: 0.2s;
+}
+
+.variant-pop .title-char:nth-of-type(n+6),
+.variant-pop .clock-char:nth-of-type(n+6),
+.variant-pop .weather-temp-char:nth-of-type(n+6),
+.variant-pop .weather-location-char:nth-of-type(n+6) {
+  animation-delay: 0.25s;
+}
+
+/* Variant: Ripple - Character by character */
+.variant-ripple .title-char,
+.variant-ripple .clock-char,
+.variant-ripple .weather-temp-char,
+.variant-ripple .weather-location-char {
+  animation: ripple 0.6s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.variant-ripple .title-char:nth-of-type(1),
+.variant-ripple .clock-char:nth-of-type(1),
+.variant-ripple .weather-temp-char:nth-of-type(1),
+.variant-ripple .weather-location-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-ripple .title-char:nth-of-type(2),
+.variant-ripple .clock-char:nth-of-type(2),
+.variant-ripple .weather-temp-char:nth-of-type(2),
+.variant-ripple .weather-location-char:nth-of-type(2) {
+  animation-delay: 0.1s;
+}
+
+.variant-ripple .title-char:nth-of-type(3),
+.variant-ripple .clock-char:nth-of-type(3),
+.variant-ripple .weather-temp-char:nth-of-type(3),
+.variant-ripple .weather-location-char:nth-of-type(3) {
+  animation-delay: 0.2s;
+}
+
+.variant-ripple .title-char:nth-of-type(4),
+.variant-ripple .clock-char:nth-of-type(4),
+.variant-ripple .weather-temp-char:nth-of-type(4),
+.variant-ripple .weather-location-char:nth-of-type(4) {
+  animation-delay: 0.3s;
+}
+
+.variant-ripple .title-char:nth-of-type(5),
+.variant-ripple .clock-char:nth-of-type(5),
+.variant-ripple .weather-temp-char:nth-of-type(5),
+.variant-ripple .weather-location-char:nth-of-type(5) {
+  animation-delay: 0.4s;
+}
+
+.variant-ripple .title-char:nth-of-type(n+6),
+.variant-ripple .clock-char:nth-of-type(n+6),
+.variant-ripple .weather-temp-char:nth-of-type(n+6),
+.variant-ripple .weather-location-char:nth-of-type(n+6) {
+  animation-delay: 0.5s;
+}
+
+/* Variant: Tumble - Character by character */
+.variant-tumble .title-char,
+.variant-tumble .clock-char,
+.variant-tumble .weather-temp-char,
+.variant-tumble .weather-location-char {
+  animation: tumble 1.2s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.variant-tumble .title-char:nth-of-type(1),
+.variant-tumble .clock-char:nth-of-type(1),
+.variant-tumble .weather-temp-char:nth-of-type(1),
+.variant-tumble .weather-location-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-tumble .title-char:nth-of-type(2),
+.variant-tumble .clock-char:nth-of-type(2),
+.variant-tumble .weather-temp-char:nth-of-type(2),
+.variant-tumble .weather-location-char:nth-of-type(2) {
+  animation-delay: 0.15s;
+}
+
+.variant-tumble .title-char:nth-of-type(3),
+.variant-tumble .clock-char:nth-of-type(3),
+.variant-tumble .weather-temp-char:nth-of-type(3),
+.variant-tumble .weather-location-char:nth-of-type(3) {
+  animation-delay: 0.3s;
+}
+
+.variant-tumble .title-char:nth-of-type(4),
+.variant-tumble .clock-char:nth-of-type(4),
+.variant-tumble .weather-temp-char:nth-of-type(4),
+.variant-tumble .weather-location-char:nth-of-type(4) {
+  animation-delay: 0.45s;
+}
+
+.variant-tumble .title-char:nth-of-type(5),
+.variant-tumble .clock-char:nth-of-type(5),
+.variant-tumble .weather-temp-char:nth-of-type(5),
+.variant-tumble .weather-location-char:nth-of-type(5) {
+  animation-delay: 0.6s;
+}
+
+.variant-tumble .title-char:nth-of-type(n+6),
+.variant-tumble .clock-char:nth-of-type(n+6),
+.variant-tumble .weather-temp-char:nth-of-type(n+6),
+.variant-tumble .weather-location-char:nth-of-type(n+6) {
+  animation-delay: 0.75s;
+}
+
+/* Variant: Rainbow - Character by character */
+.variant-rainbow .title-char,
+.variant-rainbow .clock-char,
+.variant-rainbow .weather-temp-char,
+.variant-rainbow .weather-location-char {
+  animation: rainbow 1s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.variant-rainbow .title-char:nth-of-type(1),
+.variant-rainbow .clock-char:nth-of-type(1),
+.variant-rainbow .weather-temp-char:nth-of-type(1),
+.variant-rainbow .weather-location-char:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.variant-rainbow .title-char:nth-of-type(2),
+.variant-rainbow .clock-char:nth-of-type(2),
+.variant-rainbow .weather-temp-char:nth-of-type(2),
+.variant-rainbow .weather-location-char:nth-of-type(2) {
+  animation-delay: 0.1s;
+}
+
+.variant-rainbow .title-char:nth-of-type(3),
+.variant-rainbow .clock-char:nth-of-type(3),
+.variant-rainbow .weather-temp-char:nth-of-type(3),
+.variant-rainbow .weather-location-char:nth-of-type(3) {
+  animation-delay: 0.2s;
+}
+
+.variant-rainbow .title-char:nth-of-type(4),
+.variant-rainbow .clock-char:nth-of-type(4),
+.variant-rainbow .weather-temp-char:nth-of-type(4),
+.variant-rainbow .weather-location-char:nth-of-type(4) {
+  animation-delay: 0.3s;
+}
+
+.variant-rainbow .title-char:nth-of-type(5),
+.variant-rainbow .clock-char:nth-of-type(5),
+.variant-rainbow .weather-temp-char:nth-of-type(5),
+.variant-rainbow .weather-location-char:nth-of-type(5) {
+  animation-delay: 0.4s;
+}
+
+.variant-rainbow .title-char:nth-of-type(n+6),
+.variant-rainbow .clock-char:nth-of-type(n+6),
+.variant-rainbow .weather-temp-char:nth-of-type(n+6),
+.variant-rainbow .weather-location-char:nth-of-type(n+6) {
   animation-delay: 0.5s;
 }
 

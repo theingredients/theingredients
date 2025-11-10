@@ -1,0 +1,23 @@
+.blog-content {
+  font-size: 1.2rem;
+  color: rgba(0, 0, 0, 0.6);
+  font-weight: 400;
+  transition: color 0.3s ease;
+}
+
+.theme-dark .blog-content {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 768px) {
+  .blog-content {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .blog-content {
+    font-size: 0.95rem;
+  }
+}
+

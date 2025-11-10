@@ -212,7 +212,7 @@ const Home = () => {
   const handleThePressStart = () => {
     const timer = window.setTimeout(() => {
       // Randomly select an animation variant
-      const variants = ['shake', 'spin', 'explode', 'glitch', 'wobble', 'chaos', 'disintegrate', 'float']
+      const variants = ['shake', 'spin', 'explode', 'glitch', 'wobble', 'chaos', 'disintegrate', 'float', 'bounce', 'wave', 'pulse', 'jitter', 'stretch', 'flip', 'slide', 'zoom', 'elastic', 'orbit', 'matrix', 'blur', 'squash', 'twirl', 'pop', 'ripple', 'tumble', 'rainbow']
       const randomVariant = variants[Math.floor(Math.random() * variants.length)]
       setAnimationVariant(randomVariant)
       setIsFallingApart(true)
@@ -298,10 +298,27 @@ const Home = () => {
                 )}
                 {weather && !loading && !error && (
                   <>
-                    <span className={`weather-temp ${getWeatherCursorClass(weather.description)}`}>
-                      {weather.temp}°F / {weather.tempC ?? Math.round((weather.temp - 32) * 5/9)}°C
-                    </span>
-                    <span className="weather-location">{weather.city}</span>
+                    {isFallingApart ? (
+                      <>
+                        <span className={`weather-temp ${getWeatherCursorClass(weather.description)}`}>
+                          <span className="weather-temp-char-container">
+                            {splitIntoCharacters(`${weather.temp}°F / ${weather.tempC ?? Math.round((weather.temp - 32) * 5/9)}°C`, 'weather-temp-char')}
+                          </span>
+                        </span>
+                        <span className="weather-location">
+                          <span className="weather-location-char-container">
+                            {splitIntoCharacters(weather.city, 'weather-location-char')}
+                          </span>
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className={`weather-temp ${getWeatherCursorClass(weather.description)}`}>
+                          {weather.temp}°F / {weather.tempC ?? Math.round((weather.temp - 32) * 5/9)}°C
+                        </span>
+                        <span className="weather-location">{weather.city}</span>
+                      </>
+                    )}
                   </>
                 )}
               </div>
