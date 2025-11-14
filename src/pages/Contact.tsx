@@ -3,23 +3,12 @@ import Layout from '../components/Layout'
 import './PageStyles.css'
 import './Contact.css'
 
-interface AudioDevice {
-  deviceId: string
-  label: string
-  kind: string
-}
-
 const Contact = () => {
   const [showPhone, setShowPhone] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState('')
-  const [audioDevices, setAudioDevices] = useState<AudioDevice[]>([])
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string>('default')
-  const [showDeviceSelector, setShowDeviceSelector] = useState(false)
   const [micEnabled, setMicEnabled] = useState(false)
-  const [micPermissionGranted, setMicPermissionGranted] = useState(false)
   const longPressTimerRef = useRef<number | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
-  const audioElementRef = useRef<HTMLAudioElement | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
   const micStreamRef = useRef<MediaStream | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -39,9 +28,6 @@ const Contact = () => {
         analyserRef.current.fftSize = 2048
         analyserRef.current.smoothingTimeConstant = 0.8
       }
-
-      // Enumerate audio output devices
-      enumerateAudioDevices()
       
       // Start visualization after a short delay to ensure canvas is rendered
       setTimeout(() => {
@@ -64,156 +50,9 @@ const Contact = () => {
         audioContextRef.current.close()
         audioContextRef.current = null
       }
-      if (audioElementRef.current) {
-        audioElementRef.current = null
-      }
       analyserRef.current = null
     }
   }, [showPhone])
-
-  const enumerateAudioDevices = async () => {
-    try {
-      // First, try to enumerate devices without requesting permission
-      let devices = await navigator.mediaDevices.enumerateDevices()
-      
-      // Check if we have device labels (requires permission)
-      const hasLabels = devices.some(device => device.label && device.label !== '')
-      
-      // If no labels, request permission to get proper device names
-      if (!hasLabels) {
-        try {
-          // Request minimal permission to get device labels
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-          // Stop the stream immediately - we only needed it for permission
-          stream.getTracks().forEach(track => track.stop())
-          // Enumerate again to get devices with labels
-          devices = await navigator.mediaDevices.enumerateDevices()
-        } catch (permissionError) {
-          console.warn('Permission denied for device enumeration:', permissionError)
-          // Continue with devices without labels
-        }
-      }
-      
-      // Filter for audio output devices
-      const audioOutputs = devices
-        .filter(device => device.kind === 'audiooutput')
-        .map(device => ({
-          deviceId: device.deviceId,
-          label: device.label || `Audio Output ${device.deviceId.slice(0, 8)}`,
-          kind: device.kind
-        }))
-
-      // Add default option
-      const defaultDevice: AudioDevice = {
-        deviceId: 'default',
-        label: 'Default Speaker',
-        kind: 'audiooutput'
-      }
-
-      setAudioDevices([defaultDevice, ...audioOutputs])
-    } catch (error) {
-      console.warn('Could not enumerate audio devices:', error)
-      // Fallback to default
-      setAudioDevices([{
-        deviceId: 'default',
-        label: 'Default Speaker',
-        kind: 'audiooutput'
-      }])
-    }
-  }
-
-  const handleDeviceChange = async (deviceId: string) => {
-    setSelectedDeviceId(deviceId)
-    // Test the device selection by playing a brief tone
-    if (deviceId !== 'default') {
-      await testAudioOutput(deviceId)
-    }
-  }
-
-  const testAudioOutput = async (deviceId: string) => {
-    try {
-      // Create a test audio element
-      const testAudio = new Audio()
-      
-      // Set the sink ID if supported
-      if ('setSinkId' in testAudio && typeof (testAudio as any).setSinkId === 'function') {
-        await (testAudio as any).setSinkId(deviceId)
-      }
-      
-      // Create a simple test tone
-      const context = audioContextRef.current
-      if (!context) return
-
-      const duration = 0.05
-      const sampleRate = context.sampleRate
-      const numSamples = duration * sampleRate
-      const buffer = context.createBuffer(1, numSamples, sampleRate)
-      const data = buffer.getChannelData(0)
-
-      for (let i = 0; i < numSamples; i++) {
-        const t = i / sampleRate
-        data[i] = Math.sin(2 * Math.PI * 800 * t) * 0.1
-      }
-
-      // Convert buffer to audio element
-      const blob = await bufferToWav(buffer)
-      const url = URL.createObjectURL(blob)
-      testAudio.src = url
-      testAudio.volume = 0.3
-      
-      if ('setSinkId' in testAudio && typeof (testAudio as any).setSinkId === 'function') {
-        await (testAudio as any).setSinkId(deviceId)
-      }
-      
-      testAudio.play().then(() => {
-        setTimeout(() => {
-          testAudio.pause()
-          URL.revokeObjectURL(url)
-        }, duration * 1000)
-      })
-    } catch (error) {
-      console.warn('Could not test audio output:', error)
-    }
-  }
-
-  const bufferToWav = async (buffer: AudioBuffer): Promise<Blob> => {
-    const length = buffer.length
-    const sampleRate = buffer.sampleRate
-    const arrayBuffer = new ArrayBuffer(44 + length * 2)
-    const view = new DataView(arrayBuffer)
-    const data = buffer.getChannelData(0)
-    
-    // WAV header
-    const writeString = (offset: number, string: string) => {
-      for (let i = 0; i < string.length; i++) {
-        view.setUint8(offset + i, string.charCodeAt(i))
-      }
-    }
-    
-    writeString(0, 'RIFF')
-    view.setUint32(4, 36 + length * 2, true)
-    writeString(8, 'WAVE')
-    writeString(12, 'fmt ')
-    view.setUint32(16, 16, true)
-    view.setUint16(20, 1, true)
-    view.setUint16(22, 1, true)
-    view.setUint32(24, sampleRate, true)
-    view.setUint32(28, sampleRate * 2, true)
-    view.setUint16(32, 2, true)
-    view.setUint16(34, 16, true)
-    writeString(36, 'data')
-    view.setUint32(40, length * 2, true)
-    
-    // Convert float samples to 16-bit PCM
-    let offset = 44
-    for (let i = 0; i < length; i++) {
-      const sample = Math.max(-1, Math.min(1, data[i]))
-      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true)
-      offset += 2
-    }
-    
-    return new Blob([arrayBuffer], { type: 'audio/wav' })
-  }
 
   const startVisualization = () => {
     if (!canvasRef.current || !analyserRef.current) return
@@ -388,7 +227,6 @@ const Contact = () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
         micStreamRef.current = stream
-        setMicPermissionGranted(true)
         setMicEnabled(true)
 
         // Connect microphone to analyser
@@ -398,7 +236,6 @@ const Contact = () => {
         }
       } catch (error) {
         console.warn('Microphone access denied:', error)
-        setMicPermissionGranted(false)
         setMicEnabled(false)
       }
     }
@@ -504,23 +341,6 @@ const Contact = () => {
       
       source.start(0)
       source.stop(context.currentTime + duration)
-
-      // Also play through HTMLAudioElement for device selection
-      try {
-        const blob = await bufferToWav(buffer)
-        const url = URL.createObjectURL(blob)
-        const audio = new Audio(url)
-        audio.volume = 0 // Mute this since we're playing through Web Audio API
-        audio.play().then(() => {
-          setTimeout(() => {
-            audio.pause()
-            audio.src = ''
-            URL.revokeObjectURL(url)
-          }, duration * 1000 + 50)
-        })
-      } catch (wavError) {
-        // Ignore WAV conversion errors, Web Audio API playback is primary
-      }
     } catch (error) {
       console.warn('Could not play DTMF tone:', error)
     }
