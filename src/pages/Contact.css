@@ -286,11 +286,11 @@
 }
 
 .phone-oscilloscope-container {
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(240, 240, 240, 0.95);
   border-radius: 12px;
   padding: 1rem;
-  border: 2px solid rgba(0, 255, 0, 0.3);
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+  border: 2px solid rgba(0, 150, 0, 0.4);
+  box-shadow: 0 0 10px rgba(0, 150, 0, 0.15);
 }
 
 .theme-dark .phone-oscilloscope-container {
@@ -305,20 +305,28 @@
   justify-content: space-between;
   margin-bottom: 0.75rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+  border-bottom: 1px solid rgba(0, 150, 0, 0.3);
+}
+
+.theme-dark .phone-oscilloscope-header {
+  border-bottom-color: rgba(0, 255, 0, 0.2);
 }
 
 .phone-oscilloscope-title {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #00ff00;
+  color: #009600;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
 
+.theme-dark .phone-oscilloscope-title {
+  color: #00ff00;
+}
+
 .phone-mic-button {
-  background: rgba(0, 255, 0, 0.1);
-  border: 1px solid rgba(0, 255, 0, 0.3);
+  background: rgba(0, 150, 0, 0.1);
+  border: 1px solid rgba(0, 150, 0, 0.4);
   border-radius: 8px;
   padding: 0.4rem 0.6rem;
   font-size: 1rem;
@@ -329,20 +337,49 @@
   justify-content: center;
 }
 
+.theme-dark .phone-mic-button {
+  background: rgba(0, 255, 0, 0.1);
+  border-color: rgba(0, 255, 0, 0.3);
+}
+
 .phone-mic-button:hover {
-  background: rgba(0, 255, 0, 0.2);
-  border-color: rgba(0, 255, 0, 0.5);
+  background: rgba(0, 150, 0, 0.2);
+  border-color: rgba(0, 150, 0, 0.6);
   transform: scale(1.05);
 }
 
+.theme-dark .phone-mic-button:hover {
+  background: rgba(0, 255, 0, 0.2);
+  border-color: rgba(0, 255, 0, 0.5);
+}
+
 .phone-mic-button.active {
-  background: rgba(0, 255, 0, 0.3);
-  border-color: rgba(0, 255, 0, 0.6);
-  box-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+  background: rgba(0, 150, 0, 0.25);
+  border-color: rgba(0, 150, 0, 0.7);
+  box-shadow: 0 0 8px rgba(0, 150, 0, 0.4);
   animation: micPulse 2s infinite;
 }
 
+.theme-dark .phone-mic-button.active {
+  background: rgba(0, 255, 0, 0.3);
+  border-color: rgba(0, 255, 0, 0.6);
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+}
+
 @keyframes micPulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(0, 150, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(0, 150, 0, 0.6);
+  }
+}
+
+.theme-dark .phone-mic-button.active {
+  animation: micPulseDark 2s infinite;
+}
+
+@keyframes micPulseDark {
   0%, 100% {
     box-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
   }
@@ -356,6 +393,10 @@
   height: 200px;
   display: block;
   border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark .phone-oscilloscope {
   background: rgba(0, 0, 0, 0.5);
 }
 

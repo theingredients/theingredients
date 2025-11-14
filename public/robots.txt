@@ -1,6 +1,10 @@
 User-agent: *
 Allow: /
 
+# Disallow specific pages (add paths you want to hide from crawlers)
+# Example: Disallow: /private-page
+# Example: Disallow: /admin
+
 # Sitemap location (update with your actual domain)
 Sitemap: https://theingredients.vercel.app/sitemap.xml
 
