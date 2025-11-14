@@ -1,0 +1,28 @@
+# Cursor Rules for The Ingredients Project
+
+## Pre-Deployment Checklist
+- **ALWAYS run `npm run build` before committing code that will be deployed**
+- **ALWAYS check for TypeScript errors** - Fix all TS errors before pushing
+- **ALWAYS check for linting errors** - Use `read_lints` tool to verify
+- **NEVER push code that fails the build** - If build fails, fix errors first
+
+## Testing Workflow
+1. Make code changes
+2. Run `npm run build` to verify TypeScript compilation
+3. Check for linting errors using `read_lints`
+4. Fix any errors found
+5. Re-run build to confirm fixes
+6. Only then commit and push
+
+## TypeScript Best Practices
+- Use proper type annotations
+- Avoid `any` when possible, but use it for browser APIs that lack proper types (like Screen Orientation API)
+- Always handle errors properly with try/catch or .catch()
+- Check for existence of APIs before using them
+
+## Code Quality
+- Fix all TypeScript errors before deployment
+- Ensure all imports are used
+- Remove unused variables
+- Handle edge cases and browser compatibility
+
