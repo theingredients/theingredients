@@ -21,6 +21,7 @@ const Home = () => {
   const [isFallingApart, setIsFallingApart] = useState(false)
   const [animationVariant, setAnimationVariant] = useState<string>('')
   const longPressTimerRef = useRef<number | null>(null)
+  const isPressingRef = useRef<boolean>(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -210,18 +211,23 @@ const Home = () => {
   }
 
   const handleThePressStart = () => {
+    isPressingRef.current = true
     const timer = window.setTimeout(() => {
-      // Randomly select an animation variant
-      const variants = ['shake', 'spin', 'explode', 'glitch', 'wobble', 'chaos', 'disintegrate', 'float', 'bounce', 'wave', 'pulse', 'jitter', 'stretch', 'flip', 'slide', 'zoom', 'elastic', 'orbit', 'matrix', 'blur', 'squash', 'twirl', 'pop', 'ripple', 'tumble', 'rainbow', 'spiral', 'morph', 'scatter', 'vortex', 'melt', 'teleport', 'zigzag', 'spiral-in', 'gravity', 'magnetic', 'dance', 'swirl', 'flicker-fast', 'break-apart']
-      const randomVariant = variants[Math.floor(Math.random() * variants.length)]
-      setAnimationVariant(randomVariant)
-      setIsFallingApart(true)
+      // Only start animation if still pressing
+      if (isPressingRef.current) {
+        // Randomly select an animation variant
+        const variants = ['shake', 'spin', 'explode', 'glitch', 'wobble', 'chaos', 'disintegrate', 'float', 'bounce', 'wave', 'pulse', 'jitter', 'stretch', 'flip', 'slide', 'zoom', 'elastic', 'orbit', 'matrix', 'blur', 'squash', 'twirl', 'pop', 'ripple', 'tumble', 'rainbow', 'spiral', 'morph', 'scatter', 'vortex', 'melt', 'teleport', 'zigzag', 'spiral-in', 'gravity', 'magnetic', 'dance', 'swirl', 'flicker-fast', 'break-apart']
+        const randomVariant = variants[Math.floor(Math.random() * variants.length)]
+        setAnimationVariant(randomVariant)
+        setIsFallingApart(true)
+      }
     }, 500) // 500ms hold duration
     
     longPressTimerRef.current = timer
   }
 
   const handleThePressEnd = () => {
+    isPressingRef.current = false
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current)
       longPressTimerRef.current = null
@@ -230,7 +236,8 @@ const Home = () => {
     setAnimationVariant('')
   }
 
-  const handleTheMouseDown = () => {
+  const handleTheMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
     handleThePressStart()
   }
 
@@ -238,8 +245,12 @@ const Home = () => {
     handleThePressEnd()
   }
 
-  const handleTheMouseLeave = () => {
-    handleThePressEnd()
+  const handleTheMouseLeave = (e: React.MouseEvent) => {
+    // Only stop animation if mouse button is not pressed (button 0 = left button)
+    // If buttons property is 0, no button is pressed
+    if (e.buttons === 0) {
+      handleThePressEnd()
+    }
   }
 
   const handleTheTouchStart = (e: React.TouchEvent) => {
@@ -247,12 +258,21 @@ const Home = () => {
     handleThePressStart()
   }
 
+  const handleTheTouchMove = (e: React.TouchEvent) => {
+    // Prevent default to avoid scrolling while holding, but don't cancel the animation
+    // Only prevent if we're actually in the animation state
+    if (isFallingApart) {
+      e.preventDefault()
+    }
+  }
+
   const handleTheTouchEnd = () => {
     handleThePressEnd()
   }
 
   const handleTheTouchCancel = () => {
-    // Handle touch cancellation (e.g., when scrolling starts)
+    // Touch cancel fires when the browser cancels the touch (e.g., during scrolling)
+    // This is correct behavior - stop the animation
     handleThePressEnd()
   }
 
@@ -266,6 +286,7 @@ const Home = () => {
             onMouseUp={handleTheMouseUp}
             onMouseLeave={handleTheMouseLeave}
             onTouchStart={handleTheTouchStart}
+            onTouchMove={handleTheTouchMove}
             onTouchEnd={handleTheTouchEnd}
             onTouchCancel={handleTheTouchCancel}
             aria-label="Hold to activate easter egg"

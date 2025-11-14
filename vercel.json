@@ -9,6 +9,10 @@
       "destination": "https://v2.jokeapi.dev/:path*"
     },
     {
+      "source": "/go/:path*",
+      "destination": "https://thego-navy.vercel.app/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
