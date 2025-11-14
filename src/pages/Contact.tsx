@@ -74,7 +74,7 @@ const Contact = () => {
         >
           Contact
         </h1>
-        <p className="page-content">Get in touch with us.</p>
+        <p className="page-content">Get in touch with us and let's build!</p>
         {/* <p className="page-content">Create a audio file for us using <a href="https://or-six.vercel.app/" target="_blank" rel="noopener noreferrer" className="inline-link">
           The OR (beta)
         </a>.</p> */}
@@ -82,7 +82,7 @@ const Contact = () => {
           Email Us
         </button>
         <button onClick={handleAudioClick} className="email-button">
-          Create Audio With Us
+          Create Audio With Us (beta)
         </button>
       </div>
     </Layout>
