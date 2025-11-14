@@ -13,10 +13,10 @@ const About = () => {
         <div className="legal-section">
           <h2 className="legal-title">Legal</h2>
           <p className="page-content">
-            <a href="/go/privacy" className="inline-link">Privacy Policy</a>
+            <a href="/privacy-policy.html" className="inline-link">Privacy Policy</a>
           </p>
           <p className="page-content">
-            <a href="/go/terms" className="inline-link">Terms of Service</a>
+            <a href="/terms-of-service.html" className="inline-link">Terms of Service</a>
           </p>
         </div>
       </div>
