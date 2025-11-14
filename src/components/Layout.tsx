@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from '../contexts/ThemeContext'
+import { safeRedirect } from '../utils/urlValidator'
 import './Layout.css'
 
 interface LayoutProps {
@@ -363,9 +364,10 @@ const Layout = ({ children }: LayoutProps) => {
           <button onClick={() => {
             // If running locally, navigate to live /go route
             if (import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-              window.location.href = 'https://theingredients.io/go'
+              safeRedirect('https://theingredients.io/go')
             } else {
-              window.location.href = '/go'
+              // Use React Router for internal routes, safeRedirect for external
+              navigate('/go')
             }
           }} className="footer-button">
             G.O.

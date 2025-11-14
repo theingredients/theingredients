@@ -100,6 +100,18 @@ const sanitizeInput = (input: string): string => {
 - No personal information collected
 - No tracking or analytics (unless explicitly added)
 
+### Browser Permission Management
+**Location:** `src/pages/ContactMe.tsx`, `src/pages/Home.tsx`
+
+- **Microphone Permissions:** Properly cleaned up when:
+  - Component unmounts (navigation away)
+  - Page becomes hidden (tab switch, window minimize)
+  - Browser closes/refreshes (beforeunload event)
+  - User manually disables microphone
+- **Geolocation Permissions:** User must explicitly grant permission
+- **MediaStreamSource Disconnection:** All audio sources properly disconnected
+- **Resource Cleanup:** All audio contexts, streams, and animation frames cleaned up
+
 ## 🛡️ Security Headers
 
 The following security headers should be configured at the hosting level (Vercel):
@@ -120,6 +132,8 @@ The following security headers should be configured at the hosting level (Vercel
 - [x] External links secured
 - [x] Console logs removed from production
 - [x] HTTPS enforced
+- [x] Microphone cleanup on page navigation
+- [x] Browser permission resource management
 - [ ] CSP headers (recommended for future)
 - [ ] Rate limiting (recommended for future)
 

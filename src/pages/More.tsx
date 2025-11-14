@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
+import { isValidExternalUrl } from '../utils/urlValidator'
 import './PageStyles.css'
 import './Contact.css'
 
@@ -88,7 +89,13 @@ const More = () => {
   }
 
   const handleAudioClick = () => {
-    window.open('https://or-six.vercel.app/', '_blank', 'noopener,noreferrer')
+    const url = 'https://or-six.vercel.app/'
+    // Validate URL before opening to prevent open redirect vulnerabilities
+    if (isValidExternalUrl(url)) {
+      window.open(url, '_blank', 'noopener,noreferrer')
+    } else {
+      console.warn('External URL blocked:', url)
+    }
   }
 
   // Contact handlers

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import Layout from '../components/Layout'
+import { apiRateLimiter } from '../utils/rateLimiter'
 import './PageStyles.css'
 import './Jokes.css'
 
@@ -35,6 +36,12 @@ const Jokes = () => {
   const fetchRandomJoke = async () => {
     // Prevent multiple simultaneous requests
     if (isFetchingRef.current || loading) {
+      return
+    }
+
+    // Rate limiting: prevent API abuse
+    if (!apiRateLimiter()) {
+      setError('Too many requests. Please wait a moment before trying again.')
       return
     }
 

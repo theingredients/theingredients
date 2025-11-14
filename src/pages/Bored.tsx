@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
+import { apiRateLimiter } from '../utils/rateLimiter'
 import './PageStyles.css'
 import './Bored.css'
 
@@ -32,6 +33,12 @@ const Bored = () => {
   const fetchRandomActivity = async () => {
     // Prevent multiple simultaneous requests
     if (isFetchingRef.current || loading) {
+      return
+    }
+
+    // Rate limiting: prevent API abuse
+    if (!apiRateLimiter()) {
+      setError('Too many requests. Please wait a moment before trying again.')
       return
     }
 

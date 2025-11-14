@@ -59,6 +59,17 @@ const Home = () => {
 
       const { latitude, longitude } = position.coords
 
+      // Validate coordinates are within valid ranges to prevent injection
+      if (
+        typeof latitude !== 'number' || 
+        typeof longitude !== 'number' ||
+        latitude < -90 || latitude > 90 ||
+        longitude < -180 || longitude > 180 ||
+        !isFinite(latitude) || !isFinite(longitude)
+      ) {
+        throw new Error('Invalid geolocation coordinates received')
+      }
+
       // Use Open-Meteo (free, no API key required)
       // First get city name from reverse geocoding
       const geocodeResponse = await fetch(
@@ -216,7 +227,7 @@ const Home = () => {
       // Only start animation if still pressing
       if (isPressingRef.current) {
         // Randomly select an animation variant
-        const variants = ['shake', 'spin', 'explode', 'glitch', 'wobble', 'chaos', 'disintegrate', 'float', 'bounce', 'wave', 'pulse', 'jitter', 'stretch', 'flip', 'slide', 'zoom', 'elastic', 'orbit', 'matrix', 'blur', 'squash', 'twirl', 'pop', 'ripple', 'tumble', 'rainbow', 'spiral', 'morph', 'scatter', 'vortex', 'melt', 'teleport', 'zigzag', 'spiral-in', 'gravity', 'magnetic', 'dance', 'swirl', 'flicker-fast', 'break-apart']
+        const variants = ['shake', 'spin', 'explode', 'glitch', 'wobble', 'chaos', 'disintegrate', 'float', 'bounce', 'wave', 'pulse', 'jitter', 'stretch', 'flip', 'slide', 'zoom', 'elastic', 'orbit', 'matrix', 'matrix-rain', 'blur', 'squash', 'twirl', 'pop', 'ripple', 'tumble', 'rainbow', 'spiral', 'morph', 'scatter', 'vortex', 'melt', 'teleport', 'zigzag', 'spiral-in', 'gravity', 'magnetic', 'dance', 'swirl', 'flicker-fast', 'break-apart']
         const randomVariant = variants[Math.floor(Math.random() * variants.length)]
         setAnimationVariant(randomVariant)
         setIsFallingApart(true)
