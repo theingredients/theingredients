@@ -13,6 +13,28 @@ const ContactMe = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const animationFrameRef = useRef<number | null>(null)
 
+  // Lock orientation to portrait when component mounts
+  useEffect(() => {
+    let lockPromise: Promise<void> | null = null
+    
+    // Lock orientation to portrait if Screen Orientation API is available
+    if ('orientation' in screen && 'lock' in screen.orientation) {
+      lockPromise = screen.orientation.lock('portrait').catch((err) => {
+        // Orientation lock may fail in some browsers or contexts
+        console.log('Orientation lock not supported or failed:', err)
+      })
+    }
+    
+    return () => {
+      // Unlock orientation when component unmounts
+      if ('orientation' in screen && 'unlock' in screen.orientation) {
+        screen.orientation.unlock().catch(() => {
+          // Ignore unlock errors
+        })
+      }
+    }
+  }, [])
+
   // Initialize Audio Context, analyser when component mounts
   useEffect(() => {
     // Initialize audio context
@@ -393,18 +415,6 @@ const ContactMe = () => {
     <Layout>
       <div className="phone-container">
         <div className="phone-screen">
-          <div className="phone-display">
-            <div 
-              className="phone-number-display"
-              style={{
-                fontSize: phoneNumber.length > 10 
-                  ? `${Math.max(1, 2 - (phoneNumber.length - 10) * 0.15)}rem`
-                  : '2rem'
-              }}
-            >
-              {phoneNumber || <span className="phone-placeholder">Enter number</span>}
-            </div>
-          </div>
           <div className="phone-oscilloscope-container">
             <div className="phone-oscilloscope-header">
               <span className="phone-oscilloscope-title">Audio Visualizer</span>
@@ -420,6 +430,18 @@ const ContactMe = () => {
               ref={canvasRef}
               className="phone-oscilloscope"
             />
+          </div>
+          <div className="phone-display">
+            <div 
+              className="phone-number-display"
+              style={{
+                fontSize: phoneNumber.length > 10 
+                  ? `${Math.max(1, 2 - (phoneNumber.length - 10) * 0.15)}rem`
+                  : '2rem'
+              }}
+            >
+              {phoneNumber || <span className="phone-placeholder">Enter number</span>}
+            </div>
           </div>
           <div className="phone-keypad">
             {phoneKeypad.map((row, rowIndex) => (
@@ -441,10 +463,10 @@ const ContactMe = () => {
             <button className="phone-action-button phone-back-button" onClick={handleClosePhone}>
               ← Back
             </button>
-            <button className="phone-action-button" onClick={handleBackspace}>
+            <button className="phone-action-button phone-backspace-button" onClick={handleBackspace}>
               ⌫
             </button>
-            <button className="phone-action-button phone-call-button" onClick={handleClosePhone}>
+            <button className="phone-action-button phone-call-button" disabled>
               📞
             </button>
             <button className="phone-action-button" onClick={handleClear}>
