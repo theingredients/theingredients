@@ -360,8 +360,15 @@ const Layout = ({ children }: LayoutProps) => {
           <button onClick={() => handleNavigation('/about')} className="footer-button">
             About
           </button>
-          <button onClick={() => handleNavigation('/contact')} className="footer-button">
-            Contact
+          <button onClick={() => {
+            // If running locally, navigate to live /go route
+            if (import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+              window.location.href = 'https://theingredients.io/go'
+            } else {
+              window.location.href = '/go'
+            }
+          }} className="footer-button">
+            G.O.
           </button>
           <button onClick={() => handleNavigation('/more')} className="footer-button">
             More
