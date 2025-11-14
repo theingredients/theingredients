@@ -15,22 +15,28 @@ const ContactMe = () => {
 
   // Lock orientation to portrait when component mounts
   useEffect(() => {
-    let lockPromise: Promise<void> | null = null
-    
     // Lock orientation to portrait if Screen Orientation API is available
-    if ('orientation' in screen && 'lock' in screen.orientation) {
-      lockPromise = screen.orientation.lock('portrait').catch((err) => {
-        // Orientation lock may fail in some browsers or contexts
-        console.log('Orientation lock not supported or failed:', err)
-      })
+    if ('orientation' in screen && screen.orientation) {
+      const orientation = screen.orientation as any
+      if (typeof orientation.lock === 'function') {
+        orientation.lock('portrait').catch((err: unknown) => {
+          // Orientation lock may fail in some browsers or contexts
+          console.log('Orientation lock not supported or failed:', err)
+        })
+      }
     }
     
     return () => {
       // Unlock orientation when component unmounts
-      if ('orientation' in screen && 'unlock' in screen.orientation) {
-        screen.orientation.unlock().catch(() => {
-          // Ignore unlock errors
-        })
+      if ('orientation' in screen && screen.orientation) {
+        const orientation = screen.orientation as any
+        if (typeof orientation.unlock === 'function') {
+          try {
+            orientation.unlock()
+          } catch {
+            // Ignore unlock errors
+          }
+        }
       }
     }
   }, [])
