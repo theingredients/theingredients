@@ -643,17 +643,17 @@
   }
 
   .phone-key {
-    max-width: 90px;
-    max-height: 90px;
-    padding: 0.4rem;
+    max-width: 75px;
+    max-height: 75px;
+    padding: 0.35rem;
   }
 
   .phone-key-digit {
-    font-size: 1.3rem;
+    font-size: 1.6rem;
   }
 
   .phone-key-letters {
-    font-size: 0.55rem;
+    font-size: 0.65rem;
   }
 
   .phone-actions {
@@ -735,17 +735,17 @@
   }
 
   .phone-key {
-    max-width: none;
-    max-height: none;
-    padding: 0.5rem;
+    max-width: 70px;
+    max-height: 70px;
+    padding: 0.4rem;
   }
 
   .phone-key-digit {
-    font-size: 1.1rem;
+    font-size: 1.8rem;
   }
 
   .phone-key-letters {
-    font-size: 0.5rem;
+    font-size: 0.7rem;
   }
 
   .phone-actions {
