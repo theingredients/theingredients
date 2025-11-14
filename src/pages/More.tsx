@@ -6,15 +6,10 @@ import './Contact.css'
 
 const More = () => {
   const navigate = useNavigate()
-  const [isTimelinePressing, setIsTimelinePressing] = useState(false)
   const [isContactPressing, setIsContactPressing] = useState(false)
-  const [timelineScale, setTimelineScale] = useState(1)
   const [contactScale, setContactScale] = useState(1)
-  const timelineAnimationFrameRef = useRef<number | null>(null)
   const contactAnimationFrameRef = useRef<number | null>(null)
-  const timelineStartTimeRef = useRef<number | null>(null)
   const contactStartTimeRef = useRef<number | null>(null)
-  const isTimelinePressingRef = useRef<boolean>(false)
   const isContactPressingRef = useRef<boolean>(false)
 
   // Calculate the scale needed to fill the screen
@@ -32,57 +27,6 @@ const More = () => {
     // Use the larger scale to ensure it fills the screen
     return Math.max(scaleX, scaleY) * 1.2 // Add 20% extra to ensure it fills
   }
-
-  // Timeline animation
-  useEffect(() => {
-    if (isTimelinePressing) {
-      // Only set start time if not already set (to avoid overwriting)
-      if (!timelineStartTimeRef.current) {
-        timelineStartTimeRef.current = Date.now()
-      }
-      
-      const animate = () => {
-        if (!isTimelinePressingRef.current) {
-          return
-        }
-        
-        const elapsed = Date.now() - (timelineStartTimeRef.current || 0)
-        const maxScale = getMaxScale('Timeline')
-        
-        const duration = 2000
-        const progress = Math.min(elapsed / duration, 1)
-        const easedProgress = 1 - Math.pow(1 - progress, 3)
-        let newScale = 1 + (maxScale - 1) * easedProgress
-        
-        if (progress >= 1) {
-          const extraTime = elapsed - duration
-          const extraScale = (extraTime / 1000) * 0.5
-          newScale = maxScale + extraScale
-        }
-        
-        setTimelineScale(newScale)
-        
-        if (isTimelinePressingRef.current) {
-          timelineAnimationFrameRef.current = requestAnimationFrame(animate)
-        }
-      }
-      
-      timelineAnimationFrameRef.current = requestAnimationFrame(animate)
-    } else {
-      if (timelineAnimationFrameRef.current) {
-        cancelAnimationFrame(timelineAnimationFrameRef.current)
-        timelineAnimationFrameRef.current = null
-      }
-      setTimelineScale(1)
-      // Don't reset timelineStartTimeRef here - we need it in handleTimelinePressEnd
-    }
-    
-    return () => {
-      if (timelineAnimationFrameRef.current) {
-        cancelAnimationFrame(timelineAnimationFrameRef.current)
-      }
-    }
-  }, [isTimelinePressing])
 
   // Contact animation
   useEffect(() => {
@@ -145,59 +89,6 @@ const More = () => {
 
   const handleAudioClick = () => {
     window.open('https://or-six.vercel.app/', '_blank', 'noopener,noreferrer')
-  }
-
-  // Timeline handlers
-  const handleTimelinePressStart = () => {
-    isTimelinePressingRef.current = true
-    setIsTimelinePressing(true)
-    timelineStartTimeRef.current = Date.now()
-  }
-
-  const handleTimelinePressEnd = () => {
-    const wasPressing = isTimelinePressingRef.current
-    const startTime = timelineStartTimeRef.current
-    
-    isTimelinePressingRef.current = false
-    setIsTimelinePressing(false)
-    
-    // Only navigate if user held for at least 500ms (easter egg threshold)
-    if (wasPressing && startTime) {
-      const holdDuration = Date.now() - startTime
-      if (holdDuration >= 500) {
-        window.location.href = '/go'
-      }
-    }
-    
-    timelineStartTimeRef.current = null
-  }
-
-  const handleTimelineMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault()
-    handleTimelinePressStart()
-  }
-
-  const handleTimelineMouseUp = () => {
-    handleTimelinePressEnd()
-  }
-
-  const handleTimelineMouseLeave = (e: React.MouseEvent) => {
-    if (e.buttons === 0) {
-      handleTimelinePressEnd()
-    }
-  }
-
-  const handleTimelineTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault()
-    handleTimelinePressStart()
-  }
-
-  const handleTimelineTouchEnd = () => {
-    handleTimelinePressEnd()
-  }
-
-  const handleTimelineTouchCancel = () => {
-    handleTimelinePressEnd()
   }
 
   // Contact handlers
@@ -267,18 +158,7 @@ const More = () => {
     <Layout>
       <div className="page-container">
         {/* Timeline Section */}
-        <h1 
-          className={`page-title contact-title ${isTimelinePressing ? 'contact-growing' : ''}`}
-          style={{ transform: `scale(${timelineScale})` }}
-          onMouseDown={handleTimelineMouseDown}
-          onMouseUp={handleTimelineMouseUp}
-          onMouseLeave={handleTimelineMouseLeave}
-          onTouchStart={handleTimelineTouchStart}
-          onTouchEnd={handleTimelineTouchEnd}
-          onTouchCancel={handleTimelineTouchCancel}
-          aria-label="Hold to activate easter egg"
-          title="Hold to activate easter egg"
-        >
+        <h1 className="page-title contact-title">
           Timeline
         </h1>
         <a href="https://or-six.vercel.app/" target="_blank" rel="noopener noreferrer" className="page-content">

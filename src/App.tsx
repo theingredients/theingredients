@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from './contexts/ThemeContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import Home from './pages/Home'
-import Contact from './pages/Contact'
 import ContactMe from './pages/ContactMe'
 import About from './pages/About'
 import More from './pages/More'
@@ -17,7 +16,6 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/contact" element={<Contact />} />
           <Route path="/contact-me" element={<ContactMe />} />
           <Route path="/about" element={<About />} />
           <Route path="/more" element={<More />} />
