@@ -605,7 +605,10 @@
 
 .clock-char-container,
 .weather-temp-char-container,
-.weather-location-char-container {
+.weather-location-char-container,
+.weather-loading-char-container,
+.weather-error-char-container,
+.weather-retry-char-container {
   display: inline-block;
 }
 
@@ -613,8 +616,11 @@
 .variant-shake .title-char,
 .variant-shake .clock-char,
 .variant-shake .weather-temp-char,
-.variant-shake .weather-location-char {
-  animation: shake 0.1s infinite;
+.variant-shake .weather-location-char,
+.variant-shake .weather-loading-char,
+.variant-shake .weather-error-char,
+.variant-shake .weather-retry-char {
+  animation: shake 0.15s infinite;
 }
 
 .variant-shake .title-char:nth-of-type(1),
@@ -705,8 +711,11 @@
 .variant-spin .title-char,
 .variant-spin .clock-char,
 .variant-spin .weather-temp-char,
-.variant-spin .weather-location-char {
-  animation: spin 0.5s infinite;
+.variant-spin .weather-location-char,
+.variant-spin .weather-loading-char,
+.variant-spin .weather-error-char,
+.variant-spin .weather-retry-char {
+  animation: spin 0.7s infinite;
   transform-origin: center;
 }
 
@@ -724,8 +733,11 @@
 .variant-explode .title-char,
 .variant-explode .clock-char,
 .variant-explode .weather-temp-char,
-.variant-explode .weather-location-char {
-  animation: explode 0.3s infinite;
+.variant-explode .weather-location-char,
+.variant-explode .weather-loading-char,
+.variant-explode .weather-error-char,
+.variant-explode .weather-retry-char {
+  animation: explode 0.5s infinite;
   transform-origin: center;
 }
 
@@ -775,8 +787,11 @@
 .variant-glitch .title-char,
 .variant-glitch .clock-char,
 .variant-glitch .weather-temp-char,
-.variant-glitch .weather-location-char {
-  animation: glitch 0.2s infinite;
+.variant-glitch .weather-location-char,
+.variant-glitch .weather-loading-char,
+.variant-glitch .weather-error-char,
+.variant-glitch .weather-retry-char {
+  animation: glitch 0.3s infinite;
 }
 
 .variant-glitch .title-char:nth-of-type(odd),
@@ -797,7 +812,10 @@
 .variant-wobble .title-char,
 .variant-wobble .clock-char,
 .variant-wobble .weather-temp-char,
-.variant-wobble .weather-location-char {
+.variant-wobble .weather-location-char,
+.variant-wobble .weather-loading-char,
+.variant-wobble .weather-error-char,
+.variant-wobble .weather-retry-char {
   animation: wobble 0.4s infinite;
   transform-origin: center bottom;
 }
@@ -848,7 +866,10 @@
 .variant-chaos .title-char,
 .variant-chaos .clock-char,
 .variant-chaos .weather-temp-char,
-.variant-chaos .weather-location-char {
+.variant-chaos .weather-location-char,
+.variant-chaos .weather-loading-char,
+.variant-chaos .weather-error-char,
+.variant-chaos .weather-retry-char {
   animation: chaos 0.6s infinite;
   transform-origin: center;
 }
@@ -899,8 +920,11 @@
 .variant-disintegrate .title-char,
 .variant-disintegrate .clock-char,
 .variant-disintegrate .weather-temp-char,
-.variant-disintegrate .weather-location-char {
-  animation: disintegrate 0.5s infinite, flicker 0.2s infinite;
+.variant-disintegrate .weather-location-char,
+.variant-disintegrate .weather-loading-char,
+.variant-disintegrate .weather-error-char,
+.variant-disintegrate .weather-retry-char {
+  animation: disintegrate 0.7s infinite, flicker 0.3s infinite;
   transform-origin: center;
 }
 
@@ -950,7 +974,10 @@
 .variant-float .title-char,
 .variant-float .clock-char,
 .variant-float .weather-temp-char,
-.variant-float .weather-location-char {
+.variant-float .weather-location-char,
+.variant-float .weather-loading-char,
+.variant-float .weather-error-char,
+.variant-float .weather-retry-char {
   animation: float 1s infinite ease-in-out;
   transform-origin: center;
 }
@@ -1001,7 +1028,10 @@
 .variant-bounce .title-char,
 .variant-bounce .clock-char,
 .variant-bounce .weather-temp-char,
-.variant-bounce .weather-location-char {
+.variant-bounce .weather-location-char,
+.variant-bounce .weather-loading-char,
+.variant-bounce .weather-error-char,
+.variant-bounce .weather-retry-char {
   animation: bounce 0.6s infinite ease-in-out;
   transform-origin: center bottom;
 }
@@ -1052,7 +1082,10 @@
 .variant-wave .title-char,
 .variant-wave .clock-char,
 .variant-wave .weather-temp-char,
-.variant-wave .weather-location-char {
+.variant-wave .weather-location-char,
+.variant-wave .weather-loading-char,
+.variant-wave .weather-error-char,
+.variant-wave .weather-retry-char {
   animation: wave 0.8s infinite ease-in-out;
   transform-origin: center;
 }
@@ -1103,8 +1136,11 @@
 .variant-pulse .title-char,
 .variant-pulse .clock-char,
 .variant-pulse .weather-temp-char,
-.variant-pulse .weather-location-char {
-  animation: pulse 0.5s infinite ease-in-out;
+.variant-pulse .weather-location-char,
+.variant-pulse .weather-loading-char,
+.variant-pulse .weather-error-char,
+.variant-pulse .weather-retry-char {
+  animation: pulse 0.7s infinite ease-in-out;
   transform-origin: center;
 }
 
@@ -1126,8 +1162,11 @@
 .variant-jitter .title-char,
 .variant-jitter .clock-char,
 .variant-jitter .weather-temp-char,
-.variant-jitter .weather-location-char {
-  animation: jitter 0.15s infinite;
+.variant-jitter .weather-location-char,
+.variant-jitter .weather-loading-char,
+.variant-jitter .weather-error-char,
+.variant-jitter .weather-retry-char {
+  animation: jitter 0.25s infinite;
   transform-origin: center;
 }
 
@@ -1177,8 +1216,11 @@
 .variant-stretch .title-char,
 .variant-stretch .clock-char,
 .variant-stretch .weather-temp-char,
-.variant-stretch .weather-location-char {
-  animation: stretch 0.4s infinite ease-in-out;
+.variant-stretch .weather-location-char,
+.variant-stretch .weather-loading-char,
+.variant-stretch .weather-error-char,
+.variant-stretch .weather-retry-char {
+  animation: stretch 0.6s infinite ease-in-out;
   transform-origin: center;
 }
 
@@ -1228,8 +1270,11 @@
 .variant-flip .title-char,
 .variant-flip .clock-char,
 .variant-flip .weather-temp-char,
-.variant-flip .weather-location-char {
-  animation: flip 0.6s infinite;
+.variant-flip .weather-location-char,
+.variant-flip .weather-loading-char,
+.variant-flip .weather-error-char,
+.variant-flip .weather-retry-char {
+  animation: flip 0.8s infinite;
   transform-origin: center;
   transform-style: preserve-3d;
 }
@@ -1252,8 +1297,11 @@
 .variant-slide .title-char,
 .variant-slide .clock-char,
 .variant-slide .weather-temp-char,
-.variant-slide .weather-location-char {
-  animation: slide 0.5s infinite ease-in-out;
+.variant-slide .weather-location-char,
+.variant-slide .weather-loading-char,
+.variant-slide .weather-error-char,
+.variant-slide .weather-retry-char {
+  animation: slide 0.7s infinite ease-in-out;
   transform-origin: center;
 }
 
@@ -1303,8 +1351,11 @@
 .variant-zoom .title-char,
 .variant-zoom .clock-char,
 .variant-zoom .weather-temp-char,
-.variant-zoom .weather-location-char {
-  animation: zoom 0.5s infinite ease-in-out;
+.variant-zoom .weather-location-char,
+.variant-zoom .weather-loading-char,
+.variant-zoom .weather-error-char,
+.variant-zoom .weather-retry-char {
+  animation: zoom 0.7s infinite ease-in-out;
   transform-origin: center;
   transform-style: preserve-3d;
 }
@@ -1355,7 +1406,10 @@
 .variant-elastic .title-char,
 .variant-elastic .clock-char,
 .variant-elastic .weather-temp-char,
-.variant-elastic .weather-location-char {
+.variant-elastic .weather-location-char,
+.variant-elastic .weather-loading-char,
+.variant-elastic .weather-error-char,
+.variant-elastic .weather-retry-char {
   animation: elastic 0.8s infinite ease-in-out;
   transform-origin: center bottom;
 }
@@ -1406,7 +1460,10 @@
 .variant-orbit .title-char,
 .variant-orbit .clock-char,
 .variant-orbit .weather-temp-char,
-.variant-orbit .weather-location-char {
+.variant-orbit .weather-location-char,
+.variant-orbit .weather-loading-char,
+.variant-orbit .weather-error-char,
+.variant-orbit .weather-retry-char {
   animation: orbit 1s infinite linear;
   transform-origin: center center;
 }
@@ -1457,7 +1514,10 @@
 .variant-matrix .title-char,
 .variant-matrix .clock-char,
 .variant-matrix .weather-temp-char,
-.variant-matrix .weather-location-char {
+.variant-matrix .weather-location-char,
+.variant-matrix .weather-loading-char,
+.variant-matrix .weather-error-char,
+.variant-matrix .weather-retry-char {
   animation: matrix 1.5s infinite ease-in;
   transform-origin: center;
 }
@@ -1690,8 +1750,11 @@
 .variant-blur .title-char,
 .variant-blur .clock-char,
 .variant-blur .weather-temp-char,
-.variant-blur .weather-location-char {
-  animation: blur 0.6s infinite ease-in-out;
+.variant-blur .weather-location-char,
+.variant-blur .weather-loading-char,
+.variant-blur .weather-error-char,
+.variant-blur .weather-retry-char {
+  animation: blur 0.8s infinite ease-in-out;
   transform-origin: center;
 }
 
@@ -1713,8 +1776,11 @@
 .variant-squash .title-char,
 .variant-squash .clock-char,
 .variant-squash .weather-temp-char,
-.variant-squash .weather-location-char {
-  animation: squash 0.5s infinite ease-in-out;
+.variant-squash .weather-location-char,
+.variant-squash .weather-loading-char,
+.variant-squash .weather-error-char,
+.variant-squash .weather-retry-char {
+  animation: squash 0.7s infinite ease-in-out;
   transform-origin: center;
 }
 
@@ -1764,8 +1830,11 @@
 .variant-twirl .title-char,
 .variant-twirl .clock-char,
 .variant-twirl .weather-temp-char,
-.variant-twirl .weather-location-char {
-  animation: twirl 0.7s infinite ease-in-out;
+.variant-twirl .weather-location-char,
+.variant-twirl .weather-loading-char,
+.variant-twirl .weather-error-char,
+.variant-twirl .weather-retry-char {
+  animation: twirl 0.9s infinite ease-in-out;
   transform-origin: center;
 }
 
@@ -1789,8 +1858,11 @@
 .variant-pop .title-char,
 .variant-pop .clock-char,
 .variant-pop .weather-temp-char,
-.variant-pop .weather-location-char {
-  animation: pop 0.4s infinite ease-in-out;
+.variant-pop .weather-location-char,
+.variant-pop .weather-loading-char,
+.variant-pop .weather-error-char,
+.variant-pop .weather-retry-char {
+  animation: pop 0.6s infinite ease-in-out;
   transform-origin: center;
 }
 
@@ -1840,8 +1912,11 @@
 .variant-ripple .title-char,
 .variant-ripple .clock-char,
 .variant-ripple .weather-temp-char,
-.variant-ripple .weather-location-char {
-  animation: ripple 0.6s infinite ease-in-out;
+.variant-ripple .weather-location-char,
+.variant-ripple .weather-loading-char,
+.variant-ripple .weather-error-char,
+.variant-ripple .weather-retry-char {
+  animation: ripple 0.8s infinite ease-in-out;
   transform-origin: center;
 }
 
@@ -1891,7 +1966,10 @@
 .variant-tumble .title-char,
 .variant-tumble .clock-char,
 .variant-tumble .weather-temp-char,
-.variant-tumble .weather-location-char {
+.variant-tumble .weather-location-char,
+.variant-tumble .weather-loading-char,
+.variant-tumble .weather-error-char,
+.variant-tumble .weather-retry-char {
   animation: tumble 1.2s infinite ease-in-out;
   transform-origin: center;
 }
@@ -1942,7 +2020,10 @@
 .variant-rainbow .title-char,
 .variant-rainbow .clock-char,
 .variant-rainbow .weather-temp-char,
-.variant-rainbow .weather-location-char {
+.variant-rainbow .weather-location-char,
+.variant-rainbow .weather-loading-char,
+.variant-rainbow .weather-error-char,
+.variant-rainbow .weather-retry-char {
   animation: rainbow 1s infinite ease-in-out;
   transform-origin: center;
 }
@@ -1993,7 +2074,10 @@
 .variant-spiral .title-char,
 .variant-spiral .clock-char,
 .variant-spiral .weather-temp-char,
-.variant-spiral .weather-location-char {
+.variant-spiral .weather-location-char,
+.variant-spiral .weather-loading-char,
+.variant-spiral .weather-error-char,
+.variant-spiral .weather-retry-char {
   animation: spiral 0.8s infinite ease-in-out;
   transform-origin: center;
 }
@@ -2044,8 +2128,11 @@
 .variant-morph .title-char,
 .variant-morph .clock-char,
 .variant-morph .weather-temp-char,
-.variant-morph .weather-location-char {
-  animation: morph 0.5s infinite ease-in-out;
+.variant-morph .weather-location-char,
+.variant-morph .weather-loading-char,
+.variant-morph .weather-error-char,
+.variant-morph .weather-retry-char {
+  animation: morph 0.7s infinite ease-in-out;
   transform-origin: center;
 }
 
@@ -2067,8 +2154,11 @@
 .variant-scatter .title-char,
 .variant-scatter .clock-char,
 .variant-scatter .weather-temp-char,
-.variant-scatter .weather-location-char {
-  animation: scatter 0.7s infinite ease-in-out;
+.variant-scatter .weather-location-char,
+.variant-scatter .weather-loading-char,
+.variant-scatter .weather-error-char,
+.variant-scatter .weather-retry-char {
+  animation: scatter 0.9s infinite ease-in-out;
   transform-origin: center;
 }
 
@@ -2118,7 +2208,10 @@
 .variant-vortex .title-char,
 .variant-vortex .clock-char,
 .variant-vortex .weather-temp-char,
-.variant-vortex .weather-location-char {
+.variant-vortex .weather-location-char,
+.variant-vortex .weather-loading-char,
+.variant-vortex .weather-error-char,
+.variant-vortex .weather-retry-char {
   animation: vortex 1s infinite ease-in;
   transform-origin: center;
 }
@@ -2169,7 +2262,10 @@
 .variant-melt .title-char,
 .variant-melt .clock-char,
 .variant-melt .weather-temp-char,
-.variant-melt .weather-location-char {
+.variant-melt .weather-location-char,
+.variant-melt .weather-loading-char,
+.variant-melt .weather-error-char,
+.variant-melt .weather-retry-char {
   animation: melt 1.2s infinite ease-in;
   transform-origin: center top;
 }
@@ -2220,8 +2316,11 @@
 .variant-teleport .title-char,
 .variant-teleport .clock-char,
 .variant-teleport .weather-temp-char,
-.variant-teleport .weather-location-char {
-  animation: teleport 0.6s infinite ease-in-out;
+.variant-teleport .weather-location-char,
+.variant-teleport .weather-loading-char,
+.variant-teleport .weather-error-char,
+.variant-teleport .weather-retry-char {
+  animation: teleport 0.8s infinite ease-in-out;
   transform-origin: center;
 }
 
@@ -2271,8 +2370,11 @@
 .variant-zigzag .title-char,
 .variant-zigzag .clock-char,
 .variant-zigzag .weather-temp-char,
-.variant-zigzag .weather-location-char {
-  animation: zigzag 0.5s infinite ease-in-out;
+.variant-zigzag .weather-location-char,
+.variant-zigzag .weather-loading-char,
+.variant-zigzag .weather-error-char,
+.variant-zigzag .weather-retry-char {
+  animation: zigzag 0.7s infinite ease-in-out;
   transform-origin: center;
 }
 
@@ -2373,7 +2475,10 @@
 .variant-gravity .title-char,
 .variant-gravity .clock-char,
 .variant-gravity .weather-temp-char,
-.variant-gravity .weather-location-char {
+.variant-gravity .weather-location-char,
+.variant-gravity .weather-loading-char,
+.variant-gravity .weather-error-char,
+.variant-gravity .weather-retry-char {
   animation: gravity 1s infinite ease-in;
   transform-origin: center top;
 }
@@ -2424,7 +2529,10 @@
 .variant-magnetic .title-char,
 .variant-magnetic .clock-char,
 .variant-magnetic .weather-temp-char,
-.variant-magnetic .weather-location-char {
+.variant-magnetic .weather-location-char,
+.variant-magnetic .weather-loading-char,
+.variant-magnetic .weather-error-char,
+.variant-magnetic .weather-retry-char {
   animation: magnetic 0.7s infinite ease-in-out;
   transform-origin: center;
 }
@@ -2475,7 +2583,10 @@
 .variant-dance .title-char,
 .variant-dance .clock-char,
 .variant-dance .weather-temp-char,
-.variant-dance .weather-location-char {
+.variant-dance .weather-location-char,
+.variant-dance .weather-loading-char,
+.variant-dance .weather-error-char,
+.variant-dance .weather-retry-char {
   animation: dance 0.8s infinite ease-in-out;
   transform-origin: center bottom;
 }
@@ -2526,7 +2637,10 @@
 .variant-swirl .title-char,
 .variant-swirl .clock-char,
 .variant-swirl .weather-temp-char,
-.variant-swirl .weather-location-char {
+.variant-swirl .weather-location-char,
+.variant-swirl .weather-loading-char,
+.variant-swirl .weather-error-char,
+.variant-swirl .weather-retry-char {
   animation: swirl 1s infinite ease-in-out;
   transform-origin: center;
 }
@@ -2578,7 +2692,7 @@
 .variant-flicker-fast .clock-char,
 .variant-flicker-fast .weather-temp-char,
 .variant-flicker-fast .weather-location-char {
-  animation: flicker-fast 0.3s infinite ease-in-out;
+  animation: flicker-fast 0.5s infinite ease-in-out;
   transform-origin: center;
 }
 
@@ -2601,7 +2715,7 @@
 .variant-break-apart .clock-char,
 .variant-break-apart .weather-temp-char,
 .variant-break-apart .weather-location-char {
-  animation: break-apart 0.8s infinite ease-in-out;
+  animation: break-apart 1s infinite ease-in-out;
   transform-origin: center;
 }
 

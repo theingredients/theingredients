@@ -357,16 +357,38 @@ const Home = () => {
           >
             {showWeather ? (
               <div className="weather-display">
-                {loading && <div className="weather-loading">Loading...</div>}
+                {loading && (
+                  <div className="weather-loading">
+                    {isFallingApart ? (
+                      <span className="weather-loading-char-container">
+                        {splitIntoCharacters('Loading...', 'weather-loading-char')}
+                      </span>
+                    ) : (
+                      'Loading...'
+                    )}
+                  </div>
+                )}
                 {error && (
                   <div className="weather-error">
-                    {error}
+                    {isFallingApart ? (
+                      <span className="weather-error-char-container">
+                        {splitIntoCharacters(error, 'weather-error-char')}
+                      </span>
+                    ) : (
+                      error
+                    )}
                     {error.includes('denied') && (
                       <div 
                         className="weather-retry" 
                         onClick={handleRetry}
                       >
-                        Click to retry
+                        {isFallingApart ? (
+                          <span className="weather-retry-char-container">
+                            {splitIntoCharacters('Click to retry', 'weather-retry-char')}
+                          </span>
+                        ) : (
+                          'Click to retry'
+                        )}
                       </div>
                     )}
                   </div>
