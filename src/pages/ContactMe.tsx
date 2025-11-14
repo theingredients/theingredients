@@ -393,11 +393,6 @@ const ContactMe = () => {
     <Layout>
       <div className="phone-container">
         <div className="phone-screen">
-          <div className="phone-header">
-            <button className="phone-close-button" onClick={handleClosePhone}>
-              ← Back
-            </button>
-          </div>
           <div className="phone-display">
             <div 
               className="phone-number-display"
@@ -443,6 +438,9 @@ const ContactMe = () => {
             ))}
           </div>
           <div className="phone-actions">
+            <button className="phone-action-button phone-back-button" onClick={handleClosePhone}>
+              ← Back
+            </button>
             <button className="phone-action-button" onClick={handleBackspace}>
               ⌫
             </button>

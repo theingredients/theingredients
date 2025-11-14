@@ -43,16 +43,7 @@
 }
 
 .phone-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  position: relative;
-}
-
-.theme-dark .phone-header {
-  border-bottom-color: rgba(255, 255, 255, 0.1);
+  display: none;
 }
 
 .phone-device-button {
@@ -505,7 +496,7 @@
 .phone-actions {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.5rem;
   padding-top: 1rem;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
@@ -519,12 +510,18 @@
   background: rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  padding: 1rem;
-  font-size: 1.2rem;
+  padding: 0.75rem;
+  font-size: 1rem;
   color: rgba(0, 0, 0, 0.7);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
+  white-space: nowrap;
+}
+
+.phone-back-button {
+  font-size: 0.9rem;
+  padding: 0.75rem 0.5rem;
 }
 
 .theme-dark .phone-action-button {
@@ -573,24 +570,40 @@
 
 @media (max-width: 768px) {
   .phone-container {
-    padding: 1rem;
+    padding: 0.5rem;
+    min-height: calc(100vh - 100px);
   }
 
   .phone-screen {
     padding: 1rem;
     gap: 1rem;
+    max-width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .theme-dark .phone-screen {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
   }
 
   .phone-number-display {
     font-size: 1.5rem;
   }
 
+  .phone-oscilloscope-container {
+    padding: 0.75rem;
+  }
+
+  .phone-oscilloscope {
+    height: 150px;
+  }
+
   .phone-keypad {
-    gap: 0.75rem;
+    gap: 0.6rem;
   }
 
   .phone-keypad-row {
-    gap: 0.75rem;
+    gap: 0.6rem;
   }
 
   .phone-key-digit {
@@ -600,41 +613,104 @@
   .phone-key-letters {
     font-size: 0.6rem;
   }
+
+  .phone-actions {
+    gap: 0.4rem;
+    padding-top: 0.75rem;
+  }
+
+  .phone-action-button {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.9rem;
+  }
+
+  .phone-back-button {
+    font-size: 0.85rem;
+    padding: 0.6rem 0.3rem;
+  }
+
+  .phone-call-button {
+    font-size: 1.3rem;
+  }
 }
 
 @media (max-width: 480px) {
   .phone-container {
-    padding: 0.5rem;
+    padding: 0;
+    min-height: 100vh;
+    align-items: stretch;
   }
 
   .phone-screen {
     padding: 0.75rem;
-    border-radius: 15px;
+    border-radius: 0;
+    max-width: 100%;
+    min-height: 100vh;
+    box-shadow: none;
+    gap: 0.75rem;
+  }
+
+  .theme-dark .phone-screen {
+    box-shadow: none;
+  }
+
+  .phone-display {
+    padding: 0.75rem;
   }
 
   .phone-number-display {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+  }
+
+  .phone-oscilloscope-container {
+    padding: 0.5rem;
+  }
+
+  .phone-oscilloscope {
+    height: 120px;
+  }
+
+  .phone-oscilloscope-title {
+    font-size: 0.75rem;
   }
 
   .phone-keypad {
-    gap: 0.5rem;
+    gap: 0.4rem;
   }
 
   .phone-keypad-row {
-    gap: 0.5rem;
+    gap: 0.4rem;
+  }
+
+  .phone-key {
+    padding: 0.75rem;
   }
 
   .phone-key-digit {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
 
   .phone-key-letters {
-    font-size: 0.55rem;
+    font-size: 0.5rem;
+  }
+
+  .phone-actions {
+    gap: 0.3rem;
+    padding-top: 0.5rem;
   }
 
   .phone-action-button {
-    padding: 0.75rem;
-    font-size: 1rem;
+    padding: 0.5rem 0.3rem;
+    font-size: 0.8rem;
+  }
+
+  .phone-back-button {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.25rem;
+  }
+
+  .phone-call-button {
+    font-size: 1.1rem;
   }
 }
 

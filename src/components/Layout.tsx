@@ -352,20 +352,22 @@ const Layout = ({ children }: LayoutProps) => {
         {children}
       </main>
       
-      <footer className="footer">
-        <button onClick={() => handleNavigation('/')} className="footer-button">
-          Home
-        </button>
-        <button onClick={() => handleNavigation('/about')} className="footer-button">
-          About
-        </button>
-        <button onClick={() => handleNavigation('/contact')} className="footer-button">
-          Contact
-        </button>
-        <button onClick={() => handleNavigation('/more')} className="footer-button">
-          More
-        </button>
-      </footer>
+      {location.pathname !== '/contact-me' && (
+        <footer className="footer">
+          <button onClick={() => handleNavigation('/')} className="footer-button">
+            Home
+          </button>
+          <button onClick={() => handleNavigation('/about')} className="footer-button">
+            About
+          </button>
+          <button onClick={() => handleNavigation('/contact')} className="footer-button">
+            Contact
+          </button>
+          <button onClick={() => handleNavigation('/more')} className="footer-button">
+            More
+          </button>
+        </footer>
+      )}
     </div>
   )
 }
