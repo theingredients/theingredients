@@ -407,7 +407,8 @@ const ContactMe = () => {
   }
 
   const handleClosePhone = () => {
-    navigate('/contact')
+    // Go back to previous page in history (e.g., /more or /contact)
+    navigate(-1)
   }
 
   const phoneKeypad = [
