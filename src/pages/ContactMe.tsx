@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import './Contact.css'
@@ -10,8 +10,10 @@ const ContactMe = () => {
   const audioContextRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
   const micStreamRef = useRef<MediaStream | null>(null)
+  const mediaStreamSourceRef = useRef<MediaStreamAudioSourceNode | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const animationFrameRef = useRef<number | null>(null)
+  const visualizationTimeoutRef = useRef<number | null>(null)
 
   // Lock orientation to portrait when component mounts
   useEffect(() => {
@@ -41,6 +43,58 @@ const ContactMe = () => {
     }
   }, [])
 
+  // Stop visualization function
+  const stopVisualization = useCallback(() => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current)
+      animationFrameRef.current = null
+    }
+  }, [])
+
+  // Cleanup function to ensure all resources are properly released
+  const cleanupAudioResources = useCallback(() => {
+    // Stop visualization
+    stopVisualization()
+    
+    // Clear any pending visualization timeout
+    if (visualizationTimeoutRef.current) {
+      clearTimeout(visualizationTimeoutRef.current)
+      visualizationTimeoutRef.current = null
+    }
+    
+    // Disconnect media stream source if it exists
+    if (mediaStreamSourceRef.current) {
+      try {
+        mediaStreamSourceRef.current.disconnect()
+      } catch (error) {
+        // Ignore errors if already disconnected
+        console.debug('MediaStreamSource already disconnected:', error)
+      }
+      mediaStreamSourceRef.current = null
+    }
+    
+    // Stop microphone tracks if active
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach(track => {
+        track.stop()
+        track.enabled = false
+      })
+      micStreamRef.current = null
+    }
+    
+    // Reset mic enabled state
+    setMicEnabled(false)
+    
+    // Clean up audio context when component unmounts
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      audioContextRef.current.close().catch((error) => {
+        console.debug('Error closing audio context:', error)
+      })
+      audioContextRef.current = null
+    }
+    analyserRef.current = null
+  }, [stopVisualization])
+
   // Initialize Audio Context, analyser when component mounts
   useEffect(() => {
     // Initialize audio context
@@ -56,26 +110,67 @@ const ContactMe = () => {
     }
     
     // Start visualization after a short delay to ensure canvas is rendered
-    setTimeout(() => {
+    visualizationTimeoutRef.current = window.setTimeout(() => {
       startVisualization()
+      visualizationTimeoutRef.current = null
     }, 100)
 
     return () => {
-      // Stop visualization
-      stopVisualization()
-      
-      // Stop microphone if active
+      cleanupAudioResources()
+    }
+  }, [cleanupAudioResources])
+
+  // Handle page visibility changes (tab switching, minimizing window)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Page is hidden - clean up microphone to save resources
+        if (micEnabled && micStreamRef.current) {
+          // Stop microphone when page becomes hidden
+          if (micStreamRef.current) {
+            micStreamRef.current.getTracks().forEach(track => track.stop())
+            micStreamRef.current = null
+          }
+          if (mediaStreamSourceRef.current) {
+            try {
+              mediaStreamSourceRef.current.disconnect()
+            } catch (error) {
+              console.debug('Error disconnecting MediaStreamSource:', error)
+            }
+            mediaStreamSourceRef.current = null
+          }
+          setMicEnabled(false)
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [micEnabled])
+
+  // Handle beforeunload (browser close/refresh)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Clean up microphone before page unloads
       if (micStreamRef.current) {
         micStreamRef.current.getTracks().forEach(track => track.stop())
-        micStreamRef.current = null
       }
-      
-      // Clean up audio context when component unmounts
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close()
-        audioContextRef.current = null
+      if (mediaStreamSourceRef.current) {
+        try {
+          mediaStreamSourceRef.current.disconnect()
+        } catch (error) {
+          // Ignore errors during unload
+        }
       }
-      analyserRef.current = null
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
     }
   }, [])
 
@@ -240,18 +335,23 @@ const ContactMe = () => {
     draw()
   }
 
-  const stopVisualization = () => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current)
-      animationFrameRef.current = null
-    }
-  }
-
   const handleMicToggle = async () => {
     if (micEnabled) {
       // Disable microphone
+      if (mediaStreamSourceRef.current) {
+        try {
+          mediaStreamSourceRef.current.disconnect()
+        } catch (error) {
+          console.debug('Error disconnecting MediaStreamSource:', error)
+        }
+        mediaStreamSourceRef.current = null
+      }
+      
       if (micStreamRef.current) {
-        micStreamRef.current.getTracks().forEach(track => track.stop())
+        micStreamRef.current.getTracks().forEach(track => {
+          track.stop()
+          track.enabled = false
+        })
         micStreamRef.current = null
       }
       setMicEnabled(false)
@@ -264,12 +364,33 @@ const ContactMe = () => {
 
         // Connect microphone to analyser
         if (audioContextRef.current && analyserRef.current) {
+          // Disconnect any existing source first
+          if (mediaStreamSourceRef.current) {
+            try {
+              mediaStreamSourceRef.current.disconnect()
+            } catch (error) {
+              console.debug('Error disconnecting existing MediaStreamSource:', error)
+            }
+          }
+          
+          // Create and store the new media stream source
           const source = audioContextRef.current.createMediaStreamSource(stream)
           source.connect(analyserRef.current)
+          mediaStreamSourceRef.current = source
+          
+          // Resume audio context if suspended (required by some browsers)
+          if (audioContextRef.current.state === 'suspended') {
+            await audioContextRef.current.resume()
+          }
         }
       } catch (error) {
         console.warn('Microphone access denied:', error)
         setMicEnabled(false)
+        // Clean up any partial state
+        if (micStreamRef.current) {
+          micStreamRef.current.getTracks().forEach(track => track.stop())
+          micStreamRef.current = null
+        }
       }
     }
   }
