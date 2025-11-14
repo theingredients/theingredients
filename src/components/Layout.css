@@ -34,14 +34,14 @@
   
   .layout.page-flipping::before {
     transform-origin: top right;
-    /* For mobile, adjust overlay rotation to match negative page rotation */
-    transform: perspective(2000px) rotateY(calc(var(--flip-rotation) - 90deg)) scaleX(calc(1 - var(--flip-progress) * 0.5));
+    /* For mobile, start at -90deg (already flipped) and rotate back as page flips forward */
+    transform: perspective(2000px) rotateY(calc(-90deg - var(--flip-rotation))) scaleX(1);
   }
   
   /* When fully flipped on mobile */
   .layout.page-flipping[style*="--flip-rotation: -90deg"]::before {
-    opacity: 0.9;
-    transform: perspective(2000px) rotateY(-180deg) scaleX(0.5);
+    opacity: 1;
+    transform: perspective(2000px) rotateY(0deg) scaleX(1);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-out;
   }
 }
@@ -84,8 +84,9 @@
   z-index: 9999;
   pointer-events: none;
   transform-origin: top left;
-  transform: perspective(2000px) rotateY(calc(var(--flip-rotation) + 90deg)) scaleX(calc(1 - var(--flip-progress) * 0.5));
-  opacity: calc(var(--flip-progress) * 0.9);
+  /* Start at 90deg (already flipped) and rotate back as page flips forward */
+  transform: perspective(2000px) rotateY(calc(90deg - var(--flip-rotation))) scaleX(1);
+  opacity: calc(var(--flip-progress) * 1);
   transition: transform 0.1s ease-out, opacity 0.1s ease-out;
 }
 
@@ -100,8 +101,8 @@
 
 /* When fully flipped, keep overlay visible briefly to show new theme */
 .layout.page-flipping[style*="--flip-rotation: 90deg"]::before {
-  opacity: 0.9;
-  transform: perspective(2000px) rotateY(180deg) scaleX(0.5);
+  opacity: 1;
+  transform: perspective(2000px) rotateY(0deg) scaleX(1);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-out;
 }
 
