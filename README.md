@@ -1,22 +1,30 @@
 # The Ingredients
 
-A elegant and minimalist website built with Vite, React, and TypeScript.
+An elegant and minimalist website for The Ingredients Collective, built with modern web technologies.
 
-## Getting Started
+**Live Site:** [theingredients.io](https://theingredients.io)
 
-### Install Dependencies
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18+ and npm
+
+### Installation
 
 ```bash
 npm install
 ```
 
-### Run Development Server
+### Development
 
 ```bash
 npm run dev
 ```
 
-### Build for Production
+The development server will start at `http://localhost:5173` (or the next available port).
+
+### Build
 
 ```bash
 npm run build
@@ -28,53 +36,94 @@ npm run build
 npm run preview
 ```
 
-## Features
+## 🛠️ Tech Stack
+
+- **Framework:** React 18 with TypeScript
+- **Build Tool:** Vite 5
+- **Routing:** React Router v6
+- **Deployment:** Vercel
+- **Styling:** CSS3 with custom animations
+
+## 📁 Project Structure
+
+```
+src/
+├── components/       # Reusable components (Layout, ErrorBoundary)
+├── contexts/        # React contexts (ThemeContext)
+├── hooks/           # Custom React hooks
+├── pages/           # Page components
+│   ├── blog/        # Blog pages
+│   └── ...          # Other pages
+└── index.css        # Global styles
+```
+
+## ✨ Features
 
 ### Core Features
-- Elegant home page with centered, stacked title
-- Clean navigation with footer buttons
-- Contact, About, and More pages
-- Responsive design optimized for mobile and desktop
-- Beautiful typography using Playfair Display font
-- Dark/Light theme toggle with persistent storage
-- Real-time clock display on home page
-- Weather display with location-based data
-- Dynamic weather-dependent cursors (sunny, rainy, snowy, stormy, foggy, cloudy)
-- Custom cursors for interactive elements (clock, weather, location)
 
-### Easter Eggs & Interactive Features
+- **Responsive Design** - Optimized for mobile, tablet, and desktop
+- **Dark/Light Theme** - Persistent theme with cross-route synchronization
+- **Real-time Clock** - Live time display on home page
+- **Weather Integration** - Location-based weather data with dynamic cursors
+- **SEO Optimized** - Meta tags, Open Graph, Twitter Cards, and structured data
+- **Accessibility** - ARIA labels, keyboard navigation, semantic HTML
 
-#### 1. Bored Page Input Easter Egg
-- Click on "Bored?" title to reveal a text input
-- Type "joke", "tell me a joke", or similar phrases to navigate to the Jokes page
-- Input is sanitized and secured against XSS attacks
+### Interactive Easter Eggs
 
-#### 2. Jokes Page
-- Accessible via the Bored page easter egg
-- Fetches random jokes from JokeAPI
-- Filter options: category, type (single/twopart), and content flags
-- All inputs validated against whitelists for security
+1. **"The" Falling Apart Animation** (Home page)
+   - Long-press (500ms) on "The" to trigger 40+ random animations
+   - Character-by-character effects with smooth transitions
 
-#### 3. "The" Falling Apart Animation
-- Long-press (hold for 500ms) on the word "The" on the home page
-- Triggers random animations: shake, spin, explode, glitch, wobble, chaos, disintegrate, float
-- Character-by-character animations for enhanced visual effect
-- Animation resets when released
+2. **Contact Growing Text** (Contact & More pages)
+   - Hold the "Contact" title to make it grow and fill the screen
+   - Release to navigate to the Contact Me easter egg
 
-#### 4. Page Flip Theme Toggle
-- Drag from top-left corner (within 100px) diagonally to bottom-right
-- Page peels away in real-time following your drag gesture
-- Reveals opposite theme color underneath (dark when in light mode, light when in dark mode)
-- Visual feedback with grab cursor when hovering over drag zone
-- Theme toggles automatically when drag completes (50% threshold)
-- Smooth snap-back if released early
+3. **Timeline Navigation** (More page)
+   - Hold "Timeline" title to navigate to G.O. app
+   - Smooth growing animation effect
 
-### Technical Features
-- SEO optimized with meta tags, Open Graph, Twitter Cards, and JSON-LD structured data
-- Sitemap.xml and robots.txt for search engine optimization
-- Error boundary for graceful error handling
-- Input sanitization and validation for security
-- API proxy configuration for development and production
-- TypeScript for type safety
-- Accessibility features (ARIA labels, keyboard navigation)
+4. **Page Flip Theme Toggle**
+   - Drag from top-left corner to flip the page and toggle theme
+   - Real-time visual feedback with smooth animations
 
+5. **Bored Page Easter Egg**
+   - Click "Bored?" to reveal hidden input
+   - Type "joke" to navigate to Jokes page
+
+### Pages
+
+- **Home** (`/`) - Main landing page with clock, weather, and easter eggs
+- **About** (`/about`) - Information about The Ingredients
+- **Contact** (`/contact`) - Contact information with easter egg
+- **More** (`/more`) - Timeline and additional projects
+- **Contact Me** (`/contact-me`) - Interactive phone easter egg (hidden route)
+- **Bored** (`/bored`) - Activity suggestions with hidden input
+- **Jokes** (`/jokes`) - Random jokes with filtering (hidden route)
+- **Blog** (`/blog`) - Blog posts
+
+### Route Integration
+
+- **G.O. Route** (`/go`) - Proxied to external G.O. app via Vercel rewrite
+- **Theme Sync** - Themes synchronize between main site and `/go` route
+
+## 🔒 Security
+
+See [SECURITY.md](./SECURITY.md) for detailed security measures including:
+- Input sanitization and validation
+- XSS protection
+- Path traversal prevention
+- API request security
+
+## 📝 License
+
+This project is open source and available for public viewing.
+
+## 🤝 Contributing
+
+This is a personal/collective project. For questions or suggestions, please contact [theingredientscollective@gmail.com](mailto:theingredientscollective@gmail.com).
+
+## 📄 Documentation
+
+- [FEATURES.md](./FEATURES.md) - Detailed feature documentation
+- [SECURITY.md](./SECURITY.md) - Security measures and best practices
+- [CHANGELOG.md](./CHANGELOG.md) - Version history and changes
