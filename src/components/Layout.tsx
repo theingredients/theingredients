@@ -326,7 +326,8 @@ const Layout = ({ children }: LayoutProps) => {
   }
 
   // Calculate rotation angle from progress (0 to 90 degrees)
-  const rotationAngle = flipProgress * 90
+  // On mobile (right-to-left swipe), use negative rotation to flip from right to left
+  const rotationAngle = isMobile ? flipProgress * -90 : flipProgress * 90
 
   return (
     <div 
