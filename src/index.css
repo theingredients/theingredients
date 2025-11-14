@@ -41,7 +41,8 @@ body {
   }
 }
 
-body.theme-dark {
+body.theme-dark,
+[data-theme="dark"] body {
   background-color: #1a1a1a;
   color: rgba(255, 255, 255, 0.87);
 }

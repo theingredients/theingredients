@@ -100,11 +100,75 @@
     </script>
     
     <script>
-      // Apply theme immediately to prevent white flash
+      // Theme synchronization with /go route
+      // This must run early to prevent theme flash
       (function() {
+        // Get theme from localStorage (shared across theingredients.io domain)
         const theme = localStorage.getItem('theme') || 'light';
+        
+        // Set data-theme attribute on html element immediately
         document.documentElement.setAttribute('data-theme', theme);
-        document.body.className = `theme-${theme}`;
+        
+        // Set body class if body exists, otherwise wait for it
+        if (document.body) {
+          document.body.className = `theme-${theme}`;
+        } else {
+          // Wait for body to be available
+          const observer = new MutationObserver(function(mutations) {
+            if (document.body) {
+              document.body.className = `theme-${theme}`;
+              observer.disconnect();
+            }
+          });
+          observer.observe(document.documentElement, { childList: true });
+          
+          // Fallback: also try on DOMContentLoaded
+          document.addEventListener('DOMContentLoaded', function() {
+            if (document.body) {
+              document.body.className = `theme-${theme}`;
+            }
+          });
+        }
+        
+        // Listen for theme changes from other tabs/routes on the same domain
+        window.addEventListener('storage', function(e) {
+          if (e.key === 'theme') {
+            const newTheme = e.newValue || 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            if (document.body) {
+              document.body.className = `theme-${newTheme}`;
+            }
+            // Update any theme toggle buttons
+            if (window.updateThemeUI) {
+              window.updateThemeUI(newTheme);
+            }
+          }
+        });
+        
+        // Listen for theme changes in the same window (for route navigation)
+        window.addEventListener('themechange', function(e) {
+          const newTheme = e.detail ? e.detail.theme : (e.newValue || 'light');
+          document.documentElement.setAttribute('data-theme', newTheme);
+          if (document.body) {
+            document.body.className = `theme-${newTheme}`;
+          }
+          if (window.updateThemeUI) {
+            window.updateThemeUI(newTheme);
+          }
+        });
+        
+        // Helper function to update theme UI elements
+        function updateThemeUI(theme) {
+          // Update theme toggle button if it exists
+          const themeToggle = document.getElementById('themeToggle');
+          if (themeToggle) {
+            themeToggle.textContent = theme === 'light' ? '🌓 Theme' : '☀️ Theme';
+          }
+          // Add any other UI updates here (e.g., update other theme-related elements)
+        }
+        
+        // Make updateThemeUI available globally if needed
+        window.updateThemeUI = updateThemeUI;
       })();
     </script>
   </head>

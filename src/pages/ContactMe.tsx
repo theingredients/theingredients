@@ -407,8 +407,14 @@ const ContactMe = () => {
   }
 
   const handleClosePhone = () => {
-    // Go back to previous page in history (e.g., /more or /contact)
-    navigate(-1)
+    // Try to go back in history, with fallback to /more
+    // Check if there's history to go back to
+    if (window.history.length > 1) {
+      navigate(-1)
+    } else {
+      // Fallback: navigate to /more if no history
+      navigate('/more')
+    }
   }
 
   const phoneKeypad = [

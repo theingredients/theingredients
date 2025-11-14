@@ -31,8 +31,35 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         document.body.className = `theme-${theme}`
       }
       document.documentElement.setAttribute('data-theme', theme)
+      
+      // Dispatch custom event for same-window listeners (for route changes within same tab)
+      window.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }))
+      
+      // Update UI elements if function exists
+      if (typeof (window as any).updateThemeUI === 'function') {
+        (window as any).updateThemeUI(theme)
+      }
     }
   }, [theme])
+
+  // Listen for storage events from other tabs/windows
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'theme' && e.newValue) {
+          const newTheme = e.newValue as Theme
+          if (newTheme === 'light' || newTheme === 'dark') {
+            setTheme(newTheme)
+          }
+        }
+      }
+      
+      window.addEventListener('storage', handleStorageChange)
+      return () => {
+        window.removeEventListener('storage', handleStorageChange)
+      }
+    }
+  }, [])
 
   const toggleTheme = () => {
     setTheme((prev) => {
