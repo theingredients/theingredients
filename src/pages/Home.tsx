@@ -212,7 +212,7 @@ const Home = () => {
   const handleThePressStart = () => {
     const timer = window.setTimeout(() => {
       // Randomly select an animation variant
-      const variants = ['shake', 'spin', 'explode', 'glitch', 'wobble', 'chaos', 'disintegrate', 'float', 'bounce', 'wave', 'pulse', 'jitter', 'stretch', 'flip', 'slide', 'zoom', 'elastic', 'orbit', 'matrix', 'blur', 'squash', 'twirl', 'pop', 'ripple', 'tumble', 'rainbow']
+      const variants = ['shake', 'spin', 'explode', 'glitch', 'wobble', 'chaos', 'disintegrate', 'float', 'bounce', 'wave', 'pulse', 'jitter', 'stretch', 'flip', 'slide', 'zoom', 'elastic', 'orbit', 'matrix', 'blur', 'squash', 'twirl', 'pop', 'ripple', 'tumble', 'rainbow', 'spiral', 'morph', 'scatter', 'vortex', 'melt', 'teleport', 'zigzag', 'spiral-in', 'gravity', 'magnetic', 'dance', 'swirl', 'flicker-fast', 'break-apart']
       const randomVariant = variants[Math.floor(Math.random() * variants.length)]
       setAnimationVariant(randomVariant)
       setIsFallingApart(true)
