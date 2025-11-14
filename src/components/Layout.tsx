@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from '../contexts/ThemeContext'
-import { safeRedirect } from '../utils/urlValidator'
 import './Layout.css'
 
 interface LayoutProps {
@@ -362,12 +361,15 @@ const Layout = ({ children }: LayoutProps) => {
             About
           </button>
           <button onClick={() => {
-            // If running locally, navigate to live /go route
+            // Always use window.location.href to ensure Vercel rewrite works
+            // In dev, go to live site; in production, use /go which gets rewritten
             if (import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-              safeRedirect('https://theingredients.io/go')
+              // In development, redirect to live site
+              window.location.href = 'https://theingredients.io/go'
             } else {
-              // Use React Router for internal routes, safeRedirect for external
-              navigate('/go')
+              // In production, use /go which Vercel rewrites to thego-navy.vercel.app
+              // Using window.location.href ensures the rewrite happens (React Router navigate won't trigger it)
+              window.location.href = '/go'
             }
           }} className="footer-button">
             G.O.

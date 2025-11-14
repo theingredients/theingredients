@@ -179,6 +179,44 @@ const Home = () => {
     ))
   }
 
+  // Generate Matrix rain characters - many characters falling down
+  const generateMatrixRain = () => {
+    // Characters that look like Matrix code (numbers, letters, symbols)
+    const matrixChars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン'
+    const columns = 40 // Number of columns
+    const charsPerColumn = 30 // Characters per column
+    
+    const rainChars: JSX.Element[] = []
+    
+    for (let col = 0; col < columns; col++) {
+      const columnLeft = (col / columns) * 100
+      const startDelay = Math.random() * 2 // Random start delay for each column
+      
+      for (let row = 0; row < charsPerColumn; row++) {
+        const randomChar = matrixChars[Math.floor(Math.random() * matrixChars.length)]
+        // Stagger characters in each column
+        const delay = startDelay + (row * 0.1)
+        const duration = 3 + Math.random() * 2 // Vary speed slightly
+        
+        rainChars.push(
+          <span
+            key={`matrix-${col}-${row}`}
+            className="matrix-rain-char"
+            style={{
+              left: `${columnLeft}%`,
+              animationDelay: `${delay}s`,
+              animationDuration: `${duration}s`
+            }}
+          >
+            {randomChar}
+          </span>
+        )
+      }
+    }
+    
+    return rainChars
+  }
+
   const getWeatherCursorClass = (description: string): string => {
     const desc = description.toLowerCase()
     if (desc.includes('clear') || desc.includes('sunny')) {
@@ -290,6 +328,11 @@ const Home = () => {
   return (
     <Layout>
       <div className={`home-container ${isFallingApart ? `falling-apart variant-${animationVariant}` : ''}`}>
+        {isFallingApart && animationVariant === 'matrix-rain' && (
+          <div className="matrix-rain-overlay">
+            {generateMatrixRain()}
+          </div>
+        )}
         <div className="title-stack">
           <h1 
             className="title-line"
