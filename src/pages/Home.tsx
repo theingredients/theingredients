@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
+import { isValidCoordinates, sanitizeApiResponse } from '../utils/inputSanitizer'
 import './Home.css'
 
 interface WeatherData {
@@ -60,13 +61,7 @@ const Home = () => {
       const { latitude, longitude } = position.coords
 
       // Validate coordinates are within valid ranges to prevent injection
-      if (
-        typeof latitude !== 'number' || 
-        typeof longitude !== 'number' ||
-        latitude < -90 || latitude > 90 ||
-        longitude < -180 || longitude > 180 ||
-        !isFinite(latitude) || !isFinite(longitude)
-      ) {
+      if (!isValidCoordinates(latitude, longitude)) {
         throw new Error('Invalid geolocation coordinates received')
       }
 
@@ -79,7 +74,8 @@ const Home = () => {
       let cityName = 'Unknown'
       if (geocodeResponse.ok) {
         const geocodeData = await geocodeResponse.json()
-        cityName = geocodeData.city || geocodeData.locality || geocodeData.principalSubdivision || 'Unknown'
+        const rawCityName = geocodeData.city || geocodeData.locality || geocodeData.principalSubdivision || 'Unknown'
+        cityName = sanitizeApiResponse(rawCityName, 100)
       }
 
       // Get weather data from Open-Meteo (in Celsius, we'll convert to Fahrenheit)
@@ -133,8 +129,8 @@ const Home = () => {
       setWeather({
         temp: tempF,
         tempC: tempC,
-        description: weatherDescriptions[current.weathercode] || 'unknown',
-        city: cityName,
+        description: sanitizeApiResponse(weatherDescriptions[current.weathercode] || 'unknown', 50),
+        city: cityName, // Already sanitized above
         icon: ''
       })
     } catch (err) {

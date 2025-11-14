@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Layout from '../components/Layout'
 import { apiRateLimiter } from '../utils/rateLimiter'
+import { validateWhitelist, sanitizeApiResponse } from '../utils/inputSanitizer'
 import './PageStyles.css'
 import './Jokes.css'
 
@@ -53,16 +54,17 @@ const Jokes = () => {
       const apiBase = '/api/jokeapi'
       
       // Validate category against whitelist to prevent path traversal
-      const validCategories = ['Any', 'Programming', 'Misc', 'Dark', 'Pun', 'Spooky', 'Christmas']
-      const safeCategory = validCategories.includes(filterCategory) ? filterCategory : 'Any'
+      const validCategories = ['Any', 'Programming', 'Misc', 'Dark', 'Pun', 'Spooky', 'Christmas'] as const
+      const safeCategory = validateWhitelist(filterCategory, validCategories, 'Any')
       
       let url = `${apiBase}/joke/${encodeURIComponent(safeCategory)}`
       
       const params = new URLSearchParams()
       // Validate filterType
-      const validTypes = ['single', 'twopart']
-      if (filterType && validTypes.includes(filterType)) {
-        params.append('type', filterType)
+      const validTypes = ['single', 'twopart'] as const
+      const safeType = validateWhitelist(filterType, validTypes, '' as const)
+      if (safeType) {
+        params.append('type', safeType)
       }
       // Validate blacklistFlags against whitelist
       const validFlags = ['nsfw', 'religious', 'political', 'racist', 'sexist', 'explicit']
@@ -204,17 +206,17 @@ const Jokes = () => {
         {joke && !loading && !joke.error && (
           <div className="jokes-joke">
             {joke.type === 'single' ? (
-              <p className="jokes-joke-text">{joke.joke}</p>
+              <p className="jokes-joke-text">{sanitizeApiResponse(joke.joke, 2000)}</p>
             ) : (
               <div className="jokes-twopart">
-                <p className="jokes-setup">{joke.setup}</p>
-                <p className="jokes-delivery">{joke.delivery}</p>
+                <p className="jokes-setup">{sanitizeApiResponse(joke.setup, 1000)}</p>
+                <p className="jokes-delivery">{sanitizeApiResponse(joke.delivery, 1000)}</p>
               </div>
             )}
             
             {joke.category && (
               <div className="jokes-meta">
-                <span className="jokes-category">Category: {joke.category}</span>
+                <span className="jokes-category">Category: {sanitizeApiResponse(joke.category, 50)}</span>
               </div>
             )}
           </div>

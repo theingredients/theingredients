@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { apiRateLimiter } from '../utils/rateLimiter'
+import { sanitizeInput, validateWhitelist, sanitizeApiResponse, sanitizeUrl } from '../utils/inputSanitizer'
 import './PageStyles.css'
 import './Bored.css'
 
@@ -54,13 +55,14 @@ const Bored = () => {
       if (filterType || filterParticipants) {
         const params = new URLSearchParams()
         // Validate filterType against whitelist
-        const validTypes = ['education', 'recreational', 'social', 'charity', 'cooking', 'relaxation', 'busywork']
-        if (filterType && validTypes.includes(filterType)) {
-          params.append('type', filterType)
+        const validTypes = ['education', 'recreational', 'social', 'charity', 'cooking', 'relaxation', 'busywork'] as const
+        const safeType = validateWhitelist(filterType, validTypes, '' as const)
+        if (safeType) {
+          params.append('type', safeType)
         }
         // Validate participants is a valid number
         const participantsNum = parseInt(filterParticipants, 10)
-        if (filterParticipants && !isNaN(participantsNum) && participantsNum > 0 && participantsNum <= 8) {
+        if (filterParticipants && !isNaN(participantsNum) && isFinite(participantsNum) && participantsNum > 0 && participantsNum <= 8) {
           params.append('participants', filterParticipants)
         }
         if (params.toString()) {
@@ -145,12 +147,6 @@ const Bored = () => {
     }
   }, [isInputMode])
 
-  // Sanitize input to prevent XSS and other attacks
-  const sanitizeInput = (input: string): string => {
-    // Remove any potentially dangerous characters
-    // Allow only alphanumeric, spaces, and basic punctuation
-    return input.replace(/[<>\"'&]/g, '').slice(0, 100) // Max 100 characters
-  }
 
   useEffect(() => {
     if (!inputValue.trim()) return
@@ -281,13 +277,13 @@ const Bored = () => {
 
         {activity && !loading && (
           <div className="bored-activity">
-            <h2 className="bored-activity-title">{activity.activity}</h2>
+            <h2 className="bored-activity-title">{sanitizeApiResponse(activity.activity, 500)}</h2>
             
             <div className="bored-details">
               <div className="bored-detail-item">
                 <span className="bored-detail-label">Type:</span>
                 <span className="bored-detail-value">
-                  {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
+                  {sanitizeApiResponse(activity.type, 50).charAt(0).toUpperCase() + sanitizeApiResponse(activity.type, 50).slice(1)}
                 </span>
               </div>
               
@@ -305,12 +301,12 @@ const Bored = () => {
               
               <div className="bored-detail-item">
                 <span className="bored-detail-label">Accessibility:</span>
-                <span className="bored-detail-value">{activity.accessibility}</span>
+                <span className="bored-detail-value">{sanitizeApiResponse(activity.accessibility, 50)}</span>
               </div>
               
               <div className="bored-detail-item">
                 <span className="bored-detail-label">Duration:</span>
-                <span className="bored-detail-value">{activity.duration}</span>
+                <span className="bored-detail-value">{sanitizeApiResponse(activity.duration, 50)}</span>
               </div>
               
               {activity.kidFriendly && (
@@ -321,16 +317,19 @@ const Bored = () => {
               )}
             </div>
 
-            {activity.link && (
-              <a
-                href={activity.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bored-link"
-              >
-                Learn More →
-              </a>
-            )}
+            {activity.link && (() => {
+              const safeLink = sanitizeUrl(activity.link)
+              return safeLink ? (
+                <a
+                  href={safeLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bored-link"
+                >
+                  Learn More →
+                </a>
+              ) : null
+            })()}
           </div>
         )}
 

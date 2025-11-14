@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
+import { sanitizePhoneNumber, isValidPhoneNumber } from '../utils/inputSanitizer'
 import './Contact.css'
 
 const ContactMe = () => {
@@ -501,16 +502,26 @@ const ContactMe = () => {
   }
 
   const handleKeypadClick = (digit: string) => {
+    // Validate digit is safe (only allow keypad characters)
+    const safeDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '#', '+']
+    if (!safeDigits.includes(digit)) {
+      return
+    }
+    
     // Limit to 15 digits to prevent wrapping
     if (phoneNumber.length < 15) {
-      setPhoneNumber(prev => prev + digit)
-      playDTMFTone(digit)
+      const newNumber = phoneNumber + digit
+      // Additional validation for defense in depth
+      if (isValidPhoneNumber(newNumber, 15)) {
+        setPhoneNumber(newNumber)
+        playDTMFTone(digit)
+      }
     }
   }
 
   const handleBackspace = () => {
     setPhoneNumber(prev => {
-      const newNumber = prev.slice(0, -1)
+      const newNumber = sanitizePhoneNumber(prev.slice(0, -1), 15)
       if (newNumber.length < prev.length) {
         // Play a subtle tone for backspace
         playDTMFTone('*')
@@ -526,6 +537,14 @@ const ContactMe = () => {
     }
     setPhoneNumber('')
   }
+  
+  // Validate phone number on render (defense in depth)
+  useEffect(() => {
+    if (phoneNumber && !isValidPhoneNumber(phoneNumber, 15)) {
+      // Sanitize if invalid
+      setPhoneNumber(sanitizePhoneNumber(phoneNumber, 15))
+    }
+  }, [phoneNumber])
 
   const handleClosePhone = () => {
     // Try to go back in history, with fallback to /more
