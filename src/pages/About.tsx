@@ -1,4 +1,5 @@
 import Layout from '../components/Layout'
+import BuyMeACoffee from '../components/BuyMeACoffee'
 import './PageStyles.css'
 
 const About = () => {
@@ -9,6 +10,7 @@ const About = () => {
         <p className="page-content">The Ingredients was created to design and build tools that help simplify daily tasks.</p>
         <p className="page-content">Let's learn about <a href="https://developer.mozilla.org/en-US/docs/Web/API" target="_blank" rel="noopener noreferrer" className="inline-link">Web APIs</a> together!</p>
         <p className="page-content">Let's <a href="mailto:theingredientscollective@gmail.com?subject=Let's chat!" className="inline-link">chat!</a></p>
+        <BuyMeACoffee />
       </div>
     </Layout>
   )
