@@ -71,12 +71,6 @@ const BuyMeACoffee = () => {
   return (
     <div className="buy-coffee-container">
       <div className="buy-coffee-content">
-        <h2 className="buy-coffee-title">Buy Me a Coffee</h2>
-        <p className="buy-coffee-description">
-          If you enjoy The Ingredients and want to support its development, 
-          consider buying me a coffee! ☕
-        </p>
-        
         {error && (
           <div className="buy-coffee-error">
             {error}

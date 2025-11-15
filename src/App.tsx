@@ -8,6 +8,7 @@ import More from './pages/More'
 import Bored from './pages/Bored'
 import Jokes from './pages/Jokes'
 import Blog from './pages/blog/Blog'
+import Coffee from './pages/Coffee'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/bored" element={<Bored />} />
           <Route path="/jokes" element={<Jokes />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/coffee" element={<Coffee />} />
         </Routes>
       </Router>
     </ThemeProvider>

@@ -47,8 +47,8 @@ export default async function handler(
           price_data: {
             currency: currency.toLowerCase(),
             product_data: {
-              name: 'Buy Me a Coffee',
-              description: 'Support The Ingredients',
+              name: 'Buy Me a Coffee!',
+              description: 'Support The Ingredients Design Collective',
             },
             unit_amount: amountInCents,
           },
@@ -56,8 +56,8 @@ export default async function handler(
         },
       ],
       mode: 'payment',
-      success_url: `${req.headers.origin || 'https://theingredients.io'}/about?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin || 'https://theingredients.io'}/about?canceled=true`,
+      success_url: `${req.headers.origin || 'https://theingredients.io'}/coffee?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.origin || 'https://theingredients.io'}/coffee?canceled=true`,
       metadata: {
         amount: amount,
         currency: currency,
