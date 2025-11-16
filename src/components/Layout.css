@@ -170,6 +170,15 @@
   transform: translateY(0);
 }
 
+.footer-button-icon {
+  font-size: 1.3rem;
+  padding: 0.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 @media (max-width: 768px) {
   .layout {
     min-height: 100vh;

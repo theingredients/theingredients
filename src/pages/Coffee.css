@@ -207,6 +207,20 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
+.coffee-shop-drinks {
+  font-size: 0.95rem;
+  color: rgba(0, 0, 0, 0.7);
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  font-weight: 500;
+}
+
+.theme-dark .coffee-shop-drinks {
+  color: rgba(255, 255, 255, 0.7);
+}
+
 .coffee-shop-address {
   font-size: 0.95rem;
   color: rgba(0, 0, 0, 0.6);
@@ -398,6 +412,14 @@
     overflow-wrap: break-word;
   }
 
+  .coffee-shop-drinks {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
   .coffee-shop-address {
     font-size: 0.875rem;
     margin-bottom: 0.5rem;
@@ -491,6 +513,12 @@
     font-size: 1rem;
     margin-bottom: 0.5rem;
     line-height: 1.3;
+  }
+
+  .coffee-shop-drinks {
+    font-size: 0.8125rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
   }
 
   .coffee-shop-address {

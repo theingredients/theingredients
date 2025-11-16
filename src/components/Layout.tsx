@@ -378,6 +378,9 @@ const Layout = ({ children }: LayoutProps) => {
           <button onClick={() => handleNavigation('/more')} className="footer-button">
             More
           </button>
+          <button onClick={() => handleNavigation('/coffee')} className="footer-button footer-button-icon" aria-label="Coffee">
+            ☕
+          </button>
         </footer>
       )}
     </div>
