@@ -266,6 +266,17 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
+.coffee-shop-source {
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.4);
+  margin-top: 0.25rem;
+  font-weight: 400;
+}
+
+.theme-dark .coffee-shop-source {
+  color: rgba(255, 255, 255, 0.4);
+}
+
 .coffee-modal-empty {
   text-align: center;
   padding: 2rem;
@@ -443,6 +454,11 @@
   .coffee-shop-distance {
     font-size: 0.85rem;
     margin-top: 0.5rem;
+  }
+
+  .coffee-shop-source {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
   }
 
   .coffee-modal-loading,

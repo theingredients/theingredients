@@ -11,6 +11,7 @@ interface CoffeeRoaster {
   lat: number
   lon: number
   distance?: number
+  source?: 'OSM' | 'Google' // Data source
   tags?: {
     'addr:street'?: string
     'addr:city'?: string
@@ -658,6 +659,7 @@ const Coffee = () => {
             lat: center.lat,
             lon: center.lon,
             distance,
+            source: 'OSM',
             drinkTypes,
             tags: {
               'addr:street': sanitizeApiResponse(element.tags?.['addr:street'], 100),
@@ -769,6 +771,7 @@ const Coffee = () => {
             lat: placeLat,
             lon: placeLon,
             distance,
+            source: 'Google',
             drinkTypes: detectDrinkTypes(name, { types: place.types }),
             tags: {
               'addr:street': sanitizeApiResponse(route, 100),
@@ -1061,6 +1064,7 @@ const Coffee = () => {
             lat: center.lat,
             lon: center.lon,
             distance,
+            source: 'OSM',
             tags: {
               'addr:street': sanitizeApiResponse(element.tags?.['addr:street'], 100),
               'addr:city': sanitizeApiResponse(element.tags?.['addr:city'], 100),
@@ -1146,6 +1150,7 @@ const Coffee = () => {
             lat: placeLat,
             lon: placeLon,
             distance,
+            source: 'Google',
             tags: {
               'addr:street': sanitizeApiResponse(route, 100),
               'addr:city': sanitizeApiResponse(city, 100),
@@ -1376,6 +1381,11 @@ const Coffee = () => {
                           📍 {formatDistance(roaster.distance)} away
                         </div>
                       )}
+                      {roaster.source && (
+                        <div className="coffee-shop-source">
+                          {roaster.source === 'OSM' ? '🗺️ OSM' : '🔍 Google'}
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -1411,6 +1421,11 @@ const Coffee = () => {
                       {place.distance !== undefined && (
                         <div className="coffee-shop-distance">
                           📍 {formatDistance(place.distance)} away
+                        </div>
+                      )}
+                      {place.source && (
+                        <div className="coffee-shop-source">
+                          {place.source === 'OSM' ? '🗺️ OSM' : '🔍 Google'}
                         </div>
                       )}
                     </li>
