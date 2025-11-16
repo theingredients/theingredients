@@ -366,10 +366,10 @@ const Home = () => {
   }, [])
 
   useEffect(() => {
-    if (showWeather && !weather && !loading) {
+    if (showWeather && !weather && !loading && !error) {
       fetchWeather()
     }
-  }, [showWeather, weather, loading, fetchWeather])
+  }, [showWeather, weather, loading, error, fetchWeather])
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', {
@@ -478,6 +478,11 @@ const Home = () => {
       setLoading(false)
     } else {
       setShowWeather(true)
+      // If weather data already exists, clear any stale error/loading states to show it immediately
+      if (weather) {
+        setError(null)
+        setLoading(false)
+      }
     }
   }
 
@@ -634,7 +639,7 @@ const Home = () => {
                     )}
                   </div>
                 )}
-                {weather && !loading && !error && (
+                {weather && !loading && (
                   <>
                     {isFallingApart ? (
                       <>
