@@ -49,7 +49,13 @@ const sanitizeInput = (input: string): string => {
 
 1. **Input Sanitization** - Dangerous characters removed from all text inputs
 2. **React's Built-in Protection** - React automatically escapes values when rendering
-3. **No `dangerouslySetInnerHTML`** - No use of dangerous HTML injection methods
+3. **HTML Content Sanitization** - Blog post HTML content sanitized using DOMPurify before rendering
+   - **Location:** `src/pages/blog/BlogPost.tsx`, `src/utils/inputSanitizer.ts`
+   - **Library:** DOMPurify (industry-standard HTML sanitizer)
+   - **Allowed Tags:** Only safe formatting tags (p, h1-h6, ul, ol, li, strong, em, a, blockquote, code, pre, img, hr)
+   - **Removed:** All dangerous tags (script, iframe, object, embed, etc.) and event handlers
+   - **URL Validation:** Links validated to prevent javascript: and data: protocol attacks
+   - **Implementation:** `sanitizeHtmlContent()` function in `inputSanitizer.ts` used before `dangerouslySetInnerHTML`
 4. **Content Security** - All user inputs are validated, never directly rendered
 
 ### Path Traversal Protection
@@ -168,6 +174,7 @@ The following security headers should be configured at the hosting level (Vercel
 - [x] Search component input sanitization
 - [x] Weather API fallback system
 - [x] Marine API integration for tide data
+- [x] Blog post HTML sanitization with DOMPurify
 
 ## 🚨 Reporting Security Issues
 

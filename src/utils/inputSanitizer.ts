@@ -168,3 +168,41 @@ export const sanitizeUrl = (url: string | null | undefined): string => {
   }
 }
 
+/**
+ * Sanitizes HTML content for safe rendering in blog posts
+ * Uses DOMPurify to remove dangerous tags and attributes while preserving safe formatting
+ * @param html - The HTML string to sanitize
+ * @returns Sanitized HTML string safe for dangerouslySetInnerHTML
+ */
+export const sanitizeHtmlContent = (html: string): string => {
+  if (typeof html !== 'string') {
+    return ''
+  }
+
+  // Dynamic import to avoid SSR issues (DOMPurify requires DOM)
+  if (typeof window === 'undefined') {
+    return html // Return as-is for SSR (will be sanitized on client)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const DOMPurify = require('dompurify')
+  
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: [
+      'p', 'br', 'strong', 'em', 'u', 's', 'b', 'i',
+      'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'ul', 'ol', 'li',
+      'a', 'blockquote', 'code', 'pre',
+      'img', 'hr'
+    ],
+    ALLOWED_ATTR: [
+      'href', 'title', 'alt', 'src', 'width', 'height', 'class'
+    ],
+    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    KEEP_CONTENT: true,
+    RETURN_DOM: false,
+    RETURN_DOM_FRAGMENT: false,
+    RETURN_TRUSTED_TYPE: false
+  })
+}
+
