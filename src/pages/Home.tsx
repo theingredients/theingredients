@@ -30,6 +30,7 @@ const Home = () => {
   const [animationVariant, setAnimationVariant] = useState<string>('')
   const longPressTimerRef = useRef<number | null>(null)
   const isPressingRef = useRef<boolean>(false)
+  const touchHandledRef = useRef<boolean>(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -467,6 +468,12 @@ const Home = () => {
   }
 
   const handleClockClick = (e?: React.MouseEvent | React.TouchEvent) => {
+    // Prevent double-firing on mobile (touch + click)
+    if (touchHandledRef.current) {
+      touchHandledRef.current = false
+      return
+    }
+    
     if (e) {
       e.preventDefault()
       e.stopPropagation()
@@ -486,10 +493,15 @@ const Home = () => {
     }
   }
 
-  const handleClockTouchStart = (e: React.TouchEvent) => {
+  const handleClockTouchEnd = (e: React.TouchEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    touchHandledRef.current = true
     handleClockClick(e)
+    // Reset after a short delay to allow click event to be ignored
+    setTimeout(() => {
+      touchHandledRef.current = false
+    }, 300)
   }
 
   const handleRetry = (e: React.MouseEvent) => {
@@ -596,7 +608,7 @@ const Home = () => {
           <div 
             className={`clock ${showWeather ? 'weather-view' : ''} ${loading ? 'weather-loading-state' : ''}`}
             onClick={handleClockClick}
-            onTouchStart={handleClockTouchStart}
+            onTouchEnd={handleClockTouchEnd}
             role="button"
             tabIndex={0}
             aria-label="Click to toggle weather"
