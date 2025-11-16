@@ -1453,8 +1453,8 @@ const Coffee = () => {
               <div>
                 <h2 className="coffee-modal-title">Buy Me Coffee</h2>
                 <p className="coffee-modal-subtitle">
-                  If you enjoy The Ingredients and want to support its development, 
-                  consider buying me a coffee! ☕
+                  If you enjoy The Ingredients designs and want to support its development, 
+                  consider buying us a coffee! ☕
                 </p>
               </div>
               <button 
