@@ -595,17 +595,7 @@ const Home = () => {
     setClickCount(prev => prev + 1)
   }
 
-  const handleClockClick = (e?: React.MouseEvent | React.TouchEvent) => {
-    // Prevent double-firing on mobile (touch + click)
-    if (touchHandledRef.current) {
-      touchHandledRef.current = false
-      return
-    }
-    
-    if (e) {
-      e.preventDefault()
-      e.stopPropagation()
-    }
+  const toggleWeather = () => {
     if (showWeather) {
       setShowWeather(false)
       setWeather(null)
@@ -621,11 +611,31 @@ const Home = () => {
     }
   }
 
+  const handleClockClick = (e?: React.MouseEvent | React.TouchEvent) => {
+    // Prevent double-firing on mobile (touch + click)
+    if (touchHandledRef.current) {
+      touchHandledRef.current = false
+      return
+    }
+    
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    toggleWeather()
+  }
+
+  const handleClockTouchStart = (e: React.TouchEvent) => {
+    // Mark that we're handling a touch event
+    touchHandledRef.current = true
+    // Prevent default to avoid any unwanted behaviors
+    e.preventDefault()
+  }
+
   const handleClockTouchEnd = (e: React.TouchEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    touchHandledRef.current = true
-    handleClockClick(e)
+    toggleWeather()
     // Reset after a short delay to allow click event to be ignored
     setTimeout(() => {
       touchHandledRef.current = false
@@ -736,6 +746,7 @@ const Home = () => {
           <div 
             className={`clock ${showWeather ? 'weather-view' : ''} ${loading ? 'weather-loading-state' : ''}`}
             onClick={handleClockClick}
+            onTouchStart={handleClockTouchStart}
             onTouchEnd={handleClockTouchEnd}
             role="button"
             tabIndex={0}
