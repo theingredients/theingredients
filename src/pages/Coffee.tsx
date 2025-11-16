@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Layout from '../components/Layout'
 import BuyMeACoffee from '../components/BuyMeACoffee'
 import { isValidCoordinates, sanitizeApiResponse } from '../utils/inputSanitizer'
@@ -35,6 +35,10 @@ const Coffee = () => {
   const [coffeeRoasters, setCoffeeRoasters] = useState<CoffeeRoaster[]>([])
   const [drinkPlaces, setDrinkPlaces] = useState<DrinkPlace[]>([])
   const [searchMode, setSearchMode] = useState<'coffee' | 'drinks'>('coffee')
+  
+  // Prevent duplicate API calls
+  const isFetchingRef = useRef(false)
+  const lastSearchRef = useRef<{ lat: number; lon: number; mode: 'coffee' | 'drinks' } | null>(null)
 
   // Calculate distance between two coordinates using Haversine formula
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -510,6 +514,23 @@ const Coffee = () => {
 
   // Fetch tea, smoothies, and other drinks from OSM Overpass API and Google Places API
   const fetchDrinkPlaces = async (lat: number, lon: number) => {
+    // Prevent duplicate requests
+    if (isFetchingRef.current) {
+      return
+    }
+    
+    // Check if this is the same search as last time (within ~100m)
+    const lastSearch = lastSearchRef.current
+    if (lastSearch && lastSearch.mode === 'drinks') {
+      const distance = calculateDistance(lat, lon, lastSearch.lat, lastSearch.lon)
+      if (distance < 0.1) { // Same location within 100m
+        return // Skip duplicate search
+      }
+    }
+    
+    isFetchingRef.current = true
+    lastSearchRef.current = { lat, lon, mode: 'drinks' }
+    
     try {
       setIsLoading(true)
       setError(null)
@@ -561,6 +582,7 @@ const Coffee = () => {
       }
     } finally {
       setIsLoading(false)
+      isFetchingRef.current = false
     }
   }
 
@@ -924,22 +946,67 @@ const Coffee = () => {
   const isCoffeeRoaster = (name: string, tags: any): boolean => {
     const nameLower = name.toLowerCase()
     
-    // Check for explicit roaster tags
+    // Check for explicit roaster tags (OSM)
     if (tags?.craft === 'coffee_roaster' || tags?.roaster === 'yes') {
       return true
     }
     
-    // Google Places types might include cafe, food, store - we check name for roaster keywords
+    // Check for other roaster indicators (OSM)
+    if (tags?.roaster === 'coffee' || tags?.['roaster:type'] === 'coffee') {
+      return true
+    }
     
     // Check if name contains roaster-related keywords
-    const roasterKeywords = ['roaster', 'roasting', 'roast', 'roasted']
+    const roasterKeywords = [
+      'roaster', 'roasting', 'roast', 'roasted',
+      'roastery', 'roasteries', 'roast house', 'roast co',
+      'coffee roaster', 'coffee roasting', 'coffee roast'
+    ]
     if (roasterKeywords.some(keyword => nameLower.includes(keyword))) {
       return true
     }
     
-    // Check for other indicators
-    if (tags?.roaster === 'coffee' || tags?.['roaster:type'] === 'coffee') {
+    // For Google Places results, also check business types
+    // If it's a cafe and has coffee-related keywords, it might be a roaster
+    const types = tags?.types || []
+    const hasCafeType = types.some((type: string) => 
+      type === 'cafe' || type === 'food' || type === 'store'
+    )
+    
+    // Include local coffee shops that might roast (but exclude chains)
+    // Look for indicators of specialty/local coffee
+    const specialtyKeywords = [
+      'specialty coffee', 'third wave', 'artisan', 'craft coffee',
+      'micro roaster', 'local roaster', 'small batch', 'single origin'
+    ]
+    if (hasCafeType && specialtyKeywords.some(keyword => nameLower.includes(keyword))) {
       return true
+    }
+    
+    // If it's a cafe and doesn't have chain indicators, include it
+    // (many local roasters don't have "roaster" in their name)
+    // But exclude obvious non-roasters
+    const excludeKeywords = [
+      'starbucks', 'dunkin', 'dunkin\'', 'peets', 'peet\'s', 'caribou', 'tim hortons',
+      'restaurant', 'diner', 'bakery', 'bistro', 'brunch', 'breakfast',
+      'lunch', 'dinner', 'food', 'eatery', 'cafe &', '& cafe', '& restaurant',
+      'espresso bar', 'drive thru', 'drive-through', 'drive through'
+    ]
+    
+    // Only include if it's a cafe and doesn't have exclusion keywords
+    // Be more selective - prefer places with "coffee" in the name
+    if (hasCafeType && !excludeKeywords.some(keyword => nameLower.includes(keyword))) {
+      // Prioritize places with "coffee" in the name (more likely to be roasters)
+      if (nameLower.includes('coffee')) {
+        return true
+      }
+      // Also include cafes/café if they seem like specialty coffee places
+      // (but be more selective - exclude generic cafes)
+      if ((nameLower.includes('cafe') || nameLower.includes('café')) && 
+          (nameLower.includes('roast') || nameLower.includes('bean') || 
+           nameLower.includes('brew') || nameLower.includes('espresso'))) {
+        return true
+      }
     }
     
     return false
@@ -947,6 +1014,23 @@ const Coffee = () => {
 
   // Fetch coffee roasters from OSM Overpass API and Google Places API
   const fetchCoffeeRoasters = async (lat: number, lon: number) => {
+    // Prevent duplicate requests
+    if (isFetchingRef.current) {
+      return
+    }
+    
+    // Check if this is the same search as last time (within ~100m)
+    const lastSearch = lastSearchRef.current
+    if (lastSearch && lastSearch.mode === 'coffee') {
+      const distance = calculateDistance(lat, lon, lastSearch.lat, lastSearch.lon)
+      if (distance < 0.1) { // Same location within 100m
+        return // Skip duplicate search
+      }
+    }
+    
+    isFetchingRef.current = true
+    lastSearchRef.current = { lat, lon, mode: 'coffee' }
+    
     try {
       setIsLoading(true)
       setError(null)
@@ -999,6 +1083,7 @@ const Coffee = () => {
       }
     } finally {
       setIsLoading(false)
+      isFetchingRef.current = false
     }
   }
 
@@ -1347,6 +1432,14 @@ const Coffee = () => {
       {isModalOpen && (
         <div className="coffee-modal-overlay" onClick={handleCloseModal}>
           <div className="coffee-modal" onClick={(e) => e.stopPropagation()}>
+            {/* Floating close button for mobile - always visible */}
+            <button 
+              className="coffee-modal-close-floating"
+              onClick={handleCloseModal}
+              aria-label="Close modal"
+            >
+              ×
+            </button>
             <div className="coffee-modal-header">
               <div>
                 <h2 className="coffee-modal-title">
@@ -1501,8 +1594,8 @@ const Coffee = () => {
               </button>
             </div>
             <div className="coffee-modal-content">
-              <BuyMeACoffee />
-            </div>
+        <BuyMeACoffee />
+      </div>
           </div>
         </div>
       )}
