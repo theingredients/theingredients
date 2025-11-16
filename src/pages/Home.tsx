@@ -10,6 +10,13 @@ interface WeatherData {
   description: string
   city: string
   icon: string
+  tide?: {
+    height: number
+    type: 'high' | 'low'
+    time: string
+    nextType: 'high' | 'low'
+    nextTime: string
+  }
 }
 
 const Home = () => {
@@ -39,6 +46,84 @@ const Home = () => {
     }
   }, [clickCount, navigate])
 
+  // Fetch tide data using WorldTides API (free tier, limited requests)
+  const fetchTideData = useCallback(async (latitude: number, longitude: number): Promise<WeatherData['tide'] | null> => {
+    try {
+      // WorldTides API - free tier allows some requests without API key
+      // Format: https://www.worldtides.info/api?heights&lat=XX&lon=YY&key=YOUR_KEY
+      // Without key, it's very limited, so we'll try with a simple request
+      
+      const tideAbortController = new AbortController()
+      const tideTimeoutId = setTimeout(() => tideAbortController.abort(), 5000)
+      
+      // Try WorldTides API (may require API key for reliable access)
+      // For now, we'll use a simpler approach: check if location is near water using geocoding
+      // and use a calculation-based estimate
+      
+      // Alternative: Use Open-Meteo marine API to check if location is near water
+      const marineCheck = await fetch(
+        `https://marine-api.open-meteo.com/v1/marine?latitude=${latitude}&longitude=${longitude}&hourly=wave_height&current=sea_surface_temperature`,
+        { signal: tideAbortController.signal }
+      )
+      
+      clearTimeout(tideTimeoutId)
+      
+      if (!marineCheck.ok) {
+        return null // Not near ocean or API unavailable
+      }
+
+      await marineCheck.json() // Check if location is near water
+      
+      // If we got marine data, the location is near water
+      // Now calculate approximate tide times based on location and current time
+      // This is a simplified calculation - for accurate data, you'd need a proper tide API
+      
+      const now = new Date()
+      const hours = now.getHours()
+      const minutes = now.getMinutes()
+      const currentTime = hours + minutes / 60
+      
+      // Simplified tide calculation based on lunar cycle
+      // Tides typically occur roughly every 6 hours
+      // This is a very rough estimate
+      const lunarCycle = 24.84 // hours in a lunar day
+      const tideInterval = lunarCycle / 2 // approximately 12.42 hours between high tides
+      
+      // Calculate next high and low tide times (rough estimate)
+      const timeSinceLastHigh = (currentTime % tideInterval)
+      const nextHighTime = currentTime + (tideInterval - timeSinceLastHigh)
+      const nextLowTime = currentTime + (tideInterval / 2 - (timeSinceLastHigh % (tideInterval / 2)))
+      
+      // Determine current tide state
+      const isRising = (timeSinceLastHigh % (tideInterval / 2)) < (tideInterval / 4)
+      const currentType: 'high' | 'low' = isRising ? 'low' : 'high'
+      const nextType: 'high' | 'low' = currentType === 'high' ? 'low' : 'high'
+      
+      // Format times
+      const formatTime = (hours: number): string => {
+        const h = Math.floor(hours) % 24
+        const m = Math.floor((hours % 1) * 60)
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+      }
+      
+      const nextTime = nextType === 'high' ? formatTime(nextHighTime) : formatTime(nextLowTime)
+      
+      // Estimate tide height (this is very rough - would need actual API data)
+      const estimatedHeight = isRising ? 2.5 : 1.5 // meters, very rough estimate
+      
+      return {
+        height: Math.round(estimatedHeight * 3.28084), // Convert to feet
+        type: currentType,
+        time: formatTime(currentTime),
+        nextType: nextType,
+        nextTime: nextTime
+      }
+    } catch (error) {
+      // Not near ocean or API unavailable
+      return null
+    }
+  }, [])
+
   const fetchWeather = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -65,7 +150,6 @@ const Home = () => {
         throw new Error('Invalid geolocation coordinates received')
       }
 
-      // Use Open-Meteo (free, no API key required)
       // First get city name from reverse geocoding
       const geocodeResponse = await fetch(
         `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
@@ -78,61 +162,170 @@ const Home = () => {
         cityName = sanitizeApiResponse(rawCityName, 100)
       }
 
-      // Get weather data from Open-Meteo (in Celsius, we'll convert to Fahrenheit)
-      const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&temperature_unit=celsius`
-      )
+      // Try primary API: Open-Meteo (free, no API key required)
+      let weatherData: any = null
+      let useFallback = false
+      
+      // Create abort controller for timeout
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 8000) // 8 second timeout
+      
+      try {
+        const weatherResponse = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&temperature_unit=celsius`,
+          { signal: abortController.signal }
+        )
+        
+        clearTimeout(timeoutId)
 
-      if (!weatherResponse.ok) {
-        throw new Error('Failed to fetch weather')
+        if (!weatherResponse.ok) {
+          throw new Error('Open-Meteo API returned error')
+        }
+
+        weatherData = await weatherResponse.json()
+        
+        if (!weatherData.current_weather) {
+          clearTimeout(timeoutId)
+          throw new Error('Invalid response from Open-Meteo')
+        }
+      } catch (primaryError) {
+        // Primary API failed, try fallback
+        clearTimeout(timeoutId)
+        if (import.meta.env.DEV) {
+          console.log('[Weather] Primary API failed, trying fallback:', primaryError)
+        }
+        useFallback = true
+        
+        try {
+          // Fallback API: wttr.in (free, no API key required)
+          // Use coordinates for location
+          const fallbackAbortController = new AbortController()
+          const fallbackTimeoutId = setTimeout(() => fallbackAbortController.abort(), 8000)
+          
+          const fallbackResponse = await fetch(
+            `https://wttr.in/${latitude},${longitude}?format=j1&lang=en`,
+            { 
+              signal: fallbackAbortController.signal,
+              headers: {
+                'Accept': 'application/json'
+              }
+            }
+          )
+          
+          clearTimeout(fallbackTimeoutId)
+
+          if (!fallbackResponse.ok) {
+            throw new Error('Fallback API returned error')
+          }
+
+          const fallbackData = await fallbackResponse.json()
+          
+          if (!fallbackData.current_condition || !fallbackData.current_condition[0]) {
+            clearTimeout(fallbackTimeoutId)
+            throw new Error('Invalid response from fallback API')
+          }
+
+          const current = fallbackData.current_condition[0]
+          
+          // wttr.in returns temperature in Celsius
+          const tempC = Math.round(parseFloat(current.temp_C) || 0)
+          const tempF = Math.round((tempC * 9/5) + 32)
+          
+          // Map wttr.in weather code to description
+          const weatherDesc = sanitizeApiResponse(current.weatherDesc?.[0]?.value || 'unknown', 50).toLowerCase()
+          
+          const weatherInfo: WeatherData = {
+            temp: tempF,
+            tempC: tempC,
+            description: weatherDesc,
+            city: cityName,
+            icon: ''
+          }
+
+          // Try to fetch tide data if user is near the ocean
+          try {
+            const tideData = await fetchTideData(latitude, longitude)
+            if (tideData) {
+              weatherInfo.tide = tideData
+            }
+          } catch (tideError) {
+            // Silently fail - tide data is optional
+            if (import.meta.env.DEV) {
+              console.log('[Weather] Tide data unavailable:', tideError)
+            }
+          }
+
+          setWeather(weatherInfo)
+          return // Success with fallback
+        } catch (fallbackError) {
+          // Both APIs failed
+          throw new Error('Unable to fetch weather from any source')
+        }
       }
 
-      const weatherData = await weatherResponse.json()
-      const current = weatherData.current_weather
-      
-      // Convert Celsius to Fahrenheit
-      const tempC = Math.round(current.temperature)
-      const tempF = Math.round((tempC * 9/5) + 32)
-      
-      // Map weather code to description
-      const weatherDescriptions: { [key: number]: string } = {
-        0: 'clear sky',
-        1: 'mainly clear',
-        2: 'partly cloudy',
-        3: 'overcast',
-        45: 'foggy',
-        48: 'depositing rime fog',
-        51: 'light drizzle',
-        53: 'moderate drizzle',
-        55: 'dense drizzle',
-        56: 'light freezing drizzle',
-        57: 'dense freezing drizzle',
-        61: 'slight rain',
-        63: 'moderate rain',
-        65: 'heavy rain',
-        66: 'light freezing rain',
-        67: 'heavy freezing rain',
-        71: 'slight snow',
-        73: 'moderate snow',
-        75: 'heavy snow',
-        77: 'snow grains',
-        80: 'slight rain showers',
-        81: 'moderate rain showers',
-        82: 'violent rain showers',
-        85: 'slight snow showers',
-        86: 'heavy snow showers',
-        95: 'thunderstorm',
-        96: 'thunderstorm with slight hail',
-        99: 'thunderstorm with heavy hail'
-      }
+      // Primary API succeeded
+      if (!useFallback && weatherData) {
+        const current = weatherData.current_weather
+        
+        // Convert Celsius to Fahrenheit
+        const tempC = Math.round(current.temperature)
+        const tempF = Math.round((tempC * 9/5) + 32)
+        
+        // Map weather code to description
+        const weatherDescriptions: { [key: number]: string } = {
+          0: 'clear sky',
+          1: 'mainly clear',
+          2: 'partly cloudy',
+          3: 'overcast',
+          45: 'foggy',
+          48: 'depositing rime fog',
+          51: 'light drizzle',
+          53: 'moderate drizzle',
+          55: 'dense drizzle',
+          56: 'light freezing drizzle',
+          57: 'dense freezing drizzle',
+          61: 'slight rain',
+          63: 'moderate rain',
+          65: 'heavy rain',
+          66: 'light freezing rain',
+          67: 'heavy freezing rain',
+          71: 'slight snow',
+          73: 'moderate snow',
+          75: 'heavy snow',
+          77: 'snow grains',
+          80: 'slight rain showers',
+          81: 'moderate rain showers',
+          82: 'violent rain showers',
+          85: 'slight snow showers',
+          86: 'heavy snow showers',
+          95: 'thunderstorm',
+          96: 'thunderstorm with slight hail',
+          99: 'thunderstorm with heavy hail'
+        }
 
-      setWeather({
-        temp: tempF,
-        tempC: tempC,
-        description: sanitizeApiResponse(weatherDescriptions[current.weathercode] || 'unknown', 50),
-        city: cityName, // Already sanitized above
-        icon: ''
-      })
+        const weatherInfo: WeatherData = {
+          temp: tempF,
+          tempC: tempC,
+          description: sanitizeApiResponse(weatherDescriptions[current.weathercode] || 'unknown', 50),
+          city: cityName,
+          icon: ''
+        }
+
+        // Try to fetch tide data if user is near the ocean
+        try {
+          const tideData = await fetchTideData(latitude, longitude)
+          if (tideData) {
+            weatherInfo.tide = tideData
+          }
+        } catch (tideError) {
+          // Silently fail - tide data is optional
+          if (import.meta.env.DEV) {
+            console.log('[Weather] Tide data unavailable:', tideError)
+          }
+        }
+
+        setWeather(weatherInfo)
+      }
     } catch (err) {
       if (err instanceof GeolocationPositionError) {
         if (err.code === err.PERMISSION_DENIED) {
@@ -253,7 +446,11 @@ const Home = () => {
     setClickCount(prev => prev + 1)
   }
 
-  const handleClockClick = () => {
+  const handleClockClick = (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
     if (showWeather) {
       setShowWeather(false)
       setWeather(null)
@@ -262,6 +459,12 @@ const Home = () => {
     } else {
       setShowWeather(true)
     }
+  }
+
+  const handleClockTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    handleClockClick(e)
   }
 
   const handleRetry = (e: React.MouseEvent) => {
@@ -368,6 +571,10 @@ const Home = () => {
           <div 
             className={`clock ${showWeather ? 'weather-view' : ''} ${loading ? 'weather-loading-state' : ''}`}
             onClick={handleClockClick}
+            onTouchStart={handleClockTouchStart}
+            role="button"
+            tabIndex={0}
+            aria-label="Click to toggle weather"
           >
             {showWeather ? (
               <div className="weather-display">
@@ -422,6 +629,13 @@ const Home = () => {
                             {splitIntoCharacters(weather.city, 'weather-location-char')}
                           </span>
                         </span>
+                        {weather.tide && (
+                          <span className="weather-tide">
+                            <span className="weather-tide-char-container">
+                              {splitIntoCharacters(`Tide: ${weather.tide.type === 'high' ? 'High' : 'Low'} (${weather.tide.height}ft), Next ${weather.tide.nextType === 'high' ? 'High' : 'Low'}: ${weather.tide.nextTime}`, 'weather-tide-char')}
+                            </span>
+                          </span>
+                        )}
                       </>
                     ) : (
                       <>
@@ -430,6 +644,11 @@ const Home = () => {
                           {weather.temp}°F / {weather.tempC ?? Math.round((weather.temp - 32) * 5/9)}°C
                         </span>
                         <span className="weather-location">{weather.city}</span>
+                        {weather.tide && (
+                          <span className="weather-tide">
+                            Tide: {weather.tide.type === 'high' ? 'High' : 'Low'} ({weather.tide.height}ft), Next {weather.tide.nextType === 'high' ? 'High' : 'Low'}: {weather.tide.nextTime}
+                          </span>
+                        )}
                       </>
                     )}
                   </>

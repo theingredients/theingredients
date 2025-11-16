@@ -31,7 +31,13 @@ function App() {
         beforeSend={(event) => {
           // Exclude /go route and any paths starting with /go from analytics
           if (event.url.includes('/go')) {
+            if (import.meta.env.DEV) {
+              console.log('[Analytics] Excluding /go route:', event.url)
+            }
             return null // Don't send this event
+          }
+          if (import.meta.env.DEV) {
+            console.log('[Analytics] Tracking:', event.url)
           }
           return event // Send all other events
         }}

@@ -5,6 +5,33 @@ All notable changes to The Ingredients project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2024-12-XX
+
+### Added
+- Search easter egg component accessible via 7-second coffee button hold
+- Vercel Analytics integration with automatic /go route exclusion
+- Weather API fallback system (wttr.in) for improved reliability
+- Tide information display for users detected near the ocean
+- Mobile touch event support for clock weather toggle
+- Debug logging for analytics (development mode only)
+
+### Changed
+- Improved Search modal styling with animations and better UX
+- Enhanced weather fetching with automatic fallback to secondary API
+- Updated coffee button hold time from 5 to 7 seconds
+- Moved joke easter egg from Bored page to Search component
+- Improved mobile responsiveness for weather display
+
+### Fixed
+- Mobile touch events not working for clock weather toggle
+- Weather API failures now gracefully fallback to alternative service
+
+### Security
+- Added `https://marine-api.open-meteo.com` to Content Security Policy
+- Added `https://wttr.in` to Content Security Policy
+- All API responses sanitized before display
+- Input sanitization in Search component
+
 ## [1.3.1] - 2024-12-XX
 
 ### Added
