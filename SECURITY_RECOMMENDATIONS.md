@@ -20,7 +20,7 @@ Add CSP headers via Vercel configuration or `vercel.json`:
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.bigdatacloud.net https://api.open-meteo.com https://bored-api.appbrewery.com https://v2.jokeapi.dev; media-src 'self';"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.bigdatacloud.net https://api.open-meteo.com https://api.weather.gov https://bored-api.appbrewery.com https://v2.jokeapi.dev https://api.stripe.com https://checkout.stripe.com https://overpass-api.de; frame-src https://checkout.stripe.com; media-src 'self';"
         },
         {
           "key": "X-Frame-Options",
