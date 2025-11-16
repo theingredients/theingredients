@@ -169,7 +169,7 @@ const Home = () => {
 
   const splitIntoCharacters = (text: string, className: string = '') => {
     return text.split('').map((char, index) => (
-      <span key={index} className={char === ' ' ? 'char-space' : `char-${index} ${className}`}>
+      <span key={`${text}-char-${index}-${char}`} className={char === ' ' ? 'char-space' : `char-${index} ${className}`}>
         {char === ' ' ? '\u00A0' : char}
       </span>
     ))

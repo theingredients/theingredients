@@ -12,6 +12,15 @@ const Coffee = () => {
           consider buying me a coffee! ☕
         </p>
         <BuyMeACoffee />
+        <button 
+          className="email-button"
+          onClick={() => {
+            // TODO: Implement local coffee shop finder functionality
+            console.log('Find local coffee shops clicked')
+          }}
+        >
+          Find Local Coffee Shops
+        </button>
       </div>
     </Layout>
   )
