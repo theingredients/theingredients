@@ -118,12 +118,109 @@ const Coffee = () => {
       'sbux',
       'mccafé',
       'mccafe',
+      // Convenience stores and gas stations
+      '7-eleven',
+      '7 eleven',
+      '7eleven',
+      'circle k',
+      'circle-k',
+      'speedway',
+      'shell',
+      'chevron',
+      'exxon',
+      'mobil',
+      'bp',
+      'arco',
+      'valero',
+      'phillips 66',
+      'phillips66',
+      'conoco',
+      'texaco',
+      'citgo',
+      'sunoco',
+      'wawa',
+      'sheetz',
+      'quikstop',
+      'quick stop',
+      'am/pm',
+      'ampm',
+      'casey\'s',
+      'caseys',
+      'kum & go',
+      'kum and go',
+      'kumgo',
+      'pilot',
+      'flying j',
+      'flyingj',
+      'love\'s',
+      'loves',
+      'ta',
+      'travel centers',
+      'truck stop',
     ]
 
     // Check if name or brand matches any corporate chain
     return corporateChains.some(chain => 
       nameLower.includes(chain) || brandLower.includes(chain)
     )
+  }
+
+  // Check if a place is a convenience store, gas station, or retail chain
+  const isConvenienceStoreOrGasStation = (name: string, tags: any): boolean => {
+    const nameLower = name.toLowerCase()
+    
+    // Check OSM tags
+    if (tags?.amenity === 'fuel' || tags?.amenity === 'gas_station' || 
+        tags?.shop === 'convenience' || tags?.shop === 'gas' ||
+        tags?.shop === 'fuel') {
+      return true
+    }
+    
+    // Check for convenience store/gas station keywords
+    const convenienceKeywords = [
+      'convenience store', 'gas station', 'gas station', 'fuel',
+      'service station', 'truck stop', 'travel center', 'travel plaza',
+      'mini mart', 'minimart', 'quick mart', 'quickmart'
+    ]
+    
+    if (convenienceKeywords.some(keyword => nameLower.includes(keyword))) {
+      return true
+    }
+    
+    return false
+  }
+
+  // Check if a place is a bakery, patisserie, or pastry shop (not primarily drinks)
+  const isBakeryOrPastryShop = (name: string, tags: any): boolean => {
+    const nameLower = name.toLowerCase()
+    
+    // Check OSM tags
+    if (tags?.shop === 'bakery' || tags?.shop === 'pastry' || 
+        tags?.craft === 'bakery' || tags?.craft === 'pastry') {
+      return true
+    }
+    
+    // Check for bakery/pastry keywords
+    const bakeryKeywords = [
+      'bakery', 'baker', 'patisserie', 'pâtisserie', 'pastry',
+      'pastries', 'bake shop', 'bakeshop', 'confectionery',
+      'confection', 'dessert', 'sweets', 'cake', 'cakes'
+    ]
+    
+    // But exclude if it's a drink-focused place that happens to have bakery keywords
+    // (e.g., "Tea & Pastry" should be included)
+    if (bakeryKeywords.some(keyword => nameLower.includes(keyword))) {
+      const drinkIndicators = ['tea', 'smoothie', 'juice', 'boba', 'matcha', 'chai', 'coffee']
+      const hasDrinkIndicator = drinkIndicators.some(indicator => nameLower.includes(indicator))
+      
+      // If it has both bakery and drink keywords, it might be a tea house with pastries
+      // Only exclude if it's clearly a bakery without drink focus
+      if (!hasDrinkIndicator) {
+        return true
+      }
+    }
+    
+    return false
   }
 
   // Check if a place is a restaurant
@@ -324,26 +421,36 @@ const Coffee = () => {
       return false
     }
     
+    // Exclude convenience stores and gas stations
+    if (isConvenienceStoreOrGasStation(name, tags)) {
+      return false
+    }
+    
+    // Exclude bakeries and patisseries (unless they're clearly drink-focused)
+    if (isBakeryOrPastryShop(name, tags)) {
+      return false
+    }
+    
     // Check for explicit tea/smoothie/juice shop tags - always include these
     if (tags?.shop === 'tea' || tags?.shop === 'beverages') {
       return true
     }
     
-      // Check for drink-specific keywords in name (indicating drinks are primary focus)
-      // Expanded list to catch more variations and business names
-      const drinkKeywords = [
-        'tea', 'smoothie', 'smoothies', 'juice', 'juices', 'bubble tea',
-        'boba', 'matcha', 'chai', 'iced tea', 'herbal tea', 'tapioca',
-        'acai', 'fresh juice', 'fruit juice', 'fresh pressed', 'cold press',
-        'juice bar', 'smoothie bar', 'tea house', 'tea shop', 'tea room',
-        'tea lounge', 'tea cafe', 'bubble tea', 'boba tea', 'matcha bar',
-        'smoothie shop', 'juice shop', 'juice bar', 'kombucha', 'lemonade',
-        'frappe', 'milkshake', 'shake', 'smoothie bowl', 'acai bowl',
-        'tropical', 'fresh', 'blend', 'blenders', 'squeeze', 'press', 'pressed',
-        'cold brew', 'juicery', 'tropical smoothie', 'jamba', 'planet smoothie', 
-        'smoothie king', 'naked juice', 'odwalla', 'bolthouse', 'innocent',
-        'grass', 'in the grass', 'blenders in', 'pressed juice', 'juice press'
-      ]
+    // Check for drink-specific keywords in name (indicating drinks are primary focus)
+    // Expanded list to catch more variations and business names
+    const drinkKeywords = [
+      'tea', 'smoothie', 'smoothies', 'juice', 'juices', 'bubble tea',
+      'boba', 'matcha', 'chai', 'iced tea', 'herbal tea', 'tapioca',
+      'acai', 'fresh juice', 'fruit juice', 'fresh pressed', 'cold press',
+      'juice bar', 'smoothie bar', 'tea house', 'tea shop', 'tea room',
+      'tea lounge', 'tea cafe', 'bubble tea', 'boba tea', 'matcha bar',
+      'smoothie shop', 'juice shop', 'juice bar', 'kombucha', 'lemonade',
+      'frappe', 'milkshake', 'shake', 'smoothie bowl', 'acai bowl',
+      'tropical', 'fresh', 'blend', 'blenders', 'squeeze', 'press', 'pressed',
+      'cold brew', 'juicery', 'tropical smoothie', 'jamba', 'planet smoothie', 
+      'smoothie king', 'naked juice', 'odwalla', 'bolthouse', 'innocent',
+      'grass', 'in the grass', 'blenders in', 'pressed juice', 'juice press'
+    ]
     
     // If name contains drink keywords, include it (even if it's a cafe)
     if (drinkKeywords.some(keyword => nameLower.includes(keyword))) {
@@ -358,10 +465,10 @@ const Coffee = () => {
       }
     }
     
-    // For cafes and fast_food places, be more inclusive - include if they don't have restaurant indicators
-    // Many smoothie/tea places are just tagged as cafes or fast_food
+    // For cafes and fast_food places, be MORE STRICT - only include if clearly drink-focused
+    // Many cafes are general food places, not drink-focused
     if (tags?.amenity === 'cafe' || tags?.amenity === 'fast_food') {
-      // Check if cafe has drink-related tags
+      // Check if cafe has explicit drink-related tags
       if (tags?.drink_tea === 'yes' || tags?.drink_smoothie === 'yes' || 
           tags?.drink_juice === 'yes' || tags?.drink_bubble_tea === 'yes') {
         return true
@@ -378,22 +485,9 @@ const Coffee = () => {
         return true
       }
       
-      // If cafe doesn't have food/restaurant/coffee indicators, include it
-      // This catches cafes that might be drink-focused but not explicitly tagged
-      const foodIndicators = [
-        'restaurant', 'diner', 'bistro', 'grill', 'pizza', 'burger',
-        'sandwich', 'food', 'kitchen', 'eatery', 'dining'
-      ]
-      const coffeeIndicators = [
-        'coffee', 'espresso', 'latte', 'cappuccino', 'roaster', 'roasting'
-      ]
-      const hasFoodIndicator = foodIndicators.some(indicator => nameLower.includes(indicator))
-      const hasCoffeeIndicator = coffeeIndicators.some(indicator => nameLower.includes(indicator))
-      
-      // If no food or coffee indicators and it's a cafe, include it (might be drink-focused)
-      if (!hasFoodIndicator && !hasCoffeeIndicator) {
-        return true
-      }
+      // Don't include generic cafes without clear drink indicators
+      // This prevents places like "Cat Therapy" or generic cafes from showing up
+      return false
     }
     
     return false
@@ -507,14 +601,24 @@ const Coffee = () => {
           const name = sanitizeApiResponse(
             element.tags?.name || 
             element.tags?.['addr:housenumber'] || 
-            'Unnamed Drink Place',
+            '',
             100
           )
+
+          // Skip places with no name or "Unnamed" in the name
+          if (!name || name.toLowerCase().includes('unnamed')) {
+            return null
+          }
 
           const brand = sanitizeApiResponse(element.tags?.brand, 100)
 
           // Filter out corporate chains (same as coffee)
           if (isCorporateChain(name, brand)) {
+            return null
+          }
+
+          // Filter out convenience stores and gas stations
+          if (isConvenienceStoreOrGasStation(name, element.tags)) {
             return null
           }
 
@@ -530,6 +634,11 @@ const Coffee = () => {
 
           // Filter out alcohol
           if (isAlcoholic(name, element.tags)) {
+            return null
+          }
+
+          // Filter out bakeries and patisseries
+          if (isBakeryOrPastryShop(name, element.tags)) {
             return null
           }
 
@@ -593,20 +702,41 @@ const Coffee = () => {
       // Convert Google Places results to DrinkPlace format
       const drinkPlaces: DrinkPlace[] = places
         .map((place: any) => {
-          const name = sanitizeApiResponse(place.name || 'Unnamed Drink Place', 100)
+          const name = sanitizeApiResponse(place.name || '', 100)
           
+          // Skip places with no name or "Unnamed" in the name
+          if (!name || name.toLowerCase().includes('unnamed')) {
+            return null
+          }
+
+          // Filter out corporate chains
+          const brand = sanitizeApiResponse(place.name, 100)
+          if (isCorporateChain(name, brand)) {
+            return null
+          }
+
+          // Filter out convenience stores and gas stations
+          if (isConvenienceStoreOrGasStation(name, { types: place.types })) {
+            return null
+          }
+
           // Filter out coffee shops
-          if (isCoffeeShop(name, {})) {
+          if (isCoffeeShop(name, { types: place.types })) {
             return null
           }
 
           // Filter out restaurants
-          if (isRestaurant(name, {})) {
+          if (isRestaurant(name, { types: place.types })) {
             return null
           }
 
           // Filter out alcohol-serving places
-          if (isAlcoholic(name, {})) {
+          if (isAlcoholic(name, { types: place.types })) {
+            return null
+          }
+
+          // Filter out bakeries and patisseries
+          if (isBakeryOrPastryShop(name, { types: place.types })) {
             return null
           }
 
@@ -894,24 +1024,34 @@ const Coffee = () => {
             return null
           }
 
-          const name = sanitizeApiResponse(
-            element.tags?.name || 
-            element.tags?.['addr:housenumber'] || 
-            'Unnamed Coffee Roaster',
-            100
-          )
+              const name = sanitizeApiResponse(
+                element.tags?.name || 
+                element.tags?.['addr:housenumber'] || 
+                '',
+                100
+              )
 
-          const brand = sanitizeApiResponse(element.tags?.brand, 100)
+              // Skip places with no name or "Unnamed" in the name
+              if (!name || name.toLowerCase().includes('unnamed')) {
+                return null
+              }
 
-          // Filter out corporate chains
-          if (isCorporateChain(name, brand)) {
-            return null
-          }
+              const brand = sanitizeApiResponse(element.tags?.brand, 100)
 
-          // Filter for coffee roasters only
-          if (!isCoffeeRoaster(name, element.tags)) {
-            return null
-          }
+              // Filter out corporate chains
+              if (isCorporateChain(name, brand)) {
+                return null
+              }
+
+              // Filter out convenience stores and gas stations
+              if (isConvenienceStoreOrGasStation(name, element.tags)) {
+                return null
+              }
+
+              // Filter for coffee roasters only
+              if (!isCoffeeRoaster(name, element.tags)) {
+                return null
+              }
 
           const distance = calculateDistance(lat, lon, center.lat, center.lon)
 
@@ -961,21 +1101,31 @@ const Coffee = () => {
       const data = await response.json()
       const places = data.results || []
 
-      // Convert Google Places results to CoffeeRoaster format
-      const roasters: CoffeeRoaster[] = places
-        .map((place: any) => {
-          const name = sanitizeApiResponse(place.name || 'Unnamed Coffee Roaster', 100)
-          
-          // Filter out corporate chains
-          const brand = sanitizeApiResponse(place.name, 100)
-          if (isCorporateChain(name, brand)) {
-            return null
-          }
+          // Convert Google Places results to CoffeeRoaster format
+          const roasters: CoffeeRoaster[] = places
+            .map((place: any) => {
+              const name = sanitizeApiResponse(place.name || '', 100)
+              
+              // Skip places with no name or "Unnamed" in the name
+              if (!name || name.toLowerCase().includes('unnamed')) {
+                return null
+              }
 
-          // Filter for coffee roasters only
-          if (!isCoffeeRoaster(name, { types: place.types })) {
-            return null
-          }
+              // Filter out corporate chains
+              const brand = sanitizeApiResponse(place.name, 100)
+              if (isCorporateChain(name, brand)) {
+                return null
+              }
+
+              // Filter out convenience stores and gas stations
+              if (isConvenienceStoreOrGasStation(name, { types: place.types })) {
+                return null
+              }
+
+              // Filter for coffee roasters only
+              if (!isCoffeeRoaster(name, { types: place.types })) {
+                return null
+              }
 
           const location = place.geometry?.location || {}
           const placeLat = location.lat || 0

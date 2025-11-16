@@ -11,10 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rate limiting for Google Places API to control costs (5 requests per IP per hour)
 - Graceful handling of rate limit errors - OSM results still show when rate limit is reached
 - Rate limit headers in API responses (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset)
+- Enhanced filtering for corporate chains (convenience stores, gas stations, etc.)
+- Filtering for bakeries and patisseries in drink alternatives search
+- Filtering for convenience stores and gas stations in both coffee and drink searches
 
 ### Changed
 - Google Places API endpoint now returns 429 status with helpful error message when rate limit exceeded
 - Frontend gracefully handles rate limit errors and continues with OSM results
+- Improved result filtering: excludes "Unnamed" places, convenience stores, gas stations, and non-drink-focused businesses
+- Stricter filtering for drink alternatives: only shows places clearly focused on tea, smoothies, and non-alcoholic drinks
+- Corporate chain list expanded to include 7-Eleven, Circle K, and major gas station brands
 
 ## [1.3.0] - 2024-12-XX
 
