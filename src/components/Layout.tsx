@@ -381,7 +381,9 @@ const Layout = ({ children }: LayoutProps) => {
           <button onClick={() => handleNavigation('/more')} className="footer-button">
             More
           </button>
-
+          <button onClick={toggleTheme} className="footer-button footer-button-icon" aria-label="Toggle theme">
+            {theme === 'light' ? '🌓' : '☀️'}
+          </button>
         </footer>
       )}
     </div>
