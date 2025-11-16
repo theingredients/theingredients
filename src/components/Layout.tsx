@@ -19,10 +19,11 @@ const Layout = ({ children }: LayoutProps) => {
   const isDraggingRef = useRef(false)
   const touchStartTimeRef = useRef<number | null>(null)
   
-  // Coffee button easter egg state
+  // Question mark gesture easter egg state
   const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const coffeeHoldTimerRef = useRef<number | null>(null)
-  const isHoldingCoffeeRef = useRef(false)
+  const isDrawingRef = useRef(false)
+  const drawingPointsRef = useRef<Array<{ x: number; y: number; time: number }>>([])
+  const questionMarkStartTimeRef = useRef<number | null>(null)
   
   // Detect if device is mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
@@ -184,7 +185,23 @@ const Layout = ({ children }: LayoutProps) => {
   }
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    handleDragStart(e.clientX, e.clientY)
+    // Only handle if not clicking on interactive elements
+    const target = e.target as HTMLElement
+    if (target.tagName === 'BUTTON' || target.tagName === 'A' || target.closest('button') || target.closest('a')) {
+      return
+    }
+    
+    // Check if this is for page flip or question mark detection
+    // If in drag zone, use page flip; otherwise, start question mark detection
+    const inDragZone = isMobile 
+      ? e.clientX > window.innerWidth - MOBILE_DRAG_ZONE_WIDTH
+      : e.clientX < DESKTOP_DRAG_ZONE_SIZE && e.clientY < DESKTOP_DRAG_ZONE_SIZE
+    
+    if (inDragZone) {
+      handleDragStart(e.clientX, e.clientY)
+    } else {
+      startQuestionMarkDetection(e.clientX, e.clientY)
+    }
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -228,11 +245,21 @@ const Layout = ({ children }: LayoutProps) => {
           setFlipProgress(0)
         }
       }
+    } else if (isDrawingRef.current) {
+      addDrawingPoint(e.clientX, e.clientY)
     }
   }
 
   const handleMouseUp = (e: React.MouseEvent) => {
-    handleDragEnd(e.clientX, e.clientY)
+    if (isDraggingRef.current) {
+      handleDragEnd(e.clientX, e.clientY)
+    } else if (isDrawingRef.current) {
+      // Final check for question mark on mouse up
+      if (drawingPointsRef.current.length >= 10 && detectQuestionMark(drawingPointsRef.current)) {
+        setIsSearchOpen(true)
+      }
+      stopQuestionMarkDetection()
+    }
   }
 
   const handleMouseLeave = () => {
@@ -244,6 +271,7 @@ const Layout = ({ children }: LayoutProps) => {
     }
     dragStartRef.current = null
     isDraggingRef.current = false
+    stopQuestionMarkDetection()
   }
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -261,8 +289,8 @@ const Layout = ({ children }: LayoutProps) => {
       e.preventDefault()
       handleDragStart(touch.clientX, touch.clientY)
     } else {
-      // Still track the start position but don't prevent default
-      handleDragStart(touch.clientX, touch.clientY)
+      // Start question mark detection
+      startQuestionMarkDetection(touch.clientX, touch.clientY)
     }
   }
 
@@ -304,18 +332,28 @@ const Layout = ({ children }: LayoutProps) => {
           setFlipProgress(0)
         }
       }
+    } else if (isDrawingRef.current) {
+      addDrawingPoint(touch.clientX, touch.clientY)
     }
   }
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     setIsInDragZone(false)
-    if (e.changedTouches.length > 0) {
-      const touch = e.changedTouches[0]
-      handleDragEnd(touch.clientX, touch.clientY)
-    } else {
-      // Reset if no touch data
-      setFlipProgress(0)
-      setIsFlipping(false)
+    if (isDraggingRef.current) {
+      if (e.changedTouches.length > 0) {
+        const touch = e.changedTouches[0]
+        handleDragEnd(touch.clientX, touch.clientY)
+      } else {
+        // Reset if no touch data
+        setFlipProgress(0)
+        setIsFlipping(false)
+      }
+    } else if (isDrawingRef.current) {
+      // Final check for question mark on touch end
+      if (drawingPointsRef.current.length >= 10 && detectQuestionMark(drawingPointsRef.current)) {
+        setIsSearchOpen(true)
+      }
+      stopQuestionMarkDetection()
     }
   }
 
@@ -329,63 +367,133 @@ const Layout = ({ children }: LayoutProps) => {
     dragStartRef.current = null
     isDraggingRef.current = false
     touchStartTimeRef.current = null
+    stopQuestionMarkDetection()
   }
 
   // Calculate rotation angle from progress (0 to 90 degrees)
   // On mobile (right-to-left swipe), use negative rotation so page comes towards user (like a book)
   const rotationAngle = isMobile ? flipProgress * -90 : flipProgress * 90
 
-  // Coffee button easter egg handlers
-  const handleCoffeeButtonMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault()
-    isHoldingCoffeeRef.current = true
-    coffeeHoldTimerRef.current = window.setTimeout(() => {
-      if (isHoldingCoffeeRef.current) {
-        setIsSearchOpen(true)
+  // Question mark gesture detection
+  // Detects when user draws a question mark pattern anywhere on the app
+  
+  const detectQuestionMark = (points: Array<{ x: number; y: number; time: number }>): boolean => {
+    if (points.length < 10) return false // Need minimum points for pattern
+    
+    // Normalize points to start at origin for easier analysis
+    const startX = points[0].x
+    const startY = points[0].y
+    const normalized = points.map(p => ({
+      x: p.x - startX,
+      y: p.y - startY,
+      time: p.time
+    }))
+    
+    // Find bounding box
+    const minX = Math.min(...normalized.map(p => p.x))
+    const maxX = Math.max(...normalized.map(p => p.x))
+    const minY = Math.min(...normalized.map(p => p.y))
+    const maxY = Math.max(...normalized.map(p => p.y))
+    const width = maxX - minX
+    const height = maxY - minY
+    
+    // Question mark should have reasonable aspect ratio (taller than wide)
+    if (height < width * 0.8 || height < 50) return false
+    
+    // Check for question mark characteristics:
+    // 1. Starts at top (or near top)
+    // 2. Goes down (vertical line or curve)
+    // 3. Has a hook/curve at bottom going up and around
+    // 4. Ends near top (dot)
+    
+    const startPoint = normalized[0]
+    const endPoint = normalized[normalized.length - 1]
+    const midPoint = normalized[Math.floor(normalized.length / 2)]
+    
+    // Start should be near top of bounding box
+    const startYRatio = (startPoint.y - minY) / height
+    if (startYRatio > 0.3) return false // Start too low
+    
+    // End should be near top (dot)
+    const endYRatio = (endPoint.y - minY) / height
+    if (endYRatio > 0.4) return false // End too low
+    
+    // Middle should be near bottom (hook part)
+    const midYRatio = (midPoint.y - minY) / height
+    if (midYRatio < 0.5) return false // Middle too high
+    
+    // Check for vertical movement (going down then up)
+    let goingDown = false
+    let goingUp = false
+    let reachedBottom = false
+    
+    for (let i = 1; i < normalized.length; i++) {
+      const prev = normalized[i - 1]
+      const curr = normalized[i]
+      const yDiff = curr.y - prev.y
+      const yRatio = (curr.y - minY) / height
+      
+      if (yDiff > 2 && !reachedBottom) {
+        goingDown = true
       }
-    }, 7000) // 7 seconds
-  }
-
-  const handleCoffeeButtonMouseUp = () => {
-    isHoldingCoffeeRef.current = false
-    if (coffeeHoldTimerRef.current) {
-      clearTimeout(coffeeHoldTimerRef.current)
-      coffeeHoldTimerRef.current = null
-    }
-  }
-
-  const handleCoffeeButtonMouseLeave = () => {
-    isHoldingCoffeeRef.current = false
-    if (coffeeHoldTimerRef.current) {
-      clearTimeout(coffeeHoldTimerRef.current)
-      coffeeHoldTimerRef.current = null
-    }
-  }
-
-  const handleCoffeeButtonTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault()
-    isHoldingCoffeeRef.current = true
-    coffeeHoldTimerRef.current = window.setTimeout(() => {
-      if (isHoldingCoffeeRef.current) {
-        setIsSearchOpen(true)
+      if (yRatio > 0.7) {
+        reachedBottom = true
       }
-    }, 7000) // 7 seconds
+      if (yDiff < -2 && reachedBottom) {
+        goingUp = true
+      }
+    }
+    
+    // Must have gone down, reached bottom, then gone up
+    if (!goingDown || !reachedBottom || !goingUp) return false
+    
+    // Check for horizontal movement (hook/curve)
+    const horizontalRange = maxX - minX
+    if (horizontalRange < width * 0.2) return false // Need some horizontal movement for hook
+    
+    // Check if path curves back (question mark hook)
+    const firstHalf = normalized.slice(0, Math.floor(normalized.length / 2))
+    const secondHalf = normalized.slice(Math.floor(normalized.length / 2))
+    
+    const firstHalfMaxX = Math.max(...firstHalf.map(p => p.x))
+    const secondHalfMinX = Math.min(...secondHalf.map(p => p.x))
+    
+    // Second half should curve back (x decreases or stays similar)
+    // This indicates the hook of the question mark
+    if (secondHalfMinX > firstHalfMaxX * 0.8) return false
+    
+    return true
   }
 
-  const handleCoffeeButtonTouchEnd = () => {
-    isHoldingCoffeeRef.current = false
-    if (coffeeHoldTimerRef.current) {
-      clearTimeout(coffeeHoldTimerRef.current)
-      coffeeHoldTimerRef.current = null
+  const startQuestionMarkDetection = (clientX: number, clientY: number) => {
+    isDrawingRef.current = true
+    questionMarkStartTimeRef.current = Date.now()
+    drawingPointsRef.current = [{ x: clientX, y: clientY, time: Date.now() }]
+  }
+
+  const addDrawingPoint = (clientX: number, clientY: number) => {
+    if (!isDrawingRef.current) return
+    
+    drawingPointsRef.current.push({ x: clientX, y: clientY, time: Date.now() })
+    
+    // Limit points array size to prevent memory issues
+    if (drawingPointsRef.current.length > 200) {
+      drawingPointsRef.current.shift()
+    }
+    
+    // Check for question mark pattern periodically
+    if (drawingPointsRef.current.length >= 10 && drawingPointsRef.current.length % 5 === 0) {
+      if (detectQuestionMark(drawingPointsRef.current)) {
+        setIsSearchOpen(true)
+        stopQuestionMarkDetection()
+      }
     }
   }
 
-  const handleCoffeeButtonTouchCancel = () => {
-    isHoldingCoffeeRef.current = false
-    if (coffeeHoldTimerRef.current) {
-      clearTimeout(coffeeHoldTimerRef.current)
-      coffeeHoldTimerRef.current = null
-    }
+  const stopQuestionMarkDetection = () => {
+    isDrawingRef.current = false
+    questionMarkStartTimeRef.current = null
+    drawingPointsRef.current = []
   }
 
   const handleCloseSearch = () => {
@@ -395,9 +503,7 @@ const Layout = ({ children }: LayoutProps) => {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (coffeeHoldTimerRef.current) {
-        clearTimeout(coffeeHoldTimerRef.current)
-      }
+      stopQuestionMarkDetection()
     }
   }, [])
 
@@ -435,12 +541,6 @@ const Layout = ({ children }: LayoutProps) => {
           </button>
           <button 
             onClick={() => handleNavigation('/coffee')} 
-            onMouseDown={handleCoffeeButtonMouseDown}
-            onMouseUp={handleCoffeeButtonMouseUp}
-            onMouseLeave={handleCoffeeButtonMouseLeave}
-            onTouchStart={handleCoffeeButtonTouchStart}
-            onTouchEnd={handleCoffeeButtonTouchEnd}
-            onTouchCancel={handleCoffeeButtonTouchCancel}
             className="footer-button footer-button-icon" 
             aria-label="Coffee"
           >
