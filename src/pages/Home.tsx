@@ -47,73 +47,145 @@ const Home = () => {
     }
   }, [clickCount, navigate])
 
-  // Fetch tide data using WorldTides API (free tier, limited requests)
+  // Fetch tide data using Open-Meteo Marine API
   const fetchTideData = useCallback(async (latitude: number, longitude: number): Promise<WeatherData['tide'] | null> => {
     try {
-      // Use a shorter timeout for tide data to avoid blocking
       const tideAbortController = new AbortController()
-      const tideTimeoutId = setTimeout(() => tideAbortController.abort(), 3000) // 3 second timeout
+      const tideTimeoutId = setTimeout(() => tideAbortController.abort(), 5000) // 5 second timeout
       
-      // Use Open-Meteo marine API to check if location is near water
-      const marineCheck = await fetch(
-        `https://marine-api.open-meteo.com/v1/marine?latitude=${latitude}&longitude=${longitude}&hourly=wave_height&current=sea_surface_temperature`,
+      // Use Open-Meteo marine API to get actual tide data
+      // This API provides water level data which can indicate tides
+      const marineResponse = await fetch(
+        `https://marine-api.open-meteo.com/v1/marine?latitude=${latitude}&longitude=${longitude}&hourly=water_level&forecast_days=1`,
         { signal: tideAbortController.signal }
       )
       
       clearTimeout(tideTimeoutId)
       
-      if (!marineCheck.ok) {
+      if (!marineResponse.ok) {
         return null // Not near ocean or API unavailable
       }
 
-      await marineCheck.json() // Check if location is near water
+      const marineData = await marineResponse.json()
       
-      // If we got marine data, the location is near water
-      // Now calculate approximate tide times based on location and current time
-      // This is a simplified calculation - for accurate data, you'd need a proper tide API
-      
-      const now = new Date()
-      const hours = now.getHours()
-      const minutes = now.getMinutes()
-      const currentTime = hours + minutes / 60
-      
-      // Simplified tide calculation based on lunar cycle
-      // Tides typically occur roughly every 6 hours
-      // This is a very rough estimate
-      const lunarCycle = 24.84 // hours in a lunar day
-      const tideInterval = lunarCycle / 2 // approximately 12.42 hours between high tides
-      
-      // Calculate next high and low tide times (rough estimate)
-      const timeSinceLastHigh = (currentTime % tideInterval)
-      const nextHighTime = currentTime + (tideInterval - timeSinceLastHigh)
-      const nextLowTime = currentTime + (tideInterval / 2 - (timeSinceLastHigh % (tideInterval / 2)))
-      
-      // Determine current tide state
-      const isRising = (timeSinceLastHigh % (tideInterval / 2)) < (tideInterval / 4)
-      const currentType: 'high' | 'low' = isRising ? 'low' : 'high'
-      const nextType: 'high' | 'low' = currentType === 'high' ? 'low' : 'high'
-      
-      // Format times
-      const formatTime = (hours: number): string => {
-        const h = Math.floor(hours) % 24
-        const m = Math.floor((hours % 1) * 60)
-        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+      // Check if we have water level data (indicates location is near water)
+      if (!marineData.hourly || !marineData.hourly.water_level || marineData.hourly.water_level.length === 0) {
+        return null
       }
       
-      const nextTime = nextType === 'high' ? formatTime(nextHighTime) : formatTime(nextLowTime)
+      const waterLevels = marineData.hourly.water_level
+      const times = marineData.hourly.time || []
       
-      // Estimate tide height (this is very rough - would need actual API data)
-      const estimatedHeight = isRising ? 2.5 : 1.5 // meters, very rough estimate
+      if (waterLevels.length === 0 || times.length === 0) {
+        return null
+      }
+      
+      // Find current time index
+      const now = new Date()
+      const currentTimeStr = now.toISOString().slice(0, 13) + ':00' // Round to nearest hour
+      let currentIndex = times.findIndex((t: string) => t >= currentTimeStr)
+      
+      // If current time not found, use first available
+      if (currentIndex === -1) {
+        currentIndex = 0
+      }
+      
+      // Get current water level
+      const currentLevel = waterLevels[currentIndex] || waterLevels[0]
+      
+      // Find next high and low tides in the next 24 hours
+      let nextHighIndex = -1
+      let nextLowIndex = -1
+      let maxLevel = currentLevel
+      let minLevel = currentLevel
+      
+      // Look ahead up to 24 hours
+      const lookAhead = Math.min(24, waterLevels.length - currentIndex)
+      
+      for (let i = currentIndex; i < currentIndex + lookAhead; i++) {
+        const level = waterLevels[i]
+        if (level > maxLevel) {
+          maxLevel = level
+          nextHighIndex = i
+        }
+        if (level < minLevel) {
+          minLevel = level
+          nextLowIndex = i
+        }
+      }
+      
+      // Determine current tide state based on water level trend
+      const avgLevel = (maxLevel + minLevel) / 2
+      const isHigh = currentLevel >= avgLevel
+      const currentType: 'high' | 'low' = isHigh ? 'high' : 'low'
+      
+      // Find next tide change
+      let nextType: 'high' | 'low'
+      let nextTime: string
+      
+      if (isHigh) {
+        // Currently high, next will be low
+        nextType = 'low'
+        if (nextLowIndex !== -1 && nextLowIndex > currentIndex) {
+          nextTime = new Date(times[nextLowIndex]).toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+          })
+        } else {
+          // Estimate next low tide (approximately 6 hours from now)
+          const nextLowDate = new Date(now.getTime() + 6 * 60 * 60 * 1000)
+          nextTime = nextLowDate.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+          })
+        }
+      } else {
+        // Currently low, next will be high
+        nextType = 'high'
+        if (nextHighIndex !== -1 && nextHighIndex > currentIndex) {
+          nextTime = new Date(times[nextHighIndex]).toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+          })
+        } else {
+          // Estimate next high tide (approximately 6 hours from now)
+          const nextHighDate = new Date(now.getTime() + 6 * 60 * 60 * 1000)
+          nextTime = nextHighDate.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+          })
+        }
+      }
+      
+      // Calculate tide height in feet (water level is typically in meters)
+      // Use the range between min and max as reference
+      const levelRange = maxLevel - minLevel
+      const normalizedLevel = (currentLevel - minLevel) / (levelRange || 1)
+      const estimatedHeight = minLevel + (normalizedLevel * levelRange)
+      
+      // Format current time
+      const currentTime = now.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
+      })
       
       return {
-        height: Math.round(estimatedHeight * 3.28084), // Convert to feet
+        height: Math.round(Math.abs(estimatedHeight) * 3.28084), // Convert to feet, ensure positive
         type: currentType,
-        time: formatTime(currentTime),
+        time: currentTime,
         nextType: nextType,
         nextTime: nextTime
       }
     } catch (error) {
       // Not near ocean or API unavailable
+      if (import.meta.env.DEV) {
+        console.log('[Weather] Tide data unavailable:', error)
+      }
       return null
     }
   }, [])
@@ -154,30 +226,86 @@ const Home = () => {
         throw new Error('Invalid geolocation coordinates received')
       }
 
-      // First get city name from reverse geocoding (with timeout)
+      // Get city name from reverse geocoding (non-blocking, with fallback)
+      // We'll fetch this in parallel and update after weather is set
       let cityName = 'Unknown'
-      try {
-        const geocodeAbortController = new AbortController()
-        const geocodeTimeoutId = setTimeout(() => geocodeAbortController.abort(), 5000) // 5 second timeout
-        
-        const geocodeResponse = await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
-          { signal: geocodeAbortController.signal }
-        )
-        
-        clearTimeout(geocodeTimeoutId)
-        
-        if (geocodeResponse.ok) {
-          const geocodeData = await geocodeResponse.json()
-          const rawCityName = geocodeData.city || geocodeData.locality || geocodeData.principalSubdivision || 'Unknown'
-          cityName = sanitizeApiResponse(rawCityName, 100)
+      
+      const fetchCityName = async (): Promise<string> => {
+        // Try primary geocoding API: BigDataCloud
+        try {
+          const geocodeAbortController = new AbortController()
+          const geocodeTimeoutId = setTimeout(() => geocodeAbortController.abort(), 4000) // 4 second timeout
+          
+          const geocodeResponse = await fetch(
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+            { signal: geocodeAbortController.signal }
+          )
+          
+          clearTimeout(geocodeTimeoutId)
+          
+          if (geocodeResponse.ok) {
+            const geocodeData = await geocodeResponse.json()
+            const rawCityName = geocodeData.city || geocodeData.locality || geocodeData.principalSubdivision
+            if (rawCityName) {
+              return sanitizeApiResponse(rawCityName, 100)
+            }
+          }
+        } catch (geocodeError) {
+          if (import.meta.env.DEV) {
+            console.log('[Weather] BigDataCloud geocoding failed, trying fallback:', geocodeError)
+          }
         }
-      } catch (geocodeError) {
-        // Silently fail - city name is optional, use 'Unknown' as fallback
-        if (import.meta.env.DEV) {
-          console.log('[Weather] Geocoding failed:', geocodeError)
+        
+        // Fallback: Use Nominatim (OpenStreetMap) reverse geocoding API
+        try {
+          const fallbackAbortController = new AbortController()
+          const fallbackTimeoutId = setTimeout(() => fallbackAbortController.abort(), 4000)
+          
+          const fallbackResponse = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=en`,
+            { 
+              signal: fallbackAbortController.signal,
+              headers: {
+                'User-Agent': 'TheIngredients/1.0' // Required by Nominatim
+              }
+            }
+          )
+          
+          clearTimeout(fallbackTimeoutId)
+          
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json()
+            if (fallbackData.address) {
+              // Try to get city name from address components
+              const rawCityName = fallbackData.address.city || 
+                                 fallbackData.address.town || 
+                                 fallbackData.address.village || 
+                                 fallbackData.address.municipality ||
+                                 fallbackData.address.county ||
+                                 fallbackData.address.state ||
+                                 fallbackData.display_name?.split(',')[0]
+              if (rawCityName) {
+                return sanitizeApiResponse(rawCityName, 100)
+              }
+            }
+          }
+        } catch (fallbackError) {
+          if (import.meta.env.DEV) {
+            console.log('[Weather] Fallback geocoding failed:', fallbackError)
+          }
         }
+        
+        return 'Unknown'
       }
+      
+      // Fetch city name in parallel (non-blocking)
+      fetchCityName().then(name => {
+        if (name !== 'Unknown') {
+          setWeather(prev => prev ? { ...prev, city: name } : null)
+        }
+      }).catch(() => {
+        // Silently fail - city name is optional
+      })
 
       // Try primary API: Open-Meteo (free, no API key required)
       let weatherData: any = null

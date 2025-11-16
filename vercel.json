@@ -43,7 +43,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.bigdatacloud.net https://api.open-meteo.com https://marine-api.open-meteo.com https://api.weather.gov https://wttr.in https://bored-api.appbrewery.com https://v2.jokeapi.dev https://api.stripe.com https://checkout.stripe.com https://overpass-api.de https://maps.googleapis.com; frame-src https://checkout.stripe.com; media-src 'self'; frame-ancestors 'none';"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.bigdatacloud.net https://api.open-meteo.com https://marine-api.open-meteo.com https://api.weather.gov https://wttr.in https://bored-api.appbrewery.com https://v2.jokeapi.dev https://api.stripe.com https://checkout.stripe.com https://overpass-api.de https://maps.googleapis.com https://nominatim.openstreetmap.org; frame-src https://checkout.stripe.com; media-src 'self'; frame-ancestors 'none';"
         }
       ]
     }
