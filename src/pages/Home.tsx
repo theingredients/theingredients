@@ -231,6 +231,24 @@ const Home = () => {
     return 'weather-cursor-default'
   }
 
+  const getWeatherIcon = (description: string): string => {
+    const desc = description.toLowerCase()
+    if (desc.includes('clear') || desc.includes('sunny')) {
+      return '☀️'
+    } else if (desc.includes('thunder') || desc.includes('storm')) {
+      return '⛈️'
+    } else if (desc.includes('rain') || desc.includes('drizzle') || desc.includes('shower')) {
+      return '🌧️'
+    } else if (desc.includes('snow')) {
+      return '❄️'
+    } else if (desc.includes('fog') || desc.includes('mist')) {
+      return '🌫️'
+    } else if (desc.includes('cloud') || desc.includes('overcast')) {
+      return '☁️'
+    }
+    return '🌤️' // Default to partly cloudy
+  }
+
   const handleIngredientsClick = () => {
     setClickCount(prev => prev + 1)
   }
@@ -394,6 +412,7 @@ const Home = () => {
                     {isFallingApart ? (
                       <>
                         <span className={`weather-temp ${getWeatherCursorClass(weather.description)}`}>
+                          <span className="weather-icon">{getWeatherIcon(weather.description)}</span>
                           <span className="weather-temp-char-container">
                             {splitIntoCharacters(`${weather.temp}°F / ${weather.tempC ?? Math.round((weather.temp - 32) * 5/9)}°C`, 'weather-temp-char')}
                           </span>
@@ -407,6 +426,7 @@ const Home = () => {
                     ) : (
                       <>
                         <span className={`weather-temp ${getWeatherCursorClass(weather.description)}`}>
+                          <span className="weather-icon">{getWeatherIcon(weather.description)}</span>
                           {weather.temp}°F / {weather.tempC ?? Math.round((weather.temp - 32) * 5/9)}°C
                         </span>
                         <span className="weather-location">{weather.city}</span>
