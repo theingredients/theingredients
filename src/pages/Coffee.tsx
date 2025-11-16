@@ -5,7 +5,7 @@ import { isValidCoordinates, sanitizeApiResponse } from '../utils/inputSanitizer
 import './PageStyles.css'
 import './Coffee.css'
 
-interface CoffeeShop {
+interface CoffeeRoaster {
   id: number
   name: string
   lat: number
@@ -25,7 +25,7 @@ const Coffee = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [coffeeShops, setCoffeeShops] = useState<CoffeeShop[]>([])
+  const [coffeeRoasters, setCoffeeRoasters] = useState<CoffeeRoaster[]>([])
 
   // Calculate distance between two coordinates using Haversine formula
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -160,27 +160,31 @@ const Coffee = () => {
     }
   }
 
-  // Check if a place is a restaurant (not just a coffee shop)
-  const isRestaurant = (tags: any): boolean => {
-    // Exclude if it's explicitly a restaurant
-    if (tags?.amenity === 'restaurant') {
+  // Check if a place is a coffee roaster
+  const isCoffeeRoaster = (name: string, tags: any): boolean => {
+    const nameLower = name.toLowerCase()
+    
+    // Check for explicit roaster tags
+    if (tags?.craft === 'coffee_roaster' || tags?.roaster === 'yes') {
       return true
     }
     
-    // Exclude if it has restaurant-related cuisine tags that aren't coffee-focused
-    const cuisine = tags?.cuisine?.toLowerCase() || ''
-    const restaurantCuisines = ['pizza', 'italian', 'mexican', 'chinese', 'japanese', 'thai', 'indian', 'french', 'american', 'burger', 'sandwich', 'breakfast', 'brunch']
+    // Check if name contains roaster-related keywords
+    const roasterKeywords = ['roaster', 'roasting', 'roast', 'roasted']
+    if (roasterKeywords.some(keyword => nameLower.includes(keyword))) {
+      return true
+    }
     
-    // If it has a restaurant cuisine but no coffee-related tags, it's likely a restaurant
-    if (restaurantCuisines.some(c => cuisine.includes(c)) && !tags?.amenity && !tags?.shop) {
+    // Check for other indicators
+    if (tags?.roaster === 'coffee' || tags?.['roaster:type'] === 'coffee') {
       return true
     }
     
     return false
   }
 
-  // Fetch coffee shops and cafes from OSM Overpass API
-  const fetchCoffeeShops = async (lat: number, lon: number) => {
+  // Fetch coffee roasters from OSM Overpass API
+  const fetchCoffeeRoasters = async (lat: number, lon: number) => {
     try {
       setIsLoading(true)
       setError(null)
@@ -190,18 +194,23 @@ const Coffee = () => {
         throw new Error('Invalid coordinates')
       }
 
-      // Search radius in meters (approximately 5km)
-      const radius = 5000
+      // Search radius in meters (5 miles = approximately 8047 meters)
+      const radius = 8047
 
-      // Overpass API query to find coffee shops and cafes
-      // Exclude restaurants explicitly
+      // Overpass API query to find coffee shops and cafes first
+      // Then we'll filter for roasters in the processing step
+      // This catches roasters that might be tagged as coffee shops
       const query = `
         [out:json][timeout:25];
         (
-          node["amenity"="cafe"]["amenity"!="restaurant"](around:${radius},${lat},${lon});
+          node["craft"="coffee_roaster"](around:${radius},${lat},${lon});
+          node["roaster"="yes"](around:${radius},${lat},${lon});
           node["shop"="coffee"](around:${radius},${lat},${lon});
-          way["amenity"="cafe"]["amenity"!="restaurant"](around:${radius},${lat},${lon});
+          node["amenity"="cafe"](around:${radius},${lat},${lon});
+          way["craft"="coffee_roaster"](around:${radius},${lat},${lon});
+          way["roaster"="yes"](around:${radius},${lat},${lon});
           way["shop"="coffee"](around:${radius},${lat},${lon});
+          way["amenity"="cafe"](around:${radius},${lat},${lon});
         );
         out center meta;
       `.replace(/\s+/g, ' ').trim()
@@ -215,7 +224,7 @@ const Coffee = () => {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to fetch coffee shops')
+        throw new Error('Failed to fetch coffee roasters')
       }
 
       const data = await response.json()
@@ -224,8 +233,8 @@ const Coffee = () => {
         throw new Error('Invalid response from OSM API')
       }
 
-      // Process results
-      const shops: CoffeeShop[] = data.elements
+      // Process results - filter for roasters
+      const roasters: CoffeeRoaster[] = data.elements
         .map((element: any, index: number) => {
           const center = element.center || { lat: element.lat, lon: element.lon }
           
@@ -236,14 +245,19 @@ const Coffee = () => {
           const name = sanitizeApiResponse(
             element.tags?.name || 
             element.tags?.['addr:housenumber'] || 
-            'Unnamed Coffee Shop',
+            'Unnamed Coffee Roaster',
             100
           )
 
           const brand = sanitizeApiResponse(element.tags?.brand, 100)
 
-          // Filter out corporate chains and restaurants
-          if (isCorporateChain(name, brand) || isRestaurant(element.tags)) {
+          // Filter out corporate chains
+          if (isCorporateChain(name, brand)) {
+            return null
+          }
+
+          // Filter for coffee roasters only
+          if (!isCoffeeRoaster(name, element.tags)) {
             return null
           }
 
@@ -265,16 +279,16 @@ const Coffee = () => {
             },
           }
         })
-        .filter((shop: CoffeeShop | null): shop is CoffeeShop => shop !== null)
-        .sort((a: CoffeeShop, b: CoffeeShop) => (a.distance || 0) - (b.distance || 0))
+        .filter((roaster: CoffeeRoaster | null): roaster is CoffeeRoaster => roaster !== null)
+        .sort((a: CoffeeRoaster, b: CoffeeRoaster) => (a.distance || 0) - (b.distance || 0))
         .slice(0, 20) // Limit to top 20 closest
 
-      setCoffeeShops(shops)
+      setCoffeeRoasters(roasters)
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)
       } else {
-        setError('Unable to fetch coffee shops')
+        setError('Unable to fetch coffee roasters')
       }
     } finally {
       setIsLoading(false)
@@ -282,7 +296,7 @@ const Coffee = () => {
   }
 
   // Handle button click - request geolocation
-  const handleFindCoffeeShops = () => {
+  const handleFindCoffeeRoasters = () => {
     if (!navigator.geolocation) {
       setError('Geolocation is not supported by your browser')
       setIsModalOpen(true)
@@ -292,7 +306,7 @@ const Coffee = () => {
     setIsModalOpen(true)
     setIsLoading(true)
     setError(null)
-    setCoffeeShops([])
+    setCoffeeRoasters([])
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -304,12 +318,12 @@ const Coffee = () => {
           return
         }
 
-        fetchCoffeeShops(latitude, longitude)
+        fetchCoffeeRoasters(latitude, longitude)
       },
       (err) => {
         setIsLoading(false)
         if (err.code === err.PERMISSION_DENIED) {
-          setError('Location access denied. Please enable location permissions to find nearby coffee shops.')
+          setError('Location access denied. Please enable location permissions to find nearby coffee roasters.')
         } else if (err.code === err.POSITION_UNAVAILABLE) {
           setError('Location unavailable. Please try again.')
         } else {
@@ -324,23 +338,23 @@ const Coffee = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setError(null)
-    setCoffeeShops([])
+    setCoffeeRoasters([])
   }
 
   // Format address from tags
-  const formatAddress = (shop: CoffeeShop): string => {
+  const formatAddress = (roaster: CoffeeRoaster): string => {
     const parts: string[] = []
-    if (shop.tags?.['addr:housenumber']) {
-      parts.push(shop.tags['addr:housenumber'])
+    if (roaster.tags?.['addr:housenumber']) {
+      parts.push(roaster.tags['addr:housenumber'])
     }
-    if (shop.tags?.['addr:street']) {
-      parts.push(shop.tags['addr:street'])
+    if (roaster.tags?.['addr:street']) {
+      parts.push(roaster.tags['addr:street'])
     }
-    if (shop.tags?.['addr:city']) {
-      parts.push(shop.tags['addr:city'])
+    if (roaster.tags?.['addr:city']) {
+      parts.push(roaster.tags['addr:city'])
     }
-    if (shop.tags?.['addr:postcode']) {
-      parts.push(shop.tags['addr:postcode'])
+    if (roaster.tags?.['addr:postcode']) {
+      parts.push(roaster.tags['addr:postcode'])
     }
     return parts.length > 0 ? parts.join(' ') : 'Address not available'
   }
@@ -362,17 +376,17 @@ const Coffee = () => {
     <Layout>
       <div className="page-container">
         <div className="coffee-section">
-          <h1 className="page-title">Find Local Coffee Shops!</h1>
+          <h1 className="page-title">Find Local Coffee Roasters!</h1>
           <button 
             className="email-button coffee-section-button"
-            onClick={handleFindCoffeeShops}
+            onClick={handleFindCoffeeRoasters}
           >
             Find Nearby!
           </button>
         </div>
-        <div className="coffee-section">
-          <h1 className="page-title">Buy Me a Coffee</h1>
-          <p className="page-content">
+        <div className="coffee-section coffee-section-small">
+          <h1 className="coffee-section-small-title">Buy Me a Coffee</h1>
+          <p className="coffee-section-small-content">
             If you enjoy The Ingredients and want to support its development, 
             consider buying me a coffee! ☕
           </p>
@@ -384,7 +398,10 @@ const Coffee = () => {
         <div className="coffee-modal-overlay" onClick={handleCloseModal}>
           <div className="coffee-modal" onClick={(e) => e.stopPropagation()}>
             <div className="coffee-modal-header">
-              <h2 className="coffee-modal-title">Local Coffee Shops</h2>
+              <div>
+                <h2 className="coffee-modal-title">Local Coffee Roasters</h2>
+                <p className="coffee-modal-subtitle">Searching within 5 miles</p>
+              </div>
               <button 
                 className="coffee-modal-close"
                 onClick={handleCloseModal}
@@ -396,7 +413,7 @@ const Coffee = () => {
             <div className="coffee-modal-content">
               {isLoading && (
                 <div className="coffee-modal-loading">
-                  <p>Finding nearby coffee shops...</p>
+                  <p>Finding nearby coffee roasters...</p>
                 </div>
               )}
               {error && (
@@ -404,36 +421,42 @@ const Coffee = () => {
                   <p>{error}</p>
                 </div>
               )}
-              {!isLoading && !error && coffeeShops.length === 0 && (
+              {!isLoading && !error && coffeeRoasters.length === 0 && (
                 <div className="coffee-modal-empty">
-                  <p>No coffee shops found nearby. Try expanding your search area.</p>
+                  <p>No coffee roasters found nearby. Try expanding your search area.</p>
                 </div>
               )}
-              {!isLoading && !error && coffeeShops.length > 0 && (
+              {!isLoading && !error && coffeeRoasters.length > 0 && (
                 <ul className="coffee-shops-list">
-                  {coffeeShops.map((shop) => (
+                  {coffeeRoasters.map((roaster) => (
                     <li 
-                      key={shop.id} 
+                      key={roaster.id} 
                       className="coffee-shop-item"
-                      onClick={() => openInMaps(shop.lat, shop.lon, shop.name, formatAddress(shop))}
+                      onClick={() => openInMaps(roaster.lat, roaster.lon, roaster.name, formatAddress(roaster))}
                       role="button"
                       tabIndex={0}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault()
-                          openInMaps(shop.lat, shop.lon, shop.name, formatAddress(shop))
+                          openInMaps(roaster.lat, roaster.lon, roaster.name, formatAddress(roaster))
                         }
                       }}
-                      aria-label={`Open ${shop.name} in maps`}
+                      aria-label={`Open ${roaster.name} in maps`}
                     >
-                      <div className="coffee-shop-name">{shop.name}</div>
-                      <div className="coffee-shop-details">{formatAddress(shop)}</div>
-                      {shop.tags?.phone && (
-                        <div className="coffee-shop-details">📞 {shop.tags.phone}</div>
+                      <div className="coffee-shop-name">{roaster.name}</div>
+                      <div className="coffee-shop-address">{formatAddress(roaster)}</div>
+                      {roaster.tags?.phone && (
+                        <div className="coffee-shop-phone">
+                          {roaster.tags.phone.split(';').map((phone, idx) => (
+                            <div key={idx} className="coffee-shop-phone-number">
+                              📞 {phone.trim()}
+                            </div>
+                          ))}
+                        </div>
                       )}
-                      {shop.distance !== undefined && (
+                      {roaster.distance !== undefined && (
                         <div className="coffee-shop-distance">
-                          📍 {formatDistance(shop.distance)} away
+                          📍 {formatDistance(roaster.distance)} away
                         </div>
                       )}
                     </li>
