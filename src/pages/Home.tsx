@@ -31,7 +31,12 @@ const Home = () => {
   const longPressTimerRef = useRef<number | null>(null)
   const isPressingRef = useRef<boolean>(false)
   const touchHandledRef = useRef<boolean>(false)
+  const isFetchingWeatherRef = useRef<boolean>(false)
+  const lastWeatherFetchRef = useRef<number>(0)
   const navigate = useNavigate()
+  
+  // Rate limiting: minimum 3 seconds between weather API calls
+  const MIN_WEATHER_FETCH_INTERVAL = 3000 // 3 seconds
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -191,8 +196,34 @@ const Home = () => {
   }, [])
 
   const fetchWeather = useCallback(async () => {
+    // Prevent duplicate calls
+    if (isFetchingWeatherRef.current) {
+      if (import.meta.env.DEV) {
+        console.log('[Weather] fetchWeather already in progress, skipping')
+      }
+      return
+    }
+    
+    // Rate limiting: prevent rapid successive calls
+    const now = Date.now()
+    const timeSinceLastFetch = now - lastWeatherFetchRef.current
+    if (timeSinceLastFetch < MIN_WEATHER_FETCH_INTERVAL) {
+      const remainingTime = Math.ceil((MIN_WEATHER_FETCH_INTERVAL - timeSinceLastFetch) / 1000)
+      if (import.meta.env.DEV) {
+        console.log(`[Weather] Rate limited - please wait ${remainingTime} more second(s)`)
+      }
+      setError(`Please wait ${remainingTime} more second(s) before fetching weather again`)
+      return
+    }
+    
+    lastWeatherFetchRef.current = now
+    isFetchingWeatherRef.current = true
     setLoading(true)
     setError(null)
+    
+    if (import.meta.env.DEV) {
+      console.log('[Weather] fetchWeather started')
+    }
     
     // Overall timeout to prevent infinite loading (20 seconds total)
     const overallTimeoutId = setTimeout(() => {
@@ -205,12 +236,49 @@ const Home = () => {
       if (!navigator.geolocation) {
         throw new Error('Geolocation is not supported by your browser')
       }
+      
+      // Check permission state (if available) - helps diagnose permission issues
+      if ('permissions' in navigator) {
+        try {
+          const permission = await navigator.permissions.query({ name: 'geolocation' as PermissionName })
+          if (import.meta.env.DEV) {
+            console.log('[Weather] Geolocation permission state:', permission.state)
+          }
+          if (permission.state === 'denied') {
+            throw new Error('Location access denied. Please enable location permissions in your browser settings.')
+          }
+        } catch (permError) {
+          // Permission query not supported or failed - continue anyway
+          if (import.meta.env.DEV) {
+            console.log('[Weather] Permission query not available:', permError)
+          }
+        }
+      }
 
       // Get user's location (longer timeout for mobile)
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        const geoTimeout = setTimeout(() => {
+          reject(new Error('Location request timed out. Please check your location permissions and try again.'))
+        }, 15000)
+        
         navigator.geolocation.getCurrentPosition(
-          resolve, 
-          reject,
+          (pos) => {
+            clearTimeout(geoTimeout)
+            resolve(pos)
+          }, 
+          (err) => {
+            clearTimeout(geoTimeout)
+            // Handle geolocation errors with better messages
+            let errorMessage = 'Unable to get your location'
+            if (err.code === 1) { // PERMISSION_DENIED
+              errorMessage = 'Location access denied. Please enable location permissions in your browser settings.'
+            } else if (err.code === 2) { // POSITION_UNAVAILABLE
+              errorMessage = 'Location unavailable. Please check your device settings.'
+            } else if (err.code === 3) { // TIMEOUT
+              errorMessage = 'Location request timed out. Please try again.'
+            }
+            reject(new Error(errorMessage))
+          },
           { 
             timeout: 15000, // 15 seconds for mobile devices
             enableHighAccuracy: false, // Faster on mobile
@@ -475,27 +543,31 @@ const Home = () => {
           })
       }
     } catch (err) {
-      if (err instanceof GeolocationPositionError) {
-        if (err.code === err.PERMISSION_DENIED) {
-          setError('Location access denied')
-        } else if (err.code === err.POSITION_UNAVAILABLE) {
-          setError('Location unavailable')
-        } else {
-          setError('Location timeout')
-        }
-      } else if (err instanceof Error) {
+      // Handle all error types with better messages
+      if (err instanceof Error) {
         setError(err.message)
+        // Log for debugging on mobile
+        if (import.meta.env.DEV) {
+          console.error('[Weather] Error:', err)
+        }
       } else {
-        setError('Unable to fetch weather')
+        setError('Unable to fetch weather. Please try again.')
       }
     } finally {
       clearTimeout(overallTimeoutId)
       setLoading(false)
+      isFetchingWeatherRef.current = false
     }
   }, [])
 
   useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('[Weather] useEffect triggered:', { showWeather, hasWeather: !!weather, loading, error })
+    }
     if (showWeather && !weather && !loading && !error) {
+      if (import.meta.env.DEV) {
+        console.log('[Weather] Calling fetchWeather()')
+      }
       fetchWeather()
     }
   }, [showWeather, weather, loading, error, fetchWeather])
@@ -596,18 +668,22 @@ const Home = () => {
   }
 
   const toggleWeather = () => {
+    if (import.meta.env.DEV) {
+      console.log('[Weather] toggleWeather called, current showWeather:', showWeather, 'hasWeather:', !!weather)
+    }
     if (showWeather) {
+      // Toggling off - hide weather
       setShowWeather(false)
       setWeather(null)
       setError(null)
       setLoading(false)
     } else {
+      // Toggling on - show weather (always fetch fresh data)
       setShowWeather(true)
-      // If weather data already exists, clear any stale error/loading states to show it immediately
-      if (weather) {
-        setError(null)
-        setLoading(false)
-      }
+      setWeather(null) // Reset weather
+      setError(null)
+      // Call fetchWeather directly to ensure it always runs
+      fetchWeather()
     }
   }
 
@@ -625,18 +701,19 @@ const Home = () => {
     toggleWeather()
   }
 
-  const handleClockTouchStart = (e: React.TouchEvent) => {
-    // Mark that we're handling a touch event
-    touchHandledRef.current = true
-    // Prevent default to avoid any unwanted behaviors
-    e.preventDefault()
-  }
-
   const handleClockTouchEnd = (e: React.TouchEvent) => {
+    if (import.meta.env.DEV) {
+      console.log('[Weather] Touch end event fired on clock')
+    }
+    // Prevent the click event from also firing
+    touchHandledRef.current = true
     e.preventDefault()
     e.stopPropagation()
+    
+    // Toggle weather immediately
     toggleWeather()
-    // Reset after a short delay to allow click event to be ignored
+    
+    // Reset after a delay to allow click event to be ignored if it fires
     setTimeout(() => {
       touchHandledRef.current = false
     }, 300)
@@ -746,7 +823,6 @@ const Home = () => {
           <div 
             className={`clock ${showWeather ? 'weather-view' : ''} ${loading ? 'weather-loading-state' : ''}`}
             onClick={handleClockClick}
-            onTouchStart={handleClockTouchStart}
             onTouchEnd={handleClockTouchEnd}
             role="button"
             tabIndex={0}
