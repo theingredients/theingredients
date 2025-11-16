@@ -28,6 +28,7 @@ interface DrinkPlace extends CoffeeRoaster {
 
 const Coffee = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isBuyCoffeeModalOpen, setIsBuyCoffeeModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [coffeeRoasters, setCoffeeRoasters] = useState<CoffeeRoaster[]>([])
@@ -1245,6 +1246,15 @@ const Coffee = () => {
     setSearchMode('coffee')
   }
 
+  // Handle buy coffee modal
+  const handleOpenBuyCoffeeModal = () => {
+    setIsBuyCoffeeModalOpen(true)
+  }
+
+  const handleCloseBuyCoffeeModal = () => {
+    setIsBuyCoffeeModalOpen(false)
+  }
+
   // Format address from tags
   const formatAddress = (place: CoffeeRoaster | DrinkPlace): string => {
     const parts: string[] = []
@@ -1265,7 +1275,7 @@ const Coffee = () => {
 
   // Prevent body scroll when modal is open
   useEffect(() => {
-    if (isModalOpen) {
+    if (isModalOpen || isBuyCoffeeModalOpen) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
@@ -1274,7 +1284,7 @@ const Coffee = () => {
     return () => {
       document.body.style.overflow = ''
     }
-  }, [isModalOpen])
+  }, [isModalOpen, isBuyCoffeeModalOpen])
 
   return (
     <Layout>
@@ -1294,14 +1304,13 @@ const Coffee = () => {
           >
             But I don't like coffee!
           </button>
-        </div>
-        <div className="coffee-section coffee-section-small">
-          <h1 className="coffee-section-small-title">Buy Me a Coffee</h1>
-          <p className="coffee-section-small-content">
-            If you enjoy The Ingredients and want to support its development, 
-            consider buying me a coffee! ☕
-          </p>
-          <BuyMeACoffee />
+
+          <button 
+            className="email-button coffee-section-button"
+            onClick={handleOpenBuyCoffeeModal}
+          >
+            Buy Me Coffee
+          </button>
         </div>
       </div>
 
@@ -1432,6 +1441,32 @@ const Coffee = () => {
                   ))}
                 </ul>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isBuyCoffeeModalOpen && (
+        <div className="coffee-modal-overlay" onClick={handleCloseBuyCoffeeModal}>
+          <div className="coffee-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="coffee-modal-header">
+              <div>
+                <h2 className="coffee-modal-title">Buy Me Coffee</h2>
+                <p className="coffee-modal-subtitle">
+                  If you enjoy The Ingredients and want to support its development, 
+                  consider buying me a coffee! ☕
+                </p>
+              </div>
+              <button 
+                className="coffee-modal-close"
+                onClick={handleCloseBuyCoffeeModal}
+                aria-label="Close modal"
+              >
+                ×
+              </button>
+            </div>
+            <div className="coffee-modal-content">
+              <BuyMeACoffee />
             </div>
           </div>
         </div>
