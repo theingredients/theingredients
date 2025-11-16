@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import { ThemeProvider } from './contexts/ThemeContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import Home from './pages/Home'
@@ -26,6 +27,15 @@ function App() {
           <Route path="/coffee" element={<Coffee />} />
         </Routes>
       </Router>
+      <Analytics
+        beforeSend={(event) => {
+          // Exclude /go route and any paths starting with /go from analytics
+          if (event.url.includes('/go')) {
+            return null // Don't send this event
+          }
+          return event // Send all other events
+        }}
+      />
     </ThemeProvider>
     </ErrorBoundary>
   )

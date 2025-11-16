@@ -12,14 +12,15 @@ interface CoffeeRoaster {
   lon: number
   distance?: number
   source?: 'OSM' | 'Google' // Data source
-  tags?: {
-    'addr:street'?: string
-    'addr:city'?: string
-    'addr:housenumber'?: string
-    'addr:postcode'?: string
-    phone?: string
-    website?: string
-  }
+      tags?: {
+        'formatted_address'?: string
+        'addr:street'?: string
+        'addr:city'?: string
+        'addr:housenumber'?: string
+        'addr:postcode'?: string
+        phone?: string
+        website?: string
+      }
 }
 
 interface DrinkPlace extends CoffeeRoaster {
@@ -761,6 +762,8 @@ const Coffee = () => {
           const distance = calculateDistance(lat, lon, placeLat, placeLon)
 
           // Format address from Google Places data
+          // Use formatted_address if available (most reliable), otherwise piece together from components
+          const formattedAddress = place.formatted_address || place.vicinity || ''
           const addressComponents = place.address_components || []
           const streetNumber = addressComponents.find((comp: any) => comp.types.includes('street_number'))?.long_name || ''
           const route = addressComponents.find((comp: any) => comp.types.includes('route'))?.long_name || ''
@@ -776,6 +779,7 @@ const Coffee = () => {
             source: 'Google',
             drinkTypes: detectDrinkTypes(name, { types: place.types }),
             tags: {
+              'formatted_address': sanitizeApiResponse(formattedAddress, 200),
               'addr:street': sanitizeApiResponse(route, 100),
               'addr:city': sanitizeApiResponse(city, 100),
               'addr:housenumber': sanitizeApiResponse(streetNumber, 20),
@@ -1140,6 +1144,8 @@ const Coffee = () => {
           const distance = calculateDistance(lat, lon, placeLat, placeLon)
 
           // Format address from Google Places data
+          // Use formatted_address if available (most reliable), otherwise piece together from components
+          const formattedAddress = place.formatted_address || place.vicinity || ''
           const addressComponents = place.address_components || []
           const streetNumber = addressComponents.find((comp: any) => comp.types.includes('street_number'))?.long_name || ''
           const route = addressComponents.find((comp: any) => comp.types.includes('route'))?.long_name || ''
@@ -1154,6 +1160,7 @@ const Coffee = () => {
             distance,
             source: 'Google',
             tags: {
+              'formatted_address': sanitizeApiResponse(formattedAddress, 200),
               'addr:street': sanitizeApiResponse(route, 100),
               'addr:city': sanitizeApiResponse(city, 100),
               'addr:housenumber': sanitizeApiResponse(streetNumber, 20),
@@ -1258,6 +1265,12 @@ const Coffee = () => {
 
   // Format address from tags
   const formatAddress = (place: CoffeeRoaster | DrinkPlace): string => {
+    // First try formatted_address (from Google Places API) - most reliable
+    if (place.tags?.['formatted_address']) {
+      return place.tags['formatted_address']
+    }
+    
+    // Otherwise, piece together from address components
     const parts: string[] = []
     if (place.tags?.['addr:housenumber']) {
       parts.push(place.tags['addr:housenumber'])

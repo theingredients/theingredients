@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { apiRateLimiter } from '../utils/rateLimiter'
-import { sanitizeInput, validateWhitelist, sanitizeApiResponse, sanitizeUrl } from '../utils/inputSanitizer'
+import { validateWhitelist, sanitizeApiResponse, sanitizeUrl } from '../utils/inputSanitizer'
 import './PageStyles.css'
 import './Bored.css'
 
@@ -25,11 +24,7 @@ const Bored = () => {
   const [error, setError] = useState<string | null>(null)
   const [filterType, setFilterType] = useState<string>('')
   const [filterParticipants, setFilterParticipants] = useState<string>('')
-  const [isInputMode, setIsInputMode] = useState(false)
-  const [inputValue, setInputValue] = useState('')
   const isFetchingRef = useRef(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const navigate = useNavigate()
 
   const fetchRandomActivity = async () => {
     // Prevent multiple simultaneous requests
@@ -141,41 +136,6 @@ const Bored = () => {
     fetchRandomActivity()
   }, [])
 
-  useEffect(() => {
-    if (isInputMode && inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [isInputMode])
-
-
-  useEffect(() => {
-    if (!inputValue.trim()) return
-
-    const sanitized = sanitizeInput(inputValue)
-    const normalizedInput = sanitized.toLowerCase().trim()
-    const jokeKeywords = ['joke', 'tell me a joke', 'jokes', 'make me laugh', 'funny', 'humor']
-    
-    if (jokeKeywords.some(keyword => normalizedInput.includes(keyword))) {
-      navigate('/jokes')
-    }
-  }, [inputValue, navigate])
-
-  const handleTitleClick = () => {
-    setIsInputMode(true)
-  }
-
-  const handleInputBlur = () => {
-    setIsInputMode(false)
-    setInputValue('')
-  }
-
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') {
-      setIsInputMode(false)
-      setInputValue('')
-    }
-  }
-
   const activityTypes = [
     'education',
     'recreational',
@@ -191,41 +151,7 @@ const Bored = () => {
   return (
     <Layout>
       <div className="page-container">
-        {isInputMode ? (
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={(e) => {
-              const sanitized = sanitizeInput(e.target.value)
-              setInputValue(sanitized)
-            }}
-            maxLength={100}
-            onBlur={handleInputBlur}
-            onKeyDown={handleInputKeyDown}
-            className="page-title-input"
-            placeholder="Type something..."
-            autoFocus
-            aria-label="Easter egg input - try typing 'joke'"
-          />
-        ) : (
-          <h1 
-            className="page-title" 
-            onClick={handleTitleClick} 
-            style={{ cursor: 'pointer' }}
-            role="button"
-            aria-label="Click to reveal easter egg"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                handleTitleClick()
-              }
-            }}
-          >
-            Bored?
-          </h1>
-        )}
+        <h1 className="page-title">Bored?</h1>
         
         <div className="bored-filters">
           <div className="filter-group">

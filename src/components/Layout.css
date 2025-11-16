@@ -26,14 +26,14 @@
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* On mobile, use top-right origin for right-to-left swipe */
+/* On mobile, use top-left origin for right-to-left swipe */
 @media (max-width: 768px) {
   .layout.page-flipping {
-    transform-origin: top right;
+    transform-origin: top left;
   }
   
   .layout.page-flipping::before {
-    transform-origin: top right;
+    transform-origin: top left;
     /* For mobile, start at -90deg (already flipped) and rotate back as page flips forward */
     transform: perspective(2000px) rotateY(calc(-90deg - var(--flip-rotation))) scaleX(1);
   }

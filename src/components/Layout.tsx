@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from '../contexts/ThemeContext'
+import Search from './Search'
 import './Layout.css'
 
 interface LayoutProps {
@@ -17,6 +18,11 @@ const Layout = ({ children }: LayoutProps) => {
   const dragStartRef = useRef<{ x: number; y: number } | null>(null)
   const isDraggingRef = useRef(false)
   const touchStartTimeRef = useRef<number | null>(null)
+  
+  // Coffee button easter egg state
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const coffeeHoldTimerRef = useRef<number | null>(null)
+  const isHoldingCoffeeRef = useRef(false)
   
   // Detect if device is mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
@@ -326,8 +332,74 @@ const Layout = ({ children }: LayoutProps) => {
   }
 
   // Calculate rotation angle from progress (0 to 90 degrees)
-  // On mobile (right-to-left swipe), use negative rotation to flip from right to left
+  // On mobile (right-to-left swipe), use negative rotation so page comes towards user (like a book)
   const rotationAngle = isMobile ? flipProgress * -90 : flipProgress * 90
+
+  // Coffee button easter egg handlers
+  const handleCoffeeButtonMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    isHoldingCoffeeRef.current = true
+    coffeeHoldTimerRef.current = window.setTimeout(() => {
+      if (isHoldingCoffeeRef.current) {
+        setIsSearchOpen(true)
+      }
+    }, 7000) // 7 seconds
+  }
+
+  const handleCoffeeButtonMouseUp = () => {
+    isHoldingCoffeeRef.current = false
+    if (coffeeHoldTimerRef.current) {
+      clearTimeout(coffeeHoldTimerRef.current)
+      coffeeHoldTimerRef.current = null
+    }
+  }
+
+  const handleCoffeeButtonMouseLeave = () => {
+    isHoldingCoffeeRef.current = false
+    if (coffeeHoldTimerRef.current) {
+      clearTimeout(coffeeHoldTimerRef.current)
+      coffeeHoldTimerRef.current = null
+    }
+  }
+
+  const handleCoffeeButtonTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault()
+    isHoldingCoffeeRef.current = true
+    coffeeHoldTimerRef.current = window.setTimeout(() => {
+      if (isHoldingCoffeeRef.current) {
+        setIsSearchOpen(true)
+      }
+    }, 7000) // 7 seconds
+  }
+
+  const handleCoffeeButtonTouchEnd = () => {
+    isHoldingCoffeeRef.current = false
+    if (coffeeHoldTimerRef.current) {
+      clearTimeout(coffeeHoldTimerRef.current)
+      coffeeHoldTimerRef.current = null
+    }
+  }
+
+  const handleCoffeeButtonTouchCancel = () => {
+    isHoldingCoffeeRef.current = false
+    if (coffeeHoldTimerRef.current) {
+      clearTimeout(coffeeHoldTimerRef.current)
+      coffeeHoldTimerRef.current = null
+    }
+  }
+
+  const handleCloseSearch = () => {
+    setIsSearchOpen(false)
+  }
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (coffeeHoldTimerRef.current) {
+        clearTimeout(coffeeHoldTimerRef.current)
+      }
+    }
+  }, [])
 
   return (
     <div 
@@ -361,7 +433,17 @@ const Layout = ({ children }: LayoutProps) => {
           <button onClick={() => handleNavigation('/about')} className="footer-button">
             About
           </button>
-          <button onClick={() => handleNavigation('/coffee')} className="footer-button footer-button-icon" aria-label="Coffee">
+          <button 
+            onClick={() => handleNavigation('/coffee')} 
+            onMouseDown={handleCoffeeButtonMouseDown}
+            onMouseUp={handleCoffeeButtonMouseUp}
+            onMouseLeave={handleCoffeeButtonMouseLeave}
+            onTouchStart={handleCoffeeButtonTouchStart}
+            onTouchEnd={handleCoffeeButtonTouchEnd}
+            onTouchCancel={handleCoffeeButtonTouchCancel}
+            className="footer-button footer-button-icon" 
+            aria-label="Coffee"
+          >
             ☕
           </button>
           <button onClick={() => {
@@ -383,6 +465,9 @@ const Layout = ({ children }: LayoutProps) => {
           </button>
         </footer>
       )}
+
+      {/* Search Modal (Coffee Button Easter Egg) */}
+      <Search isOpen={isSearchOpen} onClose={handleCloseSearch} />
     </div>
   )
 }

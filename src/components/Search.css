@@ -1,0 +1,221 @@
+/* Search Modal Overlay */
+.search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+  /* Safe area support for notched devices */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.theme-dark .search-overlay {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Search Modal */
+.search-modal {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+  position: relative;
+}
+
+.theme-dark .search-modal {
+  background: rgba(20, 20, 20, 0.98);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.search-close {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.5);
+  padding: 0.5rem;
+  min-width: 36px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 10;
+}
+
+.theme-dark .search-close {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.search-close:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+}
+
+.theme-dark .search-close:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.search-close:active {
+  transform: scale(0.95);
+}
+
+/* Search Content */
+.search-content {
+  padding: 1.5rem;
+  padding-top: 1.75rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.theme-dark .search-content {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Search Input */
+.search-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  color: rgba(0, 0, 0, 0.85);
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  letter-spacing: 0.3px;
+}
+
+.theme-dark .search-input {
+  background: rgba(30, 30, 30, 0.95);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  transform: translateY(-1px);
+}
+
+.theme-dark .search-input:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08), 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: rgba(35, 35, 35, 0.95);
+}
+
+.search-input::placeholder {
+  color: rgba(0, 0, 0, 0.45);
+  font-weight: 400;
+}
+
+.theme-dark .search-input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .search-overlay {
+    padding: 1rem;
+  }
+
+  .search-modal {
+    max-width: 100%;
+    max-width: calc(100% - 2rem);
+  }
+
+  .search-content {
+    padding: 1.25rem;
+    padding-top: 1.5rem;
+  }
+
+  .search-close {
+    top: 0.875rem;
+    right: 0.875rem;
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-overlay {
+    padding: 0.75rem;
+    padding-top: env(safe-area-inset-top, 0.75rem);
+    padding-bottom: env(safe-area-inset-bottom, 0.75rem);
+    padding-left: env(safe-area-inset-left, 0.75rem);
+    padding-right: env(safe-area-inset-right, 0.75rem);
+  }
+
+  .search-modal {
+    max-width: 100%;
+    border-radius: 10px;
+  }
+
+  .search-content {
+    padding: 1rem;
+    padding-top: 1.25rem;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .search-close {
+    top: 0.75rem;
+    right: 0.75rem;
+    font-size: 1.5rem;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .search-input {
+    font-size: 0.95rem;
+    padding: 0.75rem 0.875rem;
+  }
+}
+
