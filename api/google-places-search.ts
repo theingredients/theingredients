@@ -143,46 +143,92 @@ export default async function handler(
 
     // Google Places API Nearby Search endpoint
     // Support different search types: 'coffee' for coffee roasters, 'drinks' for tea/smoothies
-    let googleUrl: string
     if (searchType === 'coffee') {
       // Search for coffee shops and cafes - we'll filter for roasters on frontend
       // Google Places API keyword search doesn't support OR, so we search broadly
-      googleUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radiusMeters}&type=cafe&keyword=coffee&key=${process.env.GOOGLE_PLACES_API_KEY}`
+      const googleUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radiusMeters}&type=cafe&keyword=coffee&key=${process.env.GOOGLE_PLACES_API_KEY}`
+
+      const googleResponse = await fetch(googleUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!googleResponse.ok) {
+        const errorText = await googleResponse.text()
+        console.error('Google Places API error:', errorText)
+        return res.status(googleResponse.status).json({ 
+          error: 'Failed to fetch from Google Places API',
+          details: errorText
+        })
+      }
+
+      const data = await googleResponse.json()
+
+      // Check for API errors
+      if (data.status && data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+        return res.status(400).json({ 
+          error: `Google Places API error: ${data.status}`,
+          message: data.error_message || 'Unknown error'
+        })
+      }
+
+      // Return the results array
+      return res.status(200).json({ 
+        results: data.results || []
+      })
     } else {
-      // Search for cafes (we'll filter for drinks on frontend)
-      googleUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radiusMeters}&type=cafe&key=${process.env.GOOGLE_PLACES_API_KEY}`
-    }
-
-    const googleResponse = await fetch(googleUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-
-    if (!googleResponse.ok) {
-      const errorText = await googleResponse.text()
-      console.error('Google Places API error:', errorText)
-      return res.status(googleResponse.status).json({ 
-        error: 'Failed to fetch from Google Places API',
-        details: errorText
+      // Search for drinks: try multiple keyword searches to find tea, smoothies, juice places
+      // We'll do multiple searches and combine results for better coverage
+      const teaUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radiusMeters}&type=cafe&keyword=tea&key=${process.env.GOOGLE_PLACES_API_KEY}`
+      const smoothieUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radiusMeters}&type=cafe&keyword=smoothie&key=${process.env.GOOGLE_PLACES_API_KEY}`
+      const juiceUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radiusMeters}&type=cafe&keyword=juice&key=${process.env.GOOGLE_PLACES_API_KEY}`
+      const bobaUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radiusMeters}&type=cafe&keyword=boba&key=${process.env.GOOGLE_PLACES_API_KEY}`
+      
+      // Fetch all searches in parallel
+      const [teaResponse, smoothieResponse, juiceResponse, bobaResponse] = await Promise.allSettled([
+        fetch(teaUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } }),
+        fetch(smoothieUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } }),
+        fetch(juiceUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } }),
+        fetch(bobaUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+      ])
+      
+      // Combine results from all searches
+      const allResults: any[] = []
+      const seenPlaceIds = new Set<string>()
+      
+      for (const response of [teaResponse, smoothieResponse, juiceResponse, bobaResponse]) {
+        if (response.status === 'fulfilled' && response.value.ok) {
+          try {
+            const data = await response.value.json()
+            
+            // Check for API errors in response
+            if (data.status && data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+              console.warn('Google Places API error in search:', data.status, data.error_message)
+              continue // Skip this search result
+            }
+            
+            if (data.results && Array.isArray(data.results)) {
+              for (const place of data.results) {
+                if (place.place_id && !seenPlaceIds.has(place.place_id)) {
+                  seenPlaceIds.add(place.place_id)
+                  allResults.push(place)
+                }
+              }
+            }
+          } catch (parseError) {
+            console.warn('Error parsing Google Places response:', parseError)
+            continue // Skip this search result
+          }
+        }
+      }
+      
+      // Return combined results
+      return res.status(200).json({ 
+        results: allResults
       })
     }
-
-    const data = await googleResponse.json()
-
-    // Check for API errors
-    if (data.status && data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-      return res.status(400).json({ 
-        error: `Google Places API error: ${data.status}`,
-        message: data.error_message || 'Unknown error'
-      })
-    }
-
-    // Return the results array
-    return res.status(200).json({ 
-      results: data.results || []
-    })
   } catch (error) {
     console.error('Google Places search error:', error)
     

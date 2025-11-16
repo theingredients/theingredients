@@ -453,7 +453,14 @@ const Coffee = () => {
       'tropical', 'fresh', 'blend', 'blenders', 'squeeze', 'press', 'pressed',
       'cold brew', 'juicery', 'tropical smoothie', 'jamba', 'planet smoothie', 
       'smoothie king', 'naked juice', 'odwalla', 'bolthouse', 'innocent',
-      'grass', 'in the grass', 'blenders in', 'pressed juice', 'juice press'
+      'grass', 'in the grass', 'blenders in', 'pressed juice', 'juice press',
+      'smoothie cafe', 'juice cafe', 'tea bar', 'boba bar', 'matcha cafe',
+      'chai bar', 'kombucha bar', 'lemonade stand', 'fresh bar', 'blend bar',
+      'smoothie co', 'juice co', 'tea co', 'smoothie company', 'juice company',
+      'tea company', 'smoothie lab', 'juice lab', 'tea lab', 'smoothie house',
+      'juice house', 'tea house', 'smoothie lounge', 'juice lounge', 'tea lounge',
+      'smoothie spot', 'juice spot', 'tea spot', 'smoothie place', 'juice place',
+      'tea place', 'smoothie stop', 'juice stop', 'tea stop'
     ]
     
     // If name contains drink keywords, include it (even if it's a cafe)
@@ -483,7 +490,11 @@ const Coffee = () => {
         'tea', 'smoothie', 'juice', 'boba', 'matcha', 'chai', 'bubble',
         'tropical', 'fresh', 'blend', 'blenders', 'squeeze', 'press', 'pressed',
         'juicery', 'smoothie bowl', 'acai', 'tropical smoothie', 'grass',
-        'in the grass', 'blenders in', 'pressed juice', 'juice press'
+        'in the grass', 'blenders in', 'pressed juice', 'juice press',
+        'smoothie cafe', 'juice cafe', 'tea bar', 'boba bar', 'matcha cafe',
+        'chai bar', 'kombucha', 'lemonade', 'smoothie co', 'juice co', 'tea co',
+        'smoothie lab', 'juice lab', 'tea lab', 'smoothie house', 'juice house',
+        'tea house', 'smoothie lounge', 'juice lounge', 'tea lounge'
       ]
       if (cafeDrinkIndicators.some(indicator => nameLower.includes(indicator))) {
         return true
@@ -555,9 +566,8 @@ const Coffee = () => {
 
   // Fetch places from OSM
   const fetchOSMPlaces = async (lat: number, lon: number, radius: number): Promise<DrinkPlace[]> => {
-    // Overpass API query to find tea shops, beverage shops, cafes, and fast food
-    // We'll filter to only include drink-focused ones in processing
-    // Cast a wider net to catch places that might be tagged differently
+    // Overpass API query to find tea shops, beverage shops, cafes, juice bars, smoothie shops
+    // Expanded search to catch more drink-focused places
     const query = `
       [out:json][timeout:25];
       (
@@ -565,12 +575,18 @@ const Coffee = () => {
         node["shop"="beverages"](around:${radius},${lat},${lon});
         node["amenity"="cafe"](around:${radius},${lat},${lon});
         node["amenity"="fast_food"](around:${radius},${lat},${lon});
-        node["amenity"="food_court"](around:${radius},${lat},${lon});
+        node["cuisine"="bubble_tea"](around:${radius},${lat},${lon});
+        node["cuisine"="tea"](around:${radius},${lat},${lon});
+        node["cuisine"="juice"](around:${radius},${lat},${lon});
+        node["cuisine"="smoothie"](around:${radius},${lat},${lon});
         way["shop"="tea"](around:${radius},${lat},${lon});
         way["shop"="beverages"](around:${radius},${lat},${lon});
         way["amenity"="cafe"](around:${radius},${lat},${lon});
         way["amenity"="fast_food"](around:${radius},${lat},${lon});
-        way["amenity"="food_court"](around:${radius},${lat},${lon});
+        way["cuisine"="bubble_tea"](around:${radius},${lat},${lon});
+        way["cuisine"="tea"](around:${radius},${lat},${lon});
+        way["cuisine"="juice"](around:${radius},${lat},${lon});
+        way["cuisine"="smoothie"](around:${radius},${lat},${lon});
       );
       out center meta;
     `.replace(/\s+/g, ' ').trim()

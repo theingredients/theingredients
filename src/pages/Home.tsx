@@ -49,18 +49,11 @@ const Home = () => {
   // Fetch tide data using WorldTides API (free tier, limited requests)
   const fetchTideData = useCallback(async (latitude: number, longitude: number): Promise<WeatherData['tide'] | null> => {
     try {
-      // WorldTides API - free tier allows some requests without API key
-      // Format: https://www.worldtides.info/api?heights&lat=XX&lon=YY&key=YOUR_KEY
-      // Without key, it's very limited, so we'll try with a simple request
-      
+      // Use a shorter timeout for tide data to avoid blocking
       const tideAbortController = new AbortController()
-      const tideTimeoutId = setTimeout(() => tideAbortController.abort(), 5000)
+      const tideTimeoutId = setTimeout(() => tideAbortController.abort(), 3000) // 3 second timeout
       
-      // Try WorldTides API (may require API key for reliable access)
-      // For now, we'll use a simpler approach: check if location is near water using geocoding
-      // and use a calculation-based estimate
-      
-      // Alternative: Use Open-Meteo marine API to check if location is near water
+      // Use Open-Meteo marine API to check if location is near water
       const marineCheck = await fetch(
         `https://marine-api.open-meteo.com/v1/marine?latitude=${latitude}&longitude=${longitude}&hourly=wave_height&current=sea_surface_temperature`,
         { signal: tideAbortController.signal }
@@ -128,18 +121,28 @@ const Home = () => {
     setLoading(true)
     setError(null)
     
+    // Overall timeout to prevent infinite loading (20 seconds total)
+    const overallTimeoutId = setTimeout(() => {
+      setLoading(false)
+      setError('Request timeout - please try again')
+    }, 20000)
+    
     try {
       // Check if geolocation is available
       if (!navigator.geolocation) {
         throw new Error('Geolocation is not supported by your browser')
       }
 
-      // Get user's location
+      // Get user's location (longer timeout for mobile)
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(
           resolve, 
           reject,
-          { timeout: 10000 }
+          { 
+            timeout: 15000, // 15 seconds for mobile devices
+            enableHighAccuracy: false, // Faster on mobile
+            maximumAge: 300000 // Accept cached location up to 5 minutes old
+          }
         )
       })
 
@@ -150,16 +153,29 @@ const Home = () => {
         throw new Error('Invalid geolocation coordinates received')
       }
 
-      // First get city name from reverse geocoding
-      const geocodeResponse = await fetch(
-        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-      )
-      
+      // First get city name from reverse geocoding (with timeout)
       let cityName = 'Unknown'
-      if (geocodeResponse.ok) {
-        const geocodeData = await geocodeResponse.json()
-        const rawCityName = geocodeData.city || geocodeData.locality || geocodeData.principalSubdivision || 'Unknown'
-        cityName = sanitizeApiResponse(rawCityName, 100)
+      try {
+        const geocodeAbortController = new AbortController()
+        const geocodeTimeoutId = setTimeout(() => geocodeAbortController.abort(), 5000) // 5 second timeout
+        
+        const geocodeResponse = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+          { signal: geocodeAbortController.signal }
+        )
+        
+        clearTimeout(geocodeTimeoutId)
+        
+        if (geocodeResponse.ok) {
+          const geocodeData = await geocodeResponse.json()
+          const rawCityName = geocodeData.city || geocodeData.locality || geocodeData.principalSubdivision || 'Unknown'
+          cityName = sanitizeApiResponse(rawCityName, 100)
+        }
+      } catch (geocodeError) {
+        // Silently fail - city name is optional, use 'Unknown' as fallback
+        if (import.meta.env.DEV) {
+          console.log('[Weather] Geocoding failed:', geocodeError)
+        }
       }
 
       // Try primary API: Open-Meteo (free, no API key required)
@@ -242,20 +258,22 @@ const Home = () => {
             icon: ''
           }
 
-          // Try to fetch tide data if user is near the ocean
-          try {
-            const tideData = await fetchTideData(latitude, longitude)
-            if (tideData) {
-              weatherInfo.tide = tideData
-            }
-          } catch (tideError) {
-            // Silently fail - tide data is optional
-            if (import.meta.env.DEV) {
-              console.log('[Weather] Tide data unavailable:', tideError)
-            }
-          }
-
           setWeather(weatherInfo)
+          
+          // Try to fetch tide data if user is near the ocean (non-blocking)
+          fetchTideData(latitude, longitude)
+            .then(tideData => {
+              if (tideData) {
+                setWeather(prev => prev ? { ...prev, tide: tideData } : null)
+              }
+            })
+            .catch(tideError => {
+              // Silently fail - tide data is optional
+              if (import.meta.env.DEV) {
+                console.log('[Weather] Tide data unavailable:', tideError)
+              }
+            })
+          
           return // Success with fallback
         } catch (fallbackError) {
           // Both APIs failed
@@ -311,20 +329,21 @@ const Home = () => {
           icon: ''
         }
 
-        // Try to fetch tide data if user is near the ocean
-        try {
-          const tideData = await fetchTideData(latitude, longitude)
-          if (tideData) {
-            weatherInfo.tide = tideData
-          }
-        } catch (tideError) {
-          // Silently fail - tide data is optional
-          if (import.meta.env.DEV) {
-            console.log('[Weather] Tide data unavailable:', tideError)
-          }
-        }
-
         setWeather(weatherInfo)
+        
+        // Try to fetch tide data if user is near the ocean (non-blocking)
+        fetchTideData(latitude, longitude)
+          .then(tideData => {
+            if (tideData) {
+              setWeather(prev => prev ? { ...prev, tide: tideData } : null)
+            }
+          })
+          .catch(tideError => {
+            // Silently fail - tide data is optional
+            if (import.meta.env.DEV) {
+              console.log('[Weather] Tide data unavailable:', tideError)
+            }
+          })
       }
     } catch (err) {
       if (err instanceof GeolocationPositionError) {
@@ -341,6 +360,7 @@ const Home = () => {
         setError('Unable to fetch weather')
       }
     } finally {
+      clearTimeout(overallTimeoutId)
       setLoading(false)
     }
   }, [])
