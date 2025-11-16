@@ -352,6 +352,29 @@ const Coffee = () => {
       }
     }
     
+    // Check Google Places API types (if available)
+    if (tags?.types && Array.isArray(tags.types)) {
+      const types = tags.types.map((t: string) => t.toLowerCase())
+      
+      // Google Places types that indicate specific drinks
+      if (types.includes('cafe') && !drinkTypes.includes('Beverages')) {
+        // Cafe could have various drinks, but don't add generic if we already have specifics
+        if (drinkTypes.length === 0) {
+          drinkTypes.push('Beverages')
+        }
+      }
+      
+      // Check for meal_takeaway which often includes smoothie/juice places
+      if (types.includes('meal_takeaway') && drinkTypes.length === 0) {
+        // Could be smoothies/juices, but only add generic if no specifics found
+        if (nameLower.includes('smoothie') || nameLower.includes('juice')) {
+          // Already detected from name
+        } else {
+          drinkTypes.push('Beverages')
+        }
+      }
+    }
+    
     // Check OSM tags
     if (tags?.shop === 'tea') {
       if (!drinkTypes.includes('Tea')) {
@@ -1302,14 +1325,14 @@ const Coffee = () => {
             className="email-button coffee-section-button"
             onClick={handleDontLikeCoffee}
           >
-            But I don't like coffee!
+            Not Coffee!
           </button>
 
           <button 
             className="email-button coffee-section-button"
             onClick={handleOpenBuyCoffeeModal}
           >
-            Buy Me Coffee
+            Buy Us a Coffee!
           </button>
         </div>
       </div>
@@ -1418,6 +1441,11 @@ const Coffee = () => {
                     >
                       <div className="coffee-shop-name">{place.name}</div>
                       <div className="coffee-shop-address">{formatAddress(place)}</div>
+                      {place.drinkTypes && place.drinkTypes.length > 0 && (
+                        <div className="coffee-shop-drinks">
+                          🥤 {place.drinkTypes.join(', ')}
+                        </div>
+                      )}
                       {place.tags?.phone && (
                         <div className="coffee-shop-phone">
                           {place.tags.phone.split(';').map((phone, idx) => (
