@@ -1,11 +1,6 @@
 // Budget Alert System
 // Tracks API usage against a budget and sends alerts at 50%, 75%, and 90%
 
-interface BudgetConfig {
-  monthlyBudget: number // Monthly budget in USD
-  alertThresholds: number[] // [50, 75, 90] for percentage thresholds
-}
-
 interface BudgetStatus {
   currentUsage: number
   budget: number
@@ -18,10 +13,6 @@ interface BudgetStatus {
 // Default budget: $50/month (adjustable via environment variable)
 // Set GOOGLE_PLACES_BUDGET environment variable to customize
 const DEFAULT_BUDGET = 50
-
-// Google Places API cost per request
-// $32 per 1000 requests = $0.032 per request
-const COST_PER_REQUEST = 0.032
 
 // In-memory budget tracking (resets on cold start)
 // For production, consider using a database or external service

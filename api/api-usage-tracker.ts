@@ -64,7 +64,6 @@ function addApiCall(api: string, endpoint: string, cached: boolean = false, ip?:
 
 function getStats(): ApiStats {
   const now = Date.now()
-  const oneDayAgo = now - (24 * 60 * 60 * 1000)
   
   // Filter to last 30 days
   const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000)
