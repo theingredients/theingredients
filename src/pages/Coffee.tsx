@@ -353,27 +353,9 @@ const Coffee = () => {
     }
     
     // Check Google Places API types (if available)
-    if (tags?.types && Array.isArray(tags.types)) {
-      const types = tags.types.map((t: string) => t.toLowerCase())
-      
-      // Google Places types that indicate specific drinks
-      if (types.includes('cafe') && !drinkTypes.includes('Beverages')) {
-        // Cafe could have various drinks, but don't add generic if we already have specifics
-        if (drinkTypes.length === 0) {
-          drinkTypes.push('Beverages')
-        }
-      }
-      
-      // Check for meal_takeaway which often includes smoothie/juice places
-      if (types.includes('meal_takeaway') && drinkTypes.length === 0) {
-        // Could be smoothies/juices, but only add generic if no specifics found
-        if (nameLower.includes('smoothie') || nameLower.includes('juice')) {
-          // Already detected from name
-        } else {
-          drinkTypes.push('Beverages')
-        }
-      }
-    }
+    // Note: We don't add generic "Beverages" - only specific drink types are shown
+    // Google Places types like 'cafe' and 'meal_takeaway' don't guarantee specific drinks,
+    // so we only show drink types detected from the name or OSM tags
     
     // Check OSM tags
     if (tags?.shop === 'tea') {
@@ -394,11 +376,7 @@ const Coffee = () => {
       }
     }
     
-    // If no specific drinks found but it's a cafe/beverage shop, add generic
-    if (drinkTypes.length === 0 && (tags?.amenity === 'cafe' || tags?.shop === 'beverages')) {
-      drinkTypes.push('Beverages')
-    }
-    
+    // Return only specific drink types - no generic "Beverages" fallback
     return drinkTypes
   }
 
@@ -1313,7 +1291,7 @@ const Coffee = () => {
     <Layout>
       <div className="page-container">
         <div className="coffee-section">
-          <h1 className="page-title">Find Local Coffee Roasters!</h1>
+          <h1 className="page-title">Find Local Coffee Roasters</h1>
           <button 
             className="email-button coffee-section-button"
             onClick={handleFindCoffeeRoasters}
