@@ -5,6 +5,17 @@ All notable changes to The Ingredients project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2024-12-XX
+
+### Added
+- Rate limiting for Google Places API to control costs (5 requests per IP per hour)
+- Graceful handling of rate limit errors - OSM results still show when rate limit is reached
+- Rate limit headers in API responses (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset)
+
+### Changed
+- Google Places API endpoint now returns 429 status with helpful error message when rate limit exceeded
+- Frontend gracefully handles rate limit errors and continues with OSM results
+
 ## [1.3.0] - 2024-12-XX
 
 ### Added

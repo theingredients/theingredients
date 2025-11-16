@@ -577,6 +577,13 @@ const Coffee = () => {
         if (response.status === 500) {
           return []
         }
+        // Handle rate limiting gracefully - still return OSM results
+        if (response.status === 429) {
+          const errorData = await response.json().catch(() => ({}))
+          console.warn('Google Places API rate limit reached:', errorData.message || 'Too many requests')
+          // Return empty array so OSM results still show
+          return []
+        }
         throw new Error('Failed to fetch from Google Places')
       }
 
@@ -939,6 +946,13 @@ const Coffee = () => {
       if (!response.ok) {
         // If Google Places API is not configured, return empty array (don't fail the whole search)
         if (response.status === 500) {
+          return []
+        }
+        // Handle rate limiting gracefully - still return OSM results
+        if (response.status === 429) {
+          const errorData = await response.json().catch(() => ({}))
+          console.warn('Google Places API rate limit reached:', errorData.message || 'Too many requests')
+          // Return empty array so OSM results still show
           return []
         }
         throw new Error('Failed to fetch from Google Places')
