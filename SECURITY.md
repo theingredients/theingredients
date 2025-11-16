@@ -65,6 +65,18 @@ const sanitizeInput = (input: string): string => {
 3. **Error Handling** - Proper error boundaries prevent information leakage
 4. **No Sensitive Data** - No API keys or sensitive information in client-side code
 5. **Proxy Configuration** - API calls go through Vercel proxy (configured in `vercel.json`)
+6. **Geolocation API Security:**
+   - Coordinates validated using `isValidCoordinates()` before API calls
+   - Only valid latitude (-90 to 90) and longitude (-180 to 180) values accepted
+   - Invalid coordinates rejected with error messages
+   - User permission required before any location access
+7. **OSM Overpass API Security:**
+   - Query parameters sanitized and validated
+   - Search radius limited to 5km (5000 meters) to prevent excessive queries
+   - Query timeout set to 25 seconds to prevent hanging requests
+   - All API responses sanitized using `sanitizeApiResponse()` before rendering
+   - Response structure validated before processing (checks for `data.elements` array)
+   - No user location data stored or logged
 
 ### Injection Attack Prevention
 
@@ -99,16 +111,29 @@ const sanitizeInput = (input: string): string => {
 - No user accounts or authentication
 - No personal information collected
 - No tracking or analytics (unless explicitly added)
+- **Geolocation Data:**
+  - Location data only requested when user explicitly clicks "Find Nearby!" button
+  - Location coordinates used only for local search functionality
+  - Location data never stored in localStorage, cookies, or any persistent storage
+  - Location data only sent to OSM Overpass API for search queries
+  - No location data transmitted to any other third-party services
+  - Location permission can be revoked by user at any time through browser settings
 
 ### Browser Permission Management
-**Location:** `src/pages/ContactMe.tsx`, `src/pages/Home.tsx`
+**Location:** `src/pages/ContactMe.tsx`, `src/pages/Home.tsx`, `src/pages/Coffee.tsx`
 
 - **Microphone Permissions:** Properly cleaned up when:
   - Component unmounts (navigation away)
   - Page becomes hidden (tab switch, window minimize)
   - Browser closes/refreshes (beforeunload event)
   - User manually disables microphone
-- **Geolocation Permissions:** User must explicitly grant permission
+- **Geolocation Permissions:** 
+  - User must explicitly grant permission (no automatic requests)
+  - Location data only used for local search functionality
+  - Coordinates validated using `isValidCoordinates()` before use
+  - Location data never stored or transmitted to third parties (except OSM API for search)
+  - Permission denied gracefully handled with user-friendly error messages
+  - Location timeout set to 10 seconds to prevent hanging requests
 - **MediaStreamSource Disconnection:** All audio sources properly disconnected
 - **Resource Cleanup:** All audio contexts, streams, and animation frames cleaned up
 
@@ -134,6 +159,9 @@ The following security headers should be configured at the hosting level (Vercel
 - [x] HTTPS enforced
 - [x] Microphone cleanup on page navigation
 - [x] Browser permission resource management
+- [x] Geolocation coordinate validation
+- [x] OSM API response sanitization
+- [x] Location data privacy protection
 - [ ] CSP headers (recommended for future)
 - [ ] Rate limiting (recommended for future)
 

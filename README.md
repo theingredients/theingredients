@@ -65,6 +65,7 @@ src/
 - **Dark/Light Theme** - Persistent theme with cross-route synchronization
 - **Real-time Clock** - Live time display on home page
 - **Weather Integration** - Location-based weather data with dynamic cursors
+- **Local Coffee Shop Finder** - Find nearby independent coffee shops using Geolocation and OpenStreetMap
 - **SEO Optimized** - Meta tags, Open Graph, Twitter Cards, and structured data
 - **Accessibility** - ARIA labels, keyboard navigation, semantic HTML
 
@@ -95,6 +96,7 @@ src/
 - **Home** (`/`) - Main landing page with clock, weather, and easter eggs
 - **About** (`/about`) - Information about The Ingredients
 - **Contact** (`/contact`) - Contact information with easter egg
+- **Coffee** (`/coffee`) - Support page with local coffee shop finder and donation options
 - **More** (`/more`) - Timeline and additional projects
 - **Contact Me** (`/contact-me`) - Interactive phone easter egg (hidden route)
 - **Bored** (`/bored`) - Activity suggestions with hidden input
