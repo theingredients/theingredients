@@ -361,6 +361,9 @@ const Layout = ({ children }: LayoutProps) => {
           <button onClick={() => handleNavigation('/about')} className="footer-button">
             About
           </button>
+          <button onClick={() => handleNavigation('/coffee')} className="footer-button footer-button-icon" aria-label="Coffee">
+            ☕
+          </button>
           <button onClick={() => {
             // Always use window.location.href to ensure Vercel rewrite works
             // In dev, go to live site; in production, use /go which gets rewritten
@@ -378,9 +381,7 @@ const Layout = ({ children }: LayoutProps) => {
           <button onClick={() => handleNavigation('/more')} className="footer-button">
             More
           </button>
-          <button onClick={() => handleNavigation('/coffee')} className="footer-button footer-button-icon" aria-label="Coffee">
-            ☕
-          </button>
+
         </footer>
       )}
     </div>
