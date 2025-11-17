@@ -559,6 +559,24 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
+.voter-names {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.7);
+  line-height: 1.5;
+}
+
+.theme-dark .voter-names {
+  border-top-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.voter-name {
+  display: inline;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .birthday-invite {

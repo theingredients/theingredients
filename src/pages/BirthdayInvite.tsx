@@ -9,25 +9,26 @@ interface Restaurant {
   name: string
   description?: string
   votes: number
+  voters: string[] // Array of voter names
   link?: string
 }
 
 const BirthdayInvite = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([
-    { id: '1', name: `Arnoldi's`, description: 'Italian cuisine', votes: 0, link: 'https://www.arnoldis.com/' },
-    { id: '2', name: 'La Paloma', description: 'Mexican cuisine', votes: 0, link: 'https://lapalomasb.com/' },
-    { id: '3', name: 'Third Window Brewery', description: 'American', votes: 0, link: 'https://www.thirdwindowbrewing.com/' },
-    { id: '4', name: 'SB Public Market', description: 'American/Mexican/Japanese/Korean', votes: 0, link: 'https://www.sbpublicmarket.com/' },
-    { id: '5', name: 'M Special', description: 'American', votes: 0, link: 'https://mspecialbrewco.com/' },
-    { id: '6', name: 'Cant Go', description: 'but I bought you a coffee', votes: 0, link: 'https://www.theingredients.io/coffee' },
+    { id: '1', name: `Arnoldi's`, description: 'Italian cuisine', votes: 0, voters: [], link: 'https://www.arnoldis.com/' },
+    { id: '2', name: 'La Paloma', description: 'Mexican cuisine', votes: 0, voters: [], link: 'https://lapalomasb.com/' },
+    { id: '3', name: 'Third Window Brewery', description: 'American', votes: 0, voters: [], link: 'https://www.thirdwindowbrewing.com/' },
+    { id: '4', name: 'SB Public Market', description: 'American/Mexican/Japanese/Korean', votes: 0, voters: [], link: 'https://www.sbpublicmarket.com/' },
+    { id: '5', name: 'M Special', description: 'American', votes: 0, voters: [], link: 'https://mspecialbrewco.com/' },
+    { id: '6', name: 'Cant Go', description: 'but I bought you a coffee', votes: 0, voters: [], link: 'https://www.theingredients.io/coffee' },
   ])
   const [hasVoted, setHasVoted] = useState(false)
   const [selectedRestaurant, setSelectedRestaurant] = useState<string | null>(null)
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
+  const [isNameModalOpen, setIsNameModalOpen] = useState(false)
   const [pendingRestaurantId, setPendingRestaurantId] = useState<string | null>(null)
-  const [email, setEmail] = useState('')
-  const [emailError, setEmailError] = useState<string | null>(null)
-  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [name, setName] = useState('')
+  const [nameError, setNameError] = useState<string | null>(null)
+  const [userName, setUserName] = useState<string | null>(null)
   const [guestCount, setGuestCount] = useState<number>(0)
   const [showFireworks, setShowFireworks] = useState(false)
   const [isContentExploding, setIsContentExploding] = useState(false)
@@ -40,51 +41,24 @@ const BirthdayInvite = () => {
   const pressStartTimeRef = useRef<number | null>(null)
   const fireworkIdCounterRef = useRef<number>(0)
 
-  // Email validation
-  const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
   // Load votes from localStorage on mount
   useEffect(() => {
-    const savedVotes = localStorage.getItem('birthday-poll-votes')
+    const savedRestaurants = localStorage.getItem('birthday-poll-restaurants')
     const savedVote = localStorage.getItem('birthday-poll-user-vote')
-    const savedEmail = localStorage.getItem('birthday-poll-user-email')
+    const savedName = localStorage.getItem('birthday-poll-user-name')
     
-    if (savedVotes) {
+    if (savedRestaurants) {
       try {
-        const votes = JSON.parse(savedVotes)
-        setRestaurants(prev => prev.map(r => ({
-          ...r,
-          votes: votes[r.id] || 0
-        })))
+        const restaurantsData = JSON.parse(savedRestaurants)
+        setRestaurants(restaurantsData)
       } catch (error) {
-        console.error('Error loading votes:', error)
+        console.error('Error loading restaurants:', error)
       }
     }
     
-    // Check if this email has already voted
-    if (savedEmail) {
-      setUserEmail(savedEmail)
-      const emailVoteMap = JSON.parse(localStorage.getItem('birthday-poll-email-votes') || '{}')
-      if (emailVoteMap[savedEmail]) {
-        // This email has already voted
-        setHasVoted(true)
-        setSelectedRestaurant(emailVoteMap[savedEmail])
-        // Also sync with the old format if it exists
-        if (savedVote) {
-          localStorage.setItem('birthday-poll-user-vote', emailVoteMap[savedEmail])
-        }
-      } else if (savedVote) {
-        // Legacy: if we have a vote but no email mapping, create it
-        setHasVoted(true)
-        setSelectedRestaurant(savedVote)
-        emailVoteMap[savedEmail] = savedVote
-        localStorage.setItem('birthday-poll-email-votes', JSON.stringify(emailVoteMap))
-      }
-    } else if (savedVote) {
-      // Legacy: vote exists but no email (shouldn't happen, but handle it)
+    // Check if user has already voted
+    if (savedName && savedVote) {
+      setUserName(savedName)
       setHasVoted(true)
       setSelectedRestaurant(savedVote)
     }
@@ -96,61 +70,58 @@ const BirthdayInvite = () => {
       return // User has already voted, don't allow changes
     }
     
-    // If user already has an email, allow direct voting
-    if (userEmail) {
+    // If user already has a name, allow direct voting
+    if (userName) {
       handleVote(restaurantId)
     } else {
-      // Show email modal first
+      // Show name modal first
       setPendingRestaurantId(restaurantId)
-      setIsEmailModalOpen(true)
+      setIsNameModalOpen(true)
     }
   }
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleNameSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
-    const sanitizedEmail = sanitizeInput(email, 254) // Max email length
+    const sanitizedName = sanitizeInput(name, 100) // Max name length
     
-    if (!sanitizedEmail || sanitizedEmail.trim() === '') {
-      setEmailError('Please enter your email address')
+    if (!sanitizedName || sanitizedName.trim() === '') {
+      setNameError('Please enter your name')
       return
     }
     
-    if (!isValidEmail(sanitizedEmail)) {
-      setEmailError('Please enter a valid email address')
-      return
-    }
+    // Save name first
+    setUserName(sanitizedName.trim())
+    localStorage.setItem('birthday-poll-user-name', sanitizedName.trim())
+    setNameError(null)
     
-    // Save email first
-    setUserEmail(sanitizedEmail)
-    localStorage.setItem('birthday-poll-user-email', sanitizedEmail)
-    setEmailError(null)
-    
-    // Process the pending vote with the email passed directly
+    // Process the pending vote with the name passed directly
     if (pendingRestaurantId) {
-      handleVote(pendingRestaurantId, sanitizedEmail, guestCount)
+      handleVote(pendingRestaurantId, sanitizedName.trim(), guestCount)
       setPendingRestaurantId(null)
     }
     
     // Close modal and clear inputs
-    setIsEmailModalOpen(false)
-    setEmail('')
+    setIsNameModalOpen(false)
+    setName('')
     setGuestCount(0)
   }
 
-  const handleVote = (restaurantId: string, emailOverride?: string, guestCountOverride?: number) => {
+  const handleVote = (restaurantId: string, nameOverride?: string, guestCountOverride?: number) => {
     // Prevent voting if user has already voted
     if (hasVoted) {
       return
     }
     
-    // Use emailOverride if provided, otherwise use userEmail state
-    const emailToUse = emailOverride || userEmail
+    // Use nameOverride if provided, otherwise use userName state
+    const nameToUse = nameOverride || userName
+    const guests = guestCountOverride !== undefined ? guestCountOverride : guestCount
+    const totalPeople = 1 + guests // The voter + their guests
     
-    // Require email before voting
-    if (!emailToUse) {
+    // Require name before voting
+    if (!nameToUse) {
       setPendingRestaurantId(restaurantId)
-      setIsEmailModalOpen(true)
+      setIsNameModalOpen(true)
       return
     }
     
@@ -158,17 +129,20 @@ const BirthdayInvite = () => {
     setRestaurants(prev => {
       const updated = prev.map(r => {
         if (r.id === restaurantId) {
-          return { ...r, votes: r.votes + 1 }
+          // Add the voter's name to the list and increment votes by total people
+          // Display format: "Name (+2)" if they have guests, or just "Name" if no guests
+          const displayName = guests > 0 ? `${nameToUse} (+${guests})` : nameToUse
+          return { 
+            ...r, 
+            votes: r.votes + totalPeople,
+            voters: [...r.voters, displayName]
+          }
         }
         return r
       })
       
-      // Save votes to localStorage after state update
-      const votesMap: Record<string, number> = {}
-      updated.forEach(r => {
-        votesMap[r.id] = r.votes
-      })
-      localStorage.setItem('birthday-poll-votes', JSON.stringify(votesMap))
+      // Save restaurants data to localStorage
+      localStorage.setItem('birthday-poll-restaurants', JSON.stringify(updated))
       
       return updated
     })
@@ -177,88 +151,23 @@ const BirthdayInvite = () => {
     setHasVoted(true)
     setSelectedRestaurant(restaurantId)
     localStorage.setItem('birthday-poll-user-vote', restaurantId)
-    
-    // Get guest count (from override or state)
-    const guests = guestCountOverride !== undefined ? guestCountOverride : guestCount
-    
-    // Also save email-vote mapping to prevent duplicate votes from same email
-    const emailVoteMap = JSON.parse(localStorage.getItem('birthday-poll-email-votes') || '{}')
-    emailVoteMap[emailToUse] = restaurantId
-    localStorage.setItem('birthday-poll-email-votes', JSON.stringify(emailVoteMap))
-    
-    // Save guest count for this vote
-    const guestCountMap = JSON.parse(localStorage.getItem('birthday-poll-guest-counts') || '{}')
-    guestCountMap[emailToUse] = guests
-    localStorage.setItem('birthday-poll-guest-counts', JSON.stringify(guestCountMap))
-
-    // Send email notification (non-blocking, don't wait for response)
-    // Use setTimeout to ensure state has updated
-    setTimeout(() => {
-      const selectedRestaurant = restaurants.find(r => r.id === restaurantId)
-      if (selectedRestaurant) {
-        // Get updated vote count from localStorage
-        const votesMap = JSON.parse(localStorage.getItem('birthday-poll-votes') || '{}')
-        const updatedVoteCount = votesMap[restaurantId] || 0
-        // Calculate all votes excluding "Can't Go" (id: '6')
-        const allVotes = Object.entries(votesMap)
-          .filter(([id]) => id !== '6')
-          .reduce((sum: number, [, count]) => sum + (count as number), 0) as number
-        
-        // Get guest count for this vote
-        const guestCountMap = JSON.parse(localStorage.getItem('birthday-poll-guest-counts') || '{}')
-        const voteGuestCount = guestCountMap[emailToUse] || 0
-        
-        sendVoteNotification({
-          restaurantName: selectedRestaurant.name,
-          voterEmail: emailToUse,
-          restaurantId: restaurantId,
-          totalVotes: updatedVoteCount,
-          allVotesTotal: allVotes,
-          guestCount: voteGuestCount,
-          timestamp: new Date().toISOString(),
-        }).catch(error => {
-          // Silently fail - don't interrupt user experience
-          console.error('Failed to send vote notification:', error)
-        })
-      }
-    }, 100)
   }
 
-  const sendVoteNotification = async (data: {
-    restaurantName: string
-    voterEmail: string
-    restaurantId: string
-    totalVotes: number
-    allVotesTotal?: number
-    guestCount?: number
-    timestamp: string
-  }) => {
-    try {
-      const response = await fetch('/api/send-vote-notification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      return await response.json()
-    } catch (error) {
-      console.error('Error sending vote notification:', error)
-      throw error
-    }
-  }
-
-  const handleCloseEmailModal = () => {
-    setIsEmailModalOpen(false)
+  const handleCloseNameModal = () => {
+    setIsNameModalOpen(false)
     setPendingRestaurantId(null)
-    setEmail('')
-    setEmailError(null)
+    setName('')
+    setNameError(null)
     setGuestCount(0)
+  }
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value
+    const sanitized = sanitizeInput(rawValue, 100)
+    setName(sanitized)
+    if (nameError) {
+      setNameError(null)
+    }
   }
 
   const handleGuestCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -271,15 +180,6 @@ const BirthdayInvite = () => {
       if (!isNaN(num) && num >= 0 && num <= 50) {
         setGuestCount(num)
       }
-    }
-  }
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value
-    const sanitized = sanitizeInput(rawValue, 254)
-    setEmail(sanitized)
-    if (emailError) {
-      setEmailError(null)
     }
   }
 
@@ -499,7 +399,7 @@ const BirthdayInvite = () => {
             <h2 className={`poll-title ${isContentExploding ? 'exploding' : ''}`}>Vote for Your Favorite Restaurant</h2>
             <p className={`poll-description ${isContentExploding ? 'exploding' : ''}`}>
               {hasVoted 
-                ? `You voted for: ${restaurants.find(r => r.id === selectedRestaurant)?.name || 'Unknown'}. Thank you for voting!`
+                ? `You voted for: ${restaurants.find(r => r.id === selectedRestaurant)?.name || 'Unknown'}. Thank you for voting, ${userName}!`
                 : 'Select your preferred restaurant below'
               }
             </p>
@@ -556,21 +456,31 @@ const BirthdayInvite = () => {
                       )}
                     </div>
                     
-                    <div className="restaurant-votes">
-                      <div className="vote-bar-container">
-                        <div 
-                          className="vote-bar"
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                      <div className="vote-count">
-                        <span className="vote-number">{restaurant.votes}</span>
-                        <span className="vote-label">vote{restaurant.votes !== 1 ? 's' : ''}</span>
-                        {percentage > 0 && (
-                          <span className="vote-percentage">({percentage.toFixed(0)}%)</span>
+                      <div className="restaurant-votes">
+                        <div className="vote-bar-container">
+                          <div 
+                            className="vote-bar"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        <div className="vote-count">
+                          <span className="vote-number">{restaurant.votes}</span>
+                          <span className="vote-label">vote{restaurant.votes !== 1 ? 's' : ''}</span>
+                          {percentage > 0 && (
+                            <span className="vote-percentage">({percentage.toFixed(0)}%)</span>
+                          )}
+                        </div>
+                        {/* Display voter names only if user has voted (exclude "Can't Go") */}
+                        {hasVoted && !isCantGo && restaurant.voters && restaurant.voters.length > 0 && (
+                          <div className="voter-names">
+                            {restaurant.voters.map((voter, index) => (
+                              <span key={index} className="voter-name">
+                                {voter}{index < restaurant.voters.length - 1 ? ', ' : ''}
+                              </span>
+                            ))}
+                          </div>
                         )}
                       </div>
-                    </div>
                     
                     {isSelected && (
                       <div className="vote-indicator">✓ Your Vote</div>
@@ -615,44 +525,45 @@ const BirthdayInvite = () => {
         </div>
       )}
 
-      {/* Email Modal */}
-      {isEmailModalOpen && (
-        <div className="email-modal-overlay" onClick={handleCloseEmailModal}>
+      {/* Name Modal */}
+      {isNameModalOpen && (
+        <div className="email-modal-overlay" onClick={handleCloseNameModal}>
           <div className="email-modal" onClick={(e) => e.stopPropagation()}>
             <div className="email-modal-header">
-              <h2 className="email-modal-title">Enter Your Email</h2>
+              <h2 className="email-modal-title">Enter Your Name</h2>
               <button 
                 className="email-modal-close"
-                onClick={handleCloseEmailModal}
+                onClick={handleCloseNameModal}
                 aria-label="Close modal"
               >
                 ×
               </button>
             </div>
-            <form onSubmit={handleEmailSubmit} className="email-modal-form">
+            <form onSubmit={handleNameSubmit} className="email-modal-form">
               <p className="email-modal-description">
-                Please enter your email address to vote
+                Please enter your name to vote
               </p>
               <input
-                type="email"
-                value={email}
-                onChange={handleEmailChange}
-                placeholder="your.email@example.com"
-                className={`email-input ${emailError ? 'error' : ''}`}
+                type="text"
+                value={name}
+                onChange={handleNameChange}
+                placeholder="Your Name"
+                className={`email-input ${nameError ? 'error' : ''}`}
                 autoFocus
                 required
-                aria-label="Email address"
-                aria-invalid={emailError ? 'true' : 'false'}
-                aria-describedby={emailError ? 'email-error' : undefined}
+                maxLength={100}
+                aria-label="Your name"
+                aria-invalid={nameError ? 'true' : 'false'}
+                aria-describedby={nameError ? 'name-error' : undefined}
               />
-              {emailError && (
-                <p id="email-error" className="email-error-message" role="alert">
-                  {emailError}
+              {nameError && (
+                <p id="name-error" className="email-error-message" role="alert">
+                  {nameError}
                 </p>
               )}
               <div className="email-modal-field">
                 <label htmlFor="guest-count" className="email-modal-label">
-                  Number of guests (including yourself)
+                  Number of +1's (guests you're bringing)
                 </label>
                 <input
                   type="number"
@@ -666,13 +577,13 @@ const BirthdayInvite = () => {
                   aria-label="Number of guests"
                 />
                 <p className="email-modal-hint">
-                  Enter 0 if it's just you, or the total number of people (including yourself)
+                  Enter 0 if it's just you, or the number of additional people you're bringing
                 </p>
               </div>
               <div className="email-modal-actions">
                 <button 
                   type="button"
-                  onClick={handleCloseEmailModal}
+                  onClick={handleCloseNameModal}
                   className="email-modal-cancel"
                 >
                   Cancel
