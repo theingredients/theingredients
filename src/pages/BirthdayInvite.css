@@ -383,9 +383,9 @@
 .restaurant-name-container {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 1rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.75rem;
   flex-wrap: wrap;
 }
 
@@ -408,8 +408,19 @@
   font-weight: 500;
   transition: all 0.2s ease;
   white-space: nowrap;
-  padding: 0.25rem 0.5rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 4px;
+  margin-top: 0.5rem;
+  display: inline-block;
+}
+
+.restaurant-link-bottom {
+  margin-top: 1rem;
+  margin-bottom: 0;
+  display: block;
+  text-align: center;
+  width: 100%;
+  padding: 0.75rem 1rem;
 }
 
 .theme-dark .restaurant-link {
@@ -606,7 +617,8 @@
 
   .restaurant-link {
     font-size: 0.85rem;
-    margin-top: 0.25rem;
+    margin-top: 0.75rem;
+    padding: 0.4rem 0.6rem;
   }
 
   .vote-indicator,

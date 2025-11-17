@@ -20,12 +20,13 @@ const BirthdayInvite = () => {
     { id: '3', name: 'Third Window Brewery', description: 'American', votes: 0, voters: [], link: 'https://www.thirdwindowbrewing.com/' },
     { id: '4', name: 'SB Public Market', description: 'American/Mexican/Japanese/Korean', votes: 0, voters: [], link: 'https://www.sbpublicmarket.com/' },
     { id: '5', name: 'M Special', description: 'American', votes: 0, voters: [], link: 'https://mspecialbrewco.com/' },
-    { id: '6', name: 'Cant Go', description: 'but I bought you a coffee', votes: 0, voters: [], link: 'https://www.theingredients.io/coffee' },
+    { id: '6', name: 'Cant Go', description: 'Happy Birthday!', votes: 0, voters: [], link: 'https://www.theingredients.io/coffee' },
   ])
   const [hasVoted, setHasVoted] = useState(false)
   const [selectedRestaurant, setSelectedRestaurant] = useState<string | null>(null)
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
   const [pendingRestaurantId, setPendingRestaurantId] = useState<string | null>(null)
+  const [isCantGoVote, setIsCantGoVote] = useState(false)
   const [name, setName] = useState('')
   const [nameError, setNameError] = useState<string | null>(null)
   const [userName, setUserName] = useState<string | null>(null)
@@ -62,6 +63,34 @@ const BirthdayInvite = () => {
       setHasVoted(true)
       setSelectedRestaurant(savedVote)
     }
+
+    // Expose hidden function to view voting data (for admin/debugging)
+    // Access via: window.getBirthdayPollData() in browser console
+    if (typeof window !== 'undefined') {
+      (window as any).getBirthdayPollData = () => {
+        const restaurantsData = localStorage.getItem('birthday-poll-restaurants')
+        if (restaurantsData) {
+          try {
+            const data = JSON.parse(restaurantsData)
+            console.log('📊 Birthday Poll Voting Data:')
+            console.log(JSON.stringify(data, null, 2))
+            return data
+          } catch (error) {
+            console.error('Error parsing voting data:', error)
+            return null
+          }
+        } else {
+          console.log('No voting data found')
+          return null
+        }
+      }
+      
+      // Also expose as a simple JSON accessor
+      (window as any).birthdayPollData = () => {
+        const restaurantsData = localStorage.getItem('birthday-poll-restaurants')
+        return restaurantsData ? JSON.parse(restaurantsData) : null
+      }
+    }
   }, [])
 
   const handleRestaurantClick = (restaurantId: string) => {
@@ -70,12 +99,15 @@ const BirthdayInvite = () => {
       return // User has already voted, don't allow changes
     }
     
+    const isCantGo = restaurantId === '6'
+    
     // If user already has a name, allow direct voting
     if (userName) {
-      handleVote(restaurantId)
+      handleVote(restaurantId, undefined, isCantGo ? 0 : guestCount)
     } else {
       // Show name modal first
       setPendingRestaurantId(restaurantId)
+      setIsCantGoVote(isCantGo)
       setIsNameModalOpen(true)
     }
   }
@@ -96,8 +128,10 @@ const BirthdayInvite = () => {
     setNameError(null)
     
     // Process the pending vote with the name passed directly
+    // For "Can't Go", always use 0 guests
     if (pendingRestaurantId) {
-      handleVote(pendingRestaurantId, sanitizedName.trim(), guestCount)
+      const guests = isCantGoVote ? 0 : guestCount
+      handleVote(pendingRestaurantId, sanitizedName.trim(), guests)
       setPendingRestaurantId(null)
     }
     
@@ -105,6 +139,7 @@ const BirthdayInvite = () => {
     setIsNameModalOpen(false)
     setName('')
     setGuestCount(0)
+    setIsCantGoVote(false)
   }
 
   const handleVote = (restaurantId: string, nameOverride?: string, guestCountOverride?: number) => {
@@ -159,6 +194,7 @@ const BirthdayInvite = () => {
     setName('')
     setNameError(null)
     setGuestCount(0)
+    setIsCantGoVote(false)
   }
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -393,7 +429,8 @@ const BirthdayInvite = () => {
             Jerome's Birthday Celebration!
           </h1>
           <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>November 21st 2025 - 6:30-7pm start</p>
-          <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>This Scorpio has invited you! Help decide where we should go!</p>
+          <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>This Scorpio has invited you out for dinner! Cast your vote for dinner!</p>
+          <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>PR post dinner!</p>
           
           <div className={`poll-container ${isContentExploding ? 'exploding' : ''}`}>
             <h2 className={`poll-title ${isContentExploding ? 'exploding' : ''}`}>Vote for Your Favorite Restaurant</h2>
@@ -438,55 +475,47 @@ const BirthdayInvite = () => {
                     <div className="restaurant-info">
                       <div className="restaurant-name-container">
                         <h3 className="restaurant-name">{restaurant.name}</h3>
-                        {restaurant.link && (
-                          <a
-                            href={restaurant.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="restaurant-link"
-                            onClick={(e) => e.stopPropagation()}
-                            aria-label={`Visit ${restaurant.name} website`}
-                          >
-                            Visit Website ↗
-                          </a>
-                        )}
                       </div>
                       {restaurant.description && (
                         <p className="restaurant-description">{restaurant.description}</p>
                       )}
                     </div>
                     
-                      <div className="restaurant-votes">
-                        <div className="vote-bar-container">
-                          <div 
-                            className="vote-bar"
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                        <div className="vote-count">
-                          <span className="vote-number">{restaurant.votes}</span>
-                          <span className="vote-label">vote{restaurant.votes !== 1 ? 's' : ''}</span>
-                          {percentage > 0 && (
-                            <span className="vote-percentage">({percentage.toFixed(0)}%)</span>
-                          )}
-                        </div>
-                        {/* Display voter names only if user has voted (exclude "Can't Go") */}
-                        {hasVoted && !isCantGo && restaurant.voters && restaurant.voters.length > 0 && (
-                          <div className="voter-names">
-                            {restaurant.voters.map((voter, index) => (
-                              <span key={index} className="voter-name">
-                                {voter}{index < restaurant.voters.length - 1 ? ', ' : ''}
-                              </span>
-                            ))}
-                          </div>
+                    <div className="restaurant-votes">
+                      <div className="vote-bar-container">
+                        <div 
+                          className="vote-bar"
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                      <div className="vote-count">
+                        <span className="vote-number">{restaurant.votes}</span>
+                        <span className="vote-label">vote{restaurant.votes !== 1 ? 's' : ''}</span>
+                        {percentage > 0 && (
+                          <span className="vote-percentage">({percentage.toFixed(0)}%)</span>
                         )}
                       </div>
+                      {/* Voter names are not displayed - kept for internal tracking only */}
+                    </div>
                     
                     {isSelected && (
                       <div className="vote-indicator">✓ Your Vote</div>
                     )}
                     {isWinning && maxVotes > 0 && (
                       <div className="winning-indicator">🏆 Leading</div>
+                    )}
+                    
+                    {restaurant.link && (
+                      <a
+                        href={restaurant.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="restaurant-link restaurant-link-bottom"
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label={`Visit ${restaurant.name} website`}
+                      >
+                        Visit Website ↗
+                      </a>
                     )}
                   </div>
                 )
@@ -561,25 +590,28 @@ const BirthdayInvite = () => {
                   {nameError}
                 </p>
               )}
-              <div className="email-modal-field">
-                <label htmlFor="guest-count" className="email-modal-label">
-                  Number of +1's (guests you're bringing)
-                </label>
-                <input
-                  type="number"
-                  id="guest-count"
-                  value={guestCount || ''}
-                  onChange={handleGuestCountChange}
-                  placeholder="0"
-                  min="0"
-                  max="50"
-                  className="email-input guest-count-input"
-                  aria-label="Number of guests"
-                />
-                <p className="email-modal-hint">
-                  Enter 0 if it's just you, or the number of additional people you're bringing
-                </p>
-              </div>
+              {/* Only show guest count for non-"Can't Go" votes */}
+              {!isCantGoVote && (
+                <div className="email-modal-field">
+                  <label htmlFor="guest-count" className="email-modal-label">
+                    Number of +1's (guests you're bringing)
+                  </label>
+                  <input
+                    type="number"
+                    id="guest-count"
+                    value={guestCount || ''}
+                    onChange={handleGuestCountChange}
+                    placeholder="0"
+                    min="0"
+                    max="50"
+                    className="email-input guest-count-input"
+                    aria-label="Number of guests"
+                  />
+                  <p className="email-modal-hint">
+                    Enter 0 if it's just you, or the number of additional people you're bringing
+                  </p>
+                </div>
+              )}
               <div className="email-modal-actions">
                 <button 
                   type="button"
