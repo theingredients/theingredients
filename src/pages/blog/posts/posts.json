@@ -1,0 +1,44 @@
+{
+  "posts": [
+    {
+      "id": "2024-01-20-weather-feature",
+      "title": "New Weather Feature Now Live",
+      "slug": "weather-feature",
+      "excerpt": "Click on the time display to see current weather conditions, location, and tide information if you're near the ocean.",
+      "content": "<p>We've just launched a new weather feature on the home page!</p><h2>How to Use It</h2><p>Simply click or tap on the time display, and you'll see:</p><ul><li>Current temperature (in both Fahrenheit and Celsius)</li><li>Weather conditions with icons</li><li>Your current location</li><li>Tide information (if you're near the ocean)</li></ul><h2>Privacy</h2><p>Your location is only used to fetch weather data and is not stored or shared. The feature uses your browser's geolocation API with your permission.</p>",
+      "author": "The Ingredients Collective",
+      "publishedDate": "2024-01-20T14:00:00Z",
+      "tags": ["feature", "weather", "update"],
+      "category": "Updates",
+      "readTime": 2,
+      "published": true
+    },
+    {
+      "id": "2024-01-15-coffee-prices",
+      "title": "Adding Drink Prices to Local Coffee Shops",
+      "slug": "coffee-prices",
+      "excerpt": "We're working on a new feature to show drink prices at local coffee shops. This will help users make informed decisions about where to get their coffee.",
+      "content": "<p>We're excited to announce that we're working on a new feature for The Ingredients: drink prices at local coffee shops!</p><h2>What's Coming</h2><p>Soon, when you search for local coffee roasters, you'll be able to see the prices for popular drinks like lattes, mochas, and vanilla lattes. This will help you compare prices and find the best value.</p><h2>How It Works</h2><p>The feature will display prices in an expandable section on each coffee shop card. You'll be able to see prices for common drinks, and even contribute prices if you visit a shop.</p><p>Stay tuned for updates!</p>",
+      "author": "The Ingredients Collective",
+      "publishedDate": "2024-01-15T10:00:00Z",
+      "tags": ["feature", "coffee", "development"],
+      "category": "Updates",
+      "readTime": 3,
+      "published": true
+    },
+    {
+      "id": "2024-01-10-welcome",
+      "title": "Welcome to The Ingredients Blog",
+      "slug": "welcome",
+      "excerpt": "Welcome to our blog! Here we'll share updates, features, and thoughts about The Ingredients project.",
+      "content": "<p>Welcome to The Ingredients blog!</p><p>This is where we'll share:</p><ul><li>Feature announcements</li><li>Development updates</li><li>Tips and tricks</li><li>Behind-the-scenes content</li></ul><p>Stay tuned for more posts!</p>",
+      "author": "The Ingredients Collective",
+      "publishedDate": "2024-01-10T09:00:00Z",
+      "tags": ["announcement", "welcome"],
+      "category": "General",
+      "readTime": 1,
+      "published": true
+    }
+  ]
+}
+

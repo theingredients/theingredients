@@ -9,7 +9,9 @@ import More from './pages/More'
 import Bored from './pages/Bored'
 import Jokes from './pages/Jokes'
 import Blog from './pages/blog/Blog'
+import BlogPost from './pages/blog/BlogPost'
 import Coffee from './pages/Coffee'
+import BirthdayInvite from './pages/BirthdayInvite'
 
 function App() {
   return (
@@ -24,7 +26,9 @@ function App() {
           <Route path="/bored" element={<Bored />} />
           <Route path="/jokes" element={<Jokes />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/coffee" element={<Coffee />} />
+          <Route path="/jda11202025" element={<BirthdayInvite />} />
         </Routes>
       </Router>
       <Analytics

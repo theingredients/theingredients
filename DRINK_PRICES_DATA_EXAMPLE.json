@@ -1,0 +1,87 @@
+{
+  "coffeeShops": {
+    "handlebar-coffee-santa-barbara": {
+      "name": "Handlebar Coffee",
+      "location": {
+        "lat": 34.4208,
+        "lon": -119.6982
+      },
+      "drinkPrices": [
+        {
+          "name": "Latte",
+          "price": 5.00,
+          "size": "12oz",
+          "currency": "USD"
+        },
+        {
+          "name": "Mocha",
+          "price": 5.50,
+          "size": "12oz",
+          "currency": "USD"
+        },
+        {
+          "name": "Vanilla Latte",
+          "price": 6.00,
+          "size": "12oz",
+          "currency": "USD"
+        },
+        {
+          "name": "Cappuccino",
+          "price": 5.00,
+          "size": "12oz",
+          "currency": "USD"
+        },
+        {
+          "name": "Americano",
+          "price": 4.50,
+          "size": "12oz",
+          "currency": "USD"
+        },
+        {
+          "name": "Espresso",
+          "price": 3.50,
+          "size": "2oz",
+          "currency": "USD"
+        }
+      ],
+      "priceSource": "user",
+      "lastUpdated": "2024-01-15T10:30:00Z"
+    },
+    "dune-coffee-roasters-santa-barbara": {
+      "name": "Dune Coffee Roasters",
+      "location": {
+        "lat": 34.4194,
+        "lon": -119.6992
+      },
+      "drinkPrices": [
+        {
+          "name": "Latte",
+          "price": 5.50,
+          "size": "12oz",
+          "currency": "USD"
+        },
+        {
+          "name": "Mocha",
+          "price": 6.00,
+          "size": "12oz",
+          "currency": "USD"
+        },
+        {
+          "name": "Cortado",
+          "price": 4.50,
+          "size": "8oz",
+          "currency": "USD"
+        }
+      ],
+      "priceSource": "user",
+      "lastUpdated": "2024-01-10T14:20:00Z"
+    }
+  },
+  "metadata": {
+    "version": "1.0",
+    "lastUpdated": "2024-01-15T10:30:00Z",
+    "currency": "USD",
+    "defaultSize": "12oz"
+  }
+}
+
