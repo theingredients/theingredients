@@ -1,0 +1,245 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { createClient } from 'redis'
+
+interface Restaurant {
+  id: string
+  name: string
+  description?: string
+  votes: number
+  voters: string[] // Array of voter names with guest counts
+  link?: string
+}
+
+interface VoteData {
+  restaurants: Restaurant[]
+  lastUpdated: number
+}
+
+interface VoteRequest {
+  restaurantId: string
+  name: string
+  guestCount?: number
+}
+
+// Default poll data structure
+const DEFAULT_POLL_DATA: VoteData = {
+  restaurants: [
+    { id: '1', name: `Arnoldi's`, description: 'Italian cuisine', votes: 0, voters: [], link: 'https://www.arnoldis.com/' },
+    { id: '2', name: 'La Paloma', description: 'Mexican cuisine', votes: 0, voters: [], link: 'https://lapalomasb.com/' },
+    { id: '3', name: 'Third Window Brewery', description: 'American', votes: 0, voters: [], link: 'https://www.thirdwindowbrewing.com/' },
+    { id: '4', name: 'SB Public Market', description: 'American/Mexican/Japanese/Korean', votes: 0, voters: [], link: 'https://www.sbpublicmarket.com/' },
+    { id: '5', name: 'M Special', description: 'American', votes: 0, voters: [], link: 'https://mspecialbrewco.com/' },
+    { id: '6', name: 'Cant Go', description: 'Happy Birthday!', votes: 0, voters: [], link: 'https://www.theingredients.io/coffee' },
+  ],
+  lastUpdated: Date.now()
+}
+
+// KV keys
+const POLL_DATA_KEY = 'birthday-poll:data'
+const VOTER_REGISTRY_KEY = 'birthday-poll:voters'
+
+// Initialize Redis client (reused across requests)
+let redisClient: ReturnType<typeof createClient> | null = null
+
+// Get or create Redis client
+async function getRedisClient() {
+  if (!redisClient) {
+    // Vercel Redis provides KV_REST_API_URL and KV_REST_API_TOKEN
+    // The redis package can use these, but we need to construct the URL properly
+    const redisUrl = process.env.KV_REST_API_URL || process.env.REDIS_URL
+    const redisToken = process.env.KV_REST_API_TOKEN
+    
+    if (redisUrl) {
+      redisClient = createClient({
+        url: redisUrl,
+        ...(redisToken && { password: redisToken }),
+      })
+    } else {
+      // Fallback: try to create client without explicit config (may use default env vars)
+      redisClient = createClient()
+    }
+    
+    redisClient.on('error', (err) => console.error('Redis Client Error', err))
+    
+    if (!redisClient.isOpen) {
+      await redisClient.connect()
+    }
+  }
+  return redisClient
+}
+
+// Helper function to get poll data from Redis
+async function getPollData(): Promise<VoteData> {
+  try {
+    const redis = await getRedisClient()
+    const data = await redis.get(POLL_DATA_KEY)
+    if (data) {
+      return JSON.parse(data as string) as VoteData
+    }
+    // Initialize with default data if not found
+    await savePollData(DEFAULT_POLL_DATA)
+    return DEFAULT_POLL_DATA
+  } catch (error) {
+    console.error('Error getting poll data from Redis:', error)
+    // Return default data if Redis fails
+    return DEFAULT_POLL_DATA
+  }
+}
+
+// Helper function to save poll data to Redis
+async function savePollData(data: VoteData): Promise<void> {
+  try {
+    const redis = await getRedisClient()
+    await redis.set(POLL_DATA_KEY, JSON.stringify(data))
+  } catch (error) {
+    console.error('Error saving poll data to Redis:', error)
+    throw error
+  }
+}
+
+// Helper function to check if voter has already voted
+async function hasVoted(name: string): Promise<boolean> {
+  try {
+    const redis = await getRedisClient()
+    const voterRegistryData = await redis.get(VOTER_REGISTRY_KEY)
+    const voterRegistry = voterRegistryData ? JSON.parse(voterRegistryData as string) as Record<string, string> : {}
+    return name in voterRegistry
+  } catch (error) {
+    console.error('Error checking voter registry:', error)
+    return false
+  }
+}
+
+// Helper function to get previous vote for a voter
+async function getPreviousVote(name: string): Promise<string | null> {
+  try {
+    const redis = await getRedisClient()
+    const voterRegistryData = await redis.get(VOTER_REGISTRY_KEY)
+    const voterRegistry = voterRegistryData ? JSON.parse(voterRegistryData as string) as Record<string, string> : {}
+    return voterRegistry[name] || null
+  } catch (error) {
+    console.error('Error getting previous vote:', error)
+    return null
+  }
+}
+
+// Helper function to register a voter
+async function registerVoter(name: string, restaurantId: string): Promise<void> {
+  try {
+    const redis = await getRedisClient()
+    const voterRegistryData = await redis.get(VOTER_REGISTRY_KEY)
+    const voterRegistry = voterRegistryData ? JSON.parse(voterRegistryData as string) as Record<string, string> : {}
+    voterRegistry[name] = restaurantId
+    await redis.set(VOTER_REGISTRY_KEY, JSON.stringify(voterRegistry))
+  } catch (error) {
+    console.error('Error registering voter:', error)
+    throw error
+  }
+}
+
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse
+) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end()
+  }
+
+  // GET: Retrieve current poll data
+  if (req.method === 'GET') {
+    try {
+      const pollData = await getPollData()
+      return res.status(200).json(pollData)
+    } catch (error) {
+      console.error('Error getting poll data:', error)
+      return res.status(500).json({ 
+        error: 'Failed to get poll data' 
+      })
+    }
+  }
+
+  // POST: Submit a vote
+  if (req.method === 'POST') {
+    try {
+      const { restaurantId, name, guestCount = 0 }: VoteRequest = req.body
+
+      // Validate input
+      if (!restaurantId || !name || typeof name !== 'string' || name.trim() === '') {
+        return res.status(400).json({ 
+          error: 'Restaurant ID and name are required' 
+        })
+      }
+
+      const sanitizedName = name.trim()
+      const guests = Math.max(0, Math.min(50, Math.floor(guestCount || 0))) // Clamp between 0-50
+      const totalPeople = 1 + guests
+
+      // Get current poll data
+      const pollData = await getPollData()
+
+      // Check if this person has already voted
+      if (await hasVoted(sanitizedName)) {
+        const previousVote = await getPreviousVote(sanitizedName)
+        const restaurantName = pollData.restaurants.find(r => r.id === previousVote)?.name || 'a restaurant'
+        return res.status(409).json({ 
+          error: 'You have already voted',
+          previousVote: previousVote,
+          message: `You already voted for ${restaurantName}`
+        })
+      }
+
+      // Find the restaurant
+      const restaurant = pollData.restaurants.find(r => r.id === restaurantId)
+      if (!restaurant) {
+        return res.status(404).json({ 
+          error: 'Restaurant not found' 
+        })
+      }
+
+      // Update the vote
+      const updatedRestaurants = pollData.restaurants.map(r => {
+        if (r.id === restaurantId) {
+          const displayName = guests > 0 ? `${sanitizedName} (+${guests})` : sanitizedName
+          return {
+            ...r,
+            votes: r.votes + totalPeople,
+            voters: [...r.voters, displayName]
+          }
+        }
+        return r
+      })
+
+      // Update poll data
+      const updatedPollData: VoteData = {
+        restaurants: updatedRestaurants,
+        lastUpdated: Date.now()
+      }
+
+      // Save to KV
+      await savePollData(updatedPollData)
+
+      // Register the voter
+      await registerVoter(sanitizedName, restaurantId)
+
+      return res.status(200).json({
+        success: true,
+        message: 'Vote recorded successfully',
+        pollData: updatedPollData
+      })
+    } catch (error) {
+      console.error('Error submitting vote:', error)
+      return res.status(500).json({ 
+        error: 'Failed to submit vote',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
+
+  return res.status(405).json({ error: 'Method not allowed' })
+}
+

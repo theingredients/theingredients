@@ -42,22 +42,52 @@ const BirthdayInvite = () => {
   const pressStartTimeRef = useRef<number | null>(null)
   const fireworkIdCounterRef = useRef<number>(0)
 
-  // Load votes from localStorage on mount
+  // Load votes from API and localStorage on mount
   useEffect(() => {
-    const savedRestaurants = localStorage.getItem('birthday-poll-restaurants')
+    const loadPollData = async () => {
+      try {
+        // First, try to load from API (server-side storage)
+        const response = await fetch('/api/birthday-poll')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.restaurants && data.restaurants.length > 0) {
+            setRestaurants(data.restaurants)
+            // Also save to localStorage as backup
+            localStorage.setItem('birthday-poll-restaurants', JSON.stringify(data.restaurants))
+          }
+        } else {
+          // If API fails, fall back to localStorage
+          const savedRestaurants = localStorage.getItem('birthday-poll-restaurants')
+          if (savedRestaurants) {
+            try {
+              const restaurantsData = JSON.parse(savedRestaurants)
+              setRestaurants(restaurantsData)
+            } catch (error) {
+              console.error('Error loading restaurants from localStorage:', error)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading poll data from API:', error)
+        // Fall back to localStorage
+        const savedRestaurants = localStorage.getItem('birthday-poll-restaurants')
+        if (savedRestaurants) {
+          try {
+            const restaurantsData = JSON.parse(savedRestaurants)
+            setRestaurants(restaurantsData)
+          } catch (err) {
+            console.error('Error loading restaurants from localStorage:', err)
+          }
+        }
+      }
+    }
+
+    loadPollData()
+
+    // Check if user has already voted (from localStorage)
     const savedVote = localStorage.getItem('birthday-poll-user-vote')
     const savedName = localStorage.getItem('birthday-poll-user-name')
     
-    if (savedRestaurants) {
-      try {
-        const restaurantsData = JSON.parse(savedRestaurants)
-        setRestaurants(restaurantsData)
-      } catch (error) {
-        console.error('Error loading restaurants:', error)
-      }
-    }
-    
-    // Check if user has already voted
     if (savedName && savedVote) {
       setUserName(savedName)
       setHasVoted(true)
@@ -67,12 +97,26 @@ const BirthdayInvite = () => {
     // Expose hidden function to view voting data (for admin/debugging)
     // Access via: window.getBirthdayPollData() in browser console
     if (typeof window !== 'undefined') {
-      (window as any).getBirthdayPollData = () => {
+      (window as any).getBirthdayPollData = async () => {
+        try {
+          // Try to fetch from API first
+          const response = await fetch('/api/birthday-poll')
+          if (response.ok) {
+            const data = await response.json()
+            console.log('📊 Birthday Poll Voting Data (from API):')
+            console.log(JSON.stringify(data, null, 2))
+            return data
+          }
+        } catch (error) {
+          console.warn('Failed to fetch from API, trying localStorage:', error)
+        }
+        
+        // Fall back to localStorage
         const restaurantsData = localStorage.getItem('birthday-poll-restaurants')
         if (restaurantsData) {
           try {
             const data = JSON.parse(restaurantsData)
-            console.log('📊 Birthday Poll Voting Data:')
+            console.log('📊 Birthday Poll Voting Data (from localStorage):')
             console.log(JSON.stringify(data, null, 2))
             return data
           } catch (error) {
@@ -85,8 +129,17 @@ const BirthdayInvite = () => {
         }
       }
       
-      // Also expose as a simple JSON accessor
-      (window as any).birthdayPollData = () => {
+      // Also expose as a simple JSON accessor (async)
+      (window as any).birthdayPollData = async () => {
+        try {
+          const response = await fetch('/api/birthday-poll')
+          if (response.ok) {
+            return await response.json()
+          }
+        } catch (error) {
+          console.warn('Failed to fetch from API, trying localStorage:', error)
+        }
+        
         const restaurantsData = localStorage.getItem('birthday-poll-restaurants')
         return restaurantsData ? JSON.parse(restaurantsData) : null
       }
@@ -142,7 +195,7 @@ const BirthdayInvite = () => {
     setIsCantGoVote(false)
   }
 
-  const handleVote = (restaurantId: string, nameOverride?: string, guestCountOverride?: number) => {
+  const handleVote = async (restaurantId: string, nameOverride?: string, guestCountOverride?: number) => {
     // Prevent voting if user has already voted
     if (hasVoted) {
       return
@@ -151,7 +204,6 @@ const BirthdayInvite = () => {
     // Use nameOverride if provided, otherwise use userName state
     const nameToUse = nameOverride || userName
     const guests = guestCountOverride !== undefined ? guestCountOverride : guestCount
-    const totalPeople = 1 + guests // The voter + their guests
     
     // Require name before voting
     if (!nameToUse) {
@@ -160,32 +212,54 @@ const BirthdayInvite = () => {
       return
     }
     
-    // Record the vote
-    setRestaurants(prev => {
-      const updated = prev.map(r => {
-        if (r.id === restaurantId) {
-          // Add the voter's name to the list and increment votes by total people
-          // Display format: "Name (+2)" if they have guests, or just "Name" if no guests
-          const displayName = guests > 0 ? `${nameToUse} (+${guests})` : nameToUse
-          return { 
-            ...r, 
-            votes: r.votes + totalPeople,
-            voters: [...r.voters, displayName]
-          }
-        }
-        return r
+    try {
+      // Submit vote to API
+      const response = await fetch('/api/birthday-poll', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          restaurantId,
+          name: nameToUse,
+          guestCount: guests,
+        }),
       })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        if (response.status === 409) {
+          // User already voted
+          alert(errorData.message || 'You have already voted')
+          setHasVoted(true)
+          if (errorData.previousVote) {
+            setSelectedRestaurant(errorData.previousVote)
+          }
+          return
+        }
+        throw new Error(errorData.error || 'Failed to submit vote')
+      }
+
+      const result = await response.json()
       
-      // Save restaurants data to localStorage
-      localStorage.setItem('birthday-poll-restaurants', JSON.stringify(updated))
+      // Update local state with server response
+      if (result.pollData && result.pollData.restaurants) {
+        setRestaurants(result.pollData.restaurants)
+        // Also save to localStorage as backup
+        localStorage.setItem('birthday-poll-restaurants', JSON.stringify(result.pollData.restaurants))
+      }
       
-      return updated
-    })
-    
-    // Mark as voted and save to localStorage
-    setHasVoted(true)
-    setSelectedRestaurant(restaurantId)
-    localStorage.setItem('birthday-poll-user-vote', restaurantId)
+      // Mark as voted and save to localStorage
+      setHasVoted(true)
+      setSelectedRestaurant(restaurantId)
+      localStorage.setItem('birthday-poll-user-vote', restaurantId)
+      localStorage.setItem('birthday-poll-user-name', nameToUse)
+    } catch (error) {
+      console.error('Error submitting vote:', error)
+      alert('Failed to submit vote. Please try again.')
+      // Optionally fall back to localStorage-only voting
+      // For now, we'll just show an error
+    }
   }
 
   const handleCloseNameModal = () => {
