@@ -11,18 +11,45 @@ export default async function handler(
   }
 
   try {
-    const redisUrl = process.env.KV_REST_API_URL || process.env.REDIS_URL
-    const redisToken = process.env.KV_REST_API_TOKEN
+    // Check for various possible Redis environment variable names
+    const redisUrl = 
+      process.env.KV_REST_API_URL || 
+      process.env.REDIS_URL || 
+      process.env.UPSTASH_REDIS_REST_URL ||
+      process.env.REDIS_REST_URL
+    
+    const redisToken = 
+      process.env.KV_REST_API_TOKEN || 
+      process.env.REDIS_PASSWORD || 
+      process.env.UPSTASH_REDIS_REST_TOKEN ||
+      process.env.REDIS_REST_TOKEN
+
+    // Get all Redis-related environment variables for debugging
+    const redisEnvVars = Object.keys(process.env).filter(key => 
+      key.includes('REDIS') || key.includes('KV') || key.includes('UPSTASH')
+    ).reduce((acc, key) => {
+      acc[key] = process.env[key] ? 'set (hidden)' : 'not set'
+      return acc
+    }, {} as Record<string, string>)
 
     if (!redisUrl) {
       return res.status(500).json({
         error: 'Redis URL not configured',
-        message: 'KV_REST_API_URL or REDIS_URL environment variable is missing',
-        envVars: {
-          hasKV_REST_API_URL: !!process.env.KV_REST_API_URL,
-          hasREDIS_URL: !!process.env.REDIS_URL,
-          hasKV_REST_API_TOKEN: !!process.env.KV_REST_API_TOKEN,
-        }
+        message: 'No Redis URL environment variable found. Please check your Vercel project settings.',
+        checkedVariables: [
+          'KV_REST_API_URL',
+          'REDIS_URL',
+          'UPSTASH_REDIS_REST_URL',
+          'REDIS_REST_URL'
+        ],
+        foundEnvVars: redisEnvVars,
+        instructions: [
+          '1. Go to your Vercel project dashboard',
+          '2. Navigate to Storage → Redis (or the Redis provider you selected)',
+          '3. Make sure Redis is connected to your project',
+          '4. Check Settings → Environment Variables for Redis-related variables',
+          '5. If variables are missing, try disconnecting and reconnecting Redis'
+        ]
       })
     }
 
@@ -66,7 +93,14 @@ export default async function handler(
       connection: {
         url: redisUrl ? 'configured' : 'missing',
         token: redisToken ? 'configured' : 'missing',
-      }
+        urlSource: redisUrl === process.env.KV_REST_API_URL ? 'KV_REST_API_URL' :
+                   redisUrl === process.env.REDIS_URL ? 'REDIS_URL' :
+                   redisUrl === process.env.UPSTASH_REDIS_REST_URL ? 'UPSTASH_REDIS_REST_URL' :
+                   redisUrl === process.env.REDIS_REST_URL ? 'REDIS_REST_URL' : 'unknown',
+      },
+      allRedisEnvVars: Object.keys(process.env).filter(key => 
+        key.includes('REDIS') || key.includes('KV') || key.includes('UPSTASH')
+      )
     })
   } catch (error) {
     console.error('Redis test error:', error)

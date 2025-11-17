@@ -7,6 +7,12 @@
 
 .birthday-title-interactive {
   transition: transform 0.1s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .birthday-title-interactive:active {
@@ -27,16 +33,17 @@
 
 .firework {
   position: absolute;
-  width: calc(12px * var(--particle-size, 1));
-  height: calc(12px * var(--particle-size, 1));
+  width: calc(10px * var(--particle-size, 1));
+  height: calc(10px * var(--particle-size, 1));
   border-radius: 50%;
   background: radial-gradient(circle, #fff 0%, transparent 70%);
   box-shadow: 
-    0 0 calc(15px * var(--particle-size, 1)) currentColor,
-    0 0 calc(30px * var(--particle-size, 1)) currentColor,
-    0 0 calc(45px * var(--particle-size, 1)) currentColor,
-    0 0 calc(60px * var(--particle-size, 1)) currentColor;
-  animation: firework-explode 4s ease-out forwards;
+    0 0 calc(12px * var(--particle-size, 1)) currentColor,
+    0 0 calc(24px * var(--particle-size, 1)) currentColor,
+    0 0 calc(36px * var(--particle-size, 1)) currentColor;
+  animation: firework-explode 2.5s ease-out forwards;
+  will-change: transform, opacity;
+  transform: translateZ(0); /* Force GPU acceleration */
 }
 
 .firework:nth-child(3n) {
@@ -73,27 +80,30 @@
 
 @keyframes firework-explode {
   0% {
-    transform: translate(0, 0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
     opacity: 1;
   }
   30% {
-    transform: translate(
-      calc(var(--random-x, 0) * 150px * var(--particle-size, 1)),
-      calc(var(--random-y, 0) * 150px * var(--particle-size, 1))
-    ) scale(1.8);
+    transform: translate3d(
+      calc(var(--random-x, 0) * 120px * var(--particle-size, 1)),
+      calc(var(--random-y, 0) * 120px * var(--particle-size, 1)),
+      0
+    ) scale(1.5);
     opacity: 0.9;
   }
   60% {
-    transform: translate(
-      calc(var(--random-x, 0) * 250px * var(--particle-size, 1)),
-      calc(var(--random-y, 0) * 250px * var(--particle-size, 1))
-    ) scale(1.2);
-    opacity: 0.6;
+    transform: translate3d(
+      calc(var(--random-x, 0) * 200px * var(--particle-size, 1)),
+      calc(var(--random-y, 0) * 200px * var(--particle-size, 1)),
+      0
+    ) scale(1);
+    opacity: 0.5;
   }
   100% {
-    transform: translate(
-      calc(var(--random-x, 0) * 400px * var(--particle-size, 1)),
-      calc(var(--random-y, 0) * 400px * var(--particle-size, 1))
+    transform: translate3d(
+      calc(var(--random-x, 0) * 300px * var(--particle-size, 1)),
+      calc(var(--random-y, 0) * 300px * var(--particle-size, 1)),
+      0
     ) scale(0);
     opacity: 0;
   }
@@ -108,41 +118,40 @@
 
 @keyframes content-explode {
   0% {
-    transform: translate(0, 0) rotate(0deg) scale(1);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
     opacity: 1;
-    filter: blur(0px);
   }
   20% {
-    transform: translate(
-      calc(var(--explode-x, 0) * 50px),
-      calc(var(--explode-y, 0) * 50px)
-    ) rotate(calc(var(--explode-rotation, 0) * 45deg)) scale(1.1);
+    transform: translate3d(
+      calc(var(--explode-x, 0) * 40px),
+      calc(var(--explode-y, 0) * 40px),
+      0
+    ) rotate(calc(var(--explode-rotation, 0) * 45deg)) scale(1.05);
     opacity: 0.9;
-    filter: blur(1px);
   }
   50% {
-    transform: translate(
-      calc(var(--explode-x, 0) * 150px),
-      calc(var(--explode-y, 0) * 150px)
+    transform: translate3d(
+      calc(var(--explode-x, 0) * 120px),
+      calc(var(--explode-y, 0) * 120px),
+      0
     ) rotate(calc(var(--explode-rotation, 0) * 180deg)) scale(0.8);
-    opacity: 0.6;
-    filter: blur(3px);
+    opacity: 0.5;
   }
   80% {
-    transform: translate(
-      calc(var(--explode-x, 0) * 300px),
-      calc(var(--explode-y, 0) * 300px)
-    ) rotate(calc(var(--explode-rotation, 0) * 360deg)) scale(0.5);
-    opacity: 0.3;
-    filter: blur(5px);
+    transform: translate3d(
+      calc(var(--explode-x, 0) * 250px),
+      calc(var(--explode-y, 0) * 250px),
+      0
+    ) rotate(calc(var(--explode-rotation, 0) * 360deg)) scale(0.4);
+    opacity: 0.2;
   }
   100% {
-    transform: translate(
-      calc(var(--explode-x, 0) * 500px),
-      calc(var(--explode-y, 0) * 500px)
+    transform: translate3d(
+      calc(var(--explode-x, 0) * 400px),
+      calc(var(--explode-y, 0) * 400px),
+      0
     ) rotate(calc(var(--explode-rotation, 0) * 540deg)) scale(0);
     opacity: 0;
-    filter: blur(10px);
   }
 }
 

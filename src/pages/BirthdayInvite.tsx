@@ -295,20 +295,36 @@ const BirthdayInvite = () => {
 
   // Fireworks easter egg handlers
   const createFirework = (size: number = 1) => {
+    // Detect mobile for reduced particle count
+    const isMobile = window.innerWidth <= 768
+    const baseParticleCount = isMobile ? 12 : 20 // Reduced from 50
     const id = fireworkIdCounterRef.current++
     const centerX = 50 // Center of screen
     const centerY = 50
-    const particleCount = Math.floor(50 * size)
+    // Cap size at 2x for mobile, 3x for desktop (reduced from 4x)
+    const cappedSize = isMobile ? Math.min(size, 2) : Math.min(size, 3)
+    const particleCount = Math.floor(baseParticleCount * cappedSize)
+    
+    // Limit total particles to prevent memory issues
+    setFireworkParticles(prev => {
+      const maxParticles = isMobile ? 60 : 120 // Max total particles
+      if (prev.length >= maxParticles) {
+        // Remove oldest particles if we're at the limit
+        const toRemove = prev.length - maxParticles + particleCount
+        return prev.slice(toRemove)
+      }
+      return prev
+    })
     
     const particles = Array.from({ length: particleCount }).map((_, i) => {
       const angle = (Math.PI * 2 * i) / particleCount
-      const distance = 100 * size + Math.random() * 50 * size
+      const distance = 80 * cappedSize + Math.random() * 40 * cappedSize // Reduced distance
       const randomX = Math.cos(angle) * distance
       const randomY = Math.sin(angle) * distance
       
       return {
         id: id * 1000 + i,
-        size: size,
+        size: cappedSize,
         x: centerX,
         y: centerY,
         randomX: randomX / 100,
@@ -318,22 +334,25 @@ const BirthdayInvite = () => {
     
     setFireworkParticles(prev => [...prev, ...particles])
     
-    // Remove particles after animation completes (4 seconds)
+    // Remove particles after animation completes (reduced to 2.5 seconds)
     setTimeout(() => {
       setFireworkParticles(prev => prev.filter(p => Math.floor(p.id / 1000) !== id))
-    }, 4000)
+    }, 2500)
   }
 
   const startFireworkCycle = () => {
+    const isMobile = window.innerWidth <= 768
     setShowFireworks(true)
     createFirework(1)
     
-    // Keep creating fireworks while holding
+    // Keep creating fireworks while holding (slower interval for mobile)
+    const interval = isMobile ? 600 : 400 // Reduced frequency
     fireworkIntervalRef.current = setInterval(() => {
       if (isPressingTitleRef.current && pressStartTimeRef.current) {
         const holdDuration = (Date.now() - pressStartTimeRef.current) / 1000
-        // Size increases with hold duration: 1x at 1s, 2x at 3s, 3x at 5s, max 4x
-        const size = Math.min(1 + (holdDuration - 1) / 2, 4)
+        // Size increases more slowly: 1x at 1s, 1.5x at 2s, 2x at 3s, max 2.5x for mobile, 3x for desktop
+        const maxSize = isMobile ? 2.5 : 3
+        const size = Math.min(1 + (holdDuration - 1) / 2, maxSize)
         createFirework(size)
       } else {
         if (fireworkIntervalRef.current) {
@@ -341,7 +360,7 @@ const BirthdayInvite = () => {
           fireworkIntervalRef.current = null
         }
       }
-    }, 300) // Create new firework every 300ms
+    }, interval)
     
     // Trigger content explosion after 5 seconds total (4 seconds after initial firework)
     contentExplodeTimerRef.current = setTimeout(() => {
@@ -498,7 +517,15 @@ const BirthdayInvite = () => {
             onTouchStart={handleTitleTouchStart}
             onTouchEnd={handleTitleTouchEnd}
             onTouchCancel={handleTitleTouchCancel}
-            style={{ cursor: 'pointer', userSelect: 'none' }}
+            style={{ 
+              cursor: 'pointer', 
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none',
+              WebkitTouchCallout: 'none',
+              WebkitTapHighlightColor: 'transparent'
+            }}
           >
             Jerome's Birthday Celebration!
           </h1>

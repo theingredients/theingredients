@@ -44,10 +44,19 @@ let redisClient: ReturnType<typeof createClient> | null = null
 // Get or create Redis client
 async function getRedisClient() {
   if (!redisClient) {
-    // Vercel Redis provides KV_REST_API_URL and KV_REST_API_TOKEN
-    // The redis package can use these, but we need to construct the URL properly
-    const redisUrl = process.env.KV_REST_API_URL || process.env.REDIS_URL
-    const redisToken = process.env.KV_REST_API_TOKEN
+    // Check for various possible Redis environment variable names
+    // Different Redis providers (Vercel KV, Upstash, etc.) use different names
+    const redisUrl = 
+      process.env.KV_REST_API_URL || 
+      process.env.REDIS_URL || 
+      process.env.UPSTASH_REDIS_REST_URL ||
+      process.env.REDIS_REST_URL
+    
+    const redisToken = 
+      process.env.KV_REST_API_TOKEN || 
+      process.env.REDIS_PASSWORD || 
+      process.env.UPSTASH_REDIS_REST_TOKEN ||
+      process.env.REDIS_REST_TOKEN
     
     if (redisUrl) {
       redisClient = createClient({
@@ -55,7 +64,9 @@ async function getRedisClient() {
         ...(redisToken && { password: redisToken }),
       })
     } else {
-      // Fallback: try to create client without explicit config (may use default env vars)
+      // Fallback: try to create client without explicit config
+      // This might work if Redis is configured via other means
+      console.warn('No Redis URL found in environment variables. Attempting default connection.')
       redisClient = createClient()
     }
     
