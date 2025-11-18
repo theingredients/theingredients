@@ -31,6 +31,9 @@ const BirthdayInvite = () => {
   const [nameError, setNameError] = useState<string | null>(null)
   const [userName, setUserName] = useState<string | null>(null)
   const [guestCount, setGuestCount] = useState<number>(0)
+  const [userComment, setUserComment] = useState<string>('')
+  const [comments, setComments] = useState<Record<string, string>>({})
+  const [isSavingComment, setIsSavingComment] = useState(false)
   const [showFireworks, setShowFireworks] = useState(false)
   const [isContentExploding, setIsContentExploding] = useState(false)
   const [fireworkParticles, setFireworkParticles] = useState<Array<{ id: number; size: number; x: number; y: number; randomX: number; randomY: number }>>([])
@@ -54,6 +57,11 @@ const BirthdayInvite = () => {
             setRestaurants(data.restaurants)
             // Also save to localStorage as backup
             localStorage.setItem('birthday-poll-restaurants', JSON.stringify(data.restaurants))
+          }
+          // Load comments if available
+          if (data.comments) {
+            setComments(data.comments)
+            localStorage.setItem('birthday-poll-comments', JSON.stringify(data.comments))
           }
         } else {
           // If API fails, fall back to localStorage
@@ -87,13 +95,40 @@ const BirthdayInvite = () => {
     // Check if user has already voted (from localStorage)
     const savedVote = localStorage.getItem('birthday-poll-user-vote')
     const savedName = localStorage.getItem('birthday-poll-user-name')
+    const savedComments = localStorage.getItem('birthday-poll-comments')
     
     if (savedName && savedVote) {
       setUserName(savedName)
       setHasVoted(true)
       setSelectedRestaurant(savedVote)
     }
+    
+    // Load saved comments
+    if (savedComments) {
+      try {
+        const commentsData = JSON.parse(savedComments)
+        setComments(commentsData)
+        // Load user's comment if they have one
+        if (savedName && commentsData[savedName]) {
+          setUserComment(commentsData[savedName])
+        }
+      } catch (error) {
+        console.error('Error loading comments from localStorage:', error)
+      }
+    }
+    
+    // Also check comments from API response if available
+    // This will be handled in the loadPollData function above
+  }, [])
 
+  // Sync user comment when comments state changes
+  useEffect(() => {
+    if (userName && comments[userName] && comments[userName] !== userComment) {
+      setUserComment(comments[userName])
+    }
+  }, [comments, userName]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     // Expose hidden function to view voting data (for admin/debugging)
     // Access via: window.getBirthdayPollData() in browser console
     if (typeof window !== 'undefined') {
@@ -249,6 +284,12 @@ const BirthdayInvite = () => {
         localStorage.setItem('birthday-poll-restaurants', JSON.stringify(result.pollData.restaurants))
       }
       
+      // Update comments if provided
+      if (result.comments) {
+        setComments(result.comments)
+        localStorage.setItem('birthday-poll-comments', JSON.stringify(result.comments))
+      }
+      
       // Mark as voted and save to localStorage
       setHasVoted(true)
       setSelectedRestaurant(restaurantId)
@@ -290,6 +331,55 @@ const BirthdayInvite = () => {
       if (!isNaN(num) && num >= 0 && num <= 50) {
         setGuestCount(num)
       }
+    }
+  }
+
+  const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value
+    // Limit to 500 characters
+    if (value.length <= 500) {
+      setUserComment(value)
+    }
+  }
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!userName) {
+      return
+    }
+
+    setIsSavingComment(true)
+    
+    try {
+      const response = await fetch('/api/birthday-poll', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: userName,
+          comment: userComment,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to save comment')
+      }
+
+      const result = await response.json()
+      
+      // Update comments state
+      if (result.comments) {
+        setComments(result.comments)
+        localStorage.setItem('birthday-poll-comments', JSON.stringify(result.comments))
+      }
+    } catch (error) {
+      console.error('Error saving comment:', error)
+      alert('Failed to save comment. Please try again.')
+    } finally {
+      setIsSavingComment(false)
     }
   }
 
@@ -527,7 +617,7 @@ const BirthdayInvite = () => {
               WebkitTapHighlightColor: 'transparent'
             }}
           >
-            Jerome's Birthday Celebration!
+            Jerome's 39th Birthday Celebration!
           </h1>
           <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>November 21st 2025 - 6:30-7pm start</p>
           <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>This Scorpio has invited you out for dinner! Cast your vote for dinner!</p>
@@ -629,6 +719,41 @@ const BirthdayInvite = () => {
               </div>
             )}
           </div>
+
+          {/* Comment Section - Only show if user has voted */}
+          {hasVoted && userName && (
+            <div className={`comment-section ${isContentExploding ? 'exploding' : ''}`}>
+              <h3 className={`comment-section-title ${isContentExploding ? 'exploding' : ''}`}>
+                Add a Comment (Optional)
+              </h3>
+              <p className={`comment-section-description ${isContentExploding ? 'exploding' : ''}`}>
+                Share any additional thoughts or messages for the birthday celebration!
+              </p>
+              <form onSubmit={handleCommentSubmit} className="comment-form">
+                <textarea
+                  value={userComment}
+                  onChange={handleCommentChange}
+                  placeholder="Your comment here..."
+                  className="comment-textarea"
+                  rows={4}
+                  maxLength={500}
+                  aria-label="Comment"
+                />
+                <div className="comment-footer">
+                  <span className="comment-character-count">
+                    {userComment.length}/500 characters
+                  </span>
+                  <button
+                    type="submit"
+                    className="comment-submit-button"
+                    disabled={isSavingComment}
+                  >
+                    {isSavingComment ? 'Saving...' : 'Save Comment'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       </div>
 

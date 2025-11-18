@@ -7,11 +7,27 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
 dist
 dist-ssr
-*.local
+
+# Environment variables and secrets
 .env
+.env.local
+.env.*.local
+*.local
+.env.production
+.env.development
+.env.test
+
+# API keys and secrets (extra safety)
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+.secrets
 
 # Editor directories and files
 .vscode/*
@@ -24,4 +40,19 @@ dist-ssr
 *.sln
 *.sw?
 
+# OS files
+Thumbs.db
+.DS_Store
+
+# Build outputs
+build/
+out/
+.next/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Sensitive documentation
 API_COST_TRACKING.md

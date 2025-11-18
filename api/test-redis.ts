@@ -98,16 +98,15 @@ export default async function handler(
                    redisUrl === process.env.UPSTASH_REDIS_REST_URL ? 'UPSTASH_REDIS_REST_URL' :
                    redisUrl === process.env.REDIS_REST_URL ? 'REDIS_REST_URL' : 'unknown',
       },
-      allRedisEnvVars: Object.keys(process.env).filter(key => 
-        key.includes('REDIS') || key.includes('KV') || key.includes('UPSTASH')
-      )
+      // Removed allRedisEnvVars to avoid exposing environment variable names
     })
   } catch (error) {
     console.error('Redis test error:', error)
+    // Don't expose stack traces or detailed error information in production
     return res.status(500).json({
       error: 'Redis connection failed',
-      message: error instanceof Error ? error.message : 'Unknown error',
-      details: error instanceof Error ? error.stack : String(error)
+      message: error instanceof Error ? error.message : 'Unknown error'
+      // Removed stack trace exposure for security
     })
   }
 }

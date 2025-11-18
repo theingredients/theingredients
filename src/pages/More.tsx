@@ -171,9 +171,9 @@ const More = () => {
         <a href="https://or-six.vercel.app/" target="_blank" rel="noopener noreferrer" className="page-content">
           The OR (beta) - audio fun
         </a>
+        <p className="page-content">The EFF (alpha)- easy food fun</p>
         <p className="page-content">The MIDI (alpha) - MIDI fun</p>
         <p className="page-content">The DO (alpha) - digital organizing</p>
-        <p className="page-content">The Future</p>
 
         {/* Contact Section */}
         <h1 

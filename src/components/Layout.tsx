@@ -546,6 +546,21 @@ const Layout = ({ children }: LayoutProps) => {
           >
             ☕
           </button>
+          {/* Recipe Button - ALPHA: DO NOT SHIP - Hidden until ready for production */}
+          {/* <button onClick={() => {
+            // Always use window.location.href to ensure Vercel rewrite works
+            // In dev, go to live site; in production, use /recipe which gets rewritten
+            if (import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+              // In development, redirect to live site
+              window.location.href = 'https://theingredients.io/recipe'
+            } else {
+              // In production, use /recipe which Vercel rewrites to the recipe project
+              // Using window.location.href ensures the rewrite happens (React Router navigate won't trigger it)
+              window.location.href = '/recipe'
+            }
+          }} className="footer-button">
+            Recipe
+          </button> */}
           <button onClick={() => {
             // Always use window.location.href to ensure Vercel rewrite works
             // In dev, go to live site; in production, use /go which gets rewritten

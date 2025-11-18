@@ -47,7 +47,7 @@ export default async function handler(
           price_data: {
             currency: currency.toLowerCase(),
             product_data: {
-              name: 'Buy Me a Coffee!',
+              name: 'Buy Us a Coffee!',
               description: 'Support The Ingredients Design Collective',
             },
             unit_amount: amountInCents,

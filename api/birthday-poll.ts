@@ -19,6 +19,12 @@ interface VoteRequest {
   restaurantId: string
   name: string
   guestCount?: number
+  comment?: string
+}
+
+interface CommentRequest {
+  name: string
+  comment: string
 }
 
 // Default poll data structure
@@ -37,6 +43,7 @@ const DEFAULT_POLL_DATA: VoteData = {
 // KV keys
 const POLL_DATA_KEY = 'birthday-poll:data'
 const VOTER_REGISTRY_KEY = 'birthday-poll:voters'
+const COMMENTS_KEY = 'birthday-poll:comments'
 
 // Initialize Redis client (reused across requests)
 let redisClient: ReturnType<typeof createClient> | null = null
@@ -148,13 +155,38 @@ async function registerVoter(name: string, restaurantId: string): Promise<void> 
   }
 }
 
+// Helper function to get comments
+async function getComments(): Promise<Record<string, string>> {
+  try {
+    const redis = await getRedisClient()
+    const commentsData = await redis.get(COMMENTS_KEY)
+    return commentsData ? JSON.parse(commentsData as string) as Record<string, string> : {}
+  } catch (error) {
+    console.error('Error getting comments:', error)
+    return {}
+  }
+}
+
+// Helper function to save a comment
+async function saveComment(name: string, comment: string): Promise<void> {
+  try {
+    const redis = await getRedisClient()
+    const comments = await getComments()
+    comments[name] = comment
+    await redis.set(COMMENTS_KEY, JSON.stringify(comments))
+  } catch (error) {
+    console.error('Error saving comment:', error)
+    throw error
+  }
+}
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
   if (req.method === 'OPTIONS') {
@@ -165,7 +197,11 @@ export default async function handler(
   if (req.method === 'GET') {
     try {
       const pollData = await getPollData()
-      return res.status(200).json(pollData)
+      const comments = await getComments()
+      return res.status(200).json({
+        ...pollData,
+        comments
+      })
     } catch (error) {
       console.error('Error getting poll data:', error)
       return res.status(500).json({ 
@@ -177,7 +213,7 @@ export default async function handler(
   // POST: Submit a vote
   if (req.method === 'POST') {
     try {
-      const { restaurantId, name, guestCount = 0 }: VoteRequest = req.body
+      const { restaurantId, name, guestCount = 0, comment }: VoteRequest = req.body
 
       // Validate input
       if (!restaurantId || !name || typeof name !== 'string' || name.trim() === '') {
@@ -237,15 +273,65 @@ export default async function handler(
       // Register the voter
       await registerVoter(sanitizedName, restaurantId)
 
+      // Save comment if provided
+      if (comment && comment.trim()) {
+        const sanitizedComment = comment.trim().substring(0, 500) // Max 500 characters
+        await saveComment(sanitizedName, sanitizedComment)
+      }
+
+      const comments = await getComments()
+
       return res.status(200).json({
         success: true,
         message: 'Vote recorded successfully',
-        pollData: updatedPollData
+        pollData: updatedPollData,
+        comments
       })
     } catch (error) {
       console.error('Error submitting vote:', error)
       return res.status(500).json({ 
         error: 'Failed to submit vote',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
+
+  // PATCH: Update comment for existing vote
+  if (req.method === 'PATCH') {
+    try {
+      const { name, comment }: CommentRequest = req.body
+
+      // Validate input
+      if (!name || typeof name !== 'string' || name.trim() === '') {
+        return res.status(400).json({ 
+          error: 'Name is required' 
+        })
+      }
+
+      const sanitizedName = name.trim()
+
+      // Check if this person has voted
+      if (!(await hasVoted(sanitizedName))) {
+        return res.status(404).json({ 
+          error: 'You must vote before adding a comment' 
+        })
+      }
+
+      // Save comment (can be empty string to delete)
+      const sanitizedComment = comment ? comment.trim().substring(0, 500) : ''
+      await saveComment(sanitizedName, sanitizedComment)
+
+      const comments = await getComments()
+
+      return res.status(200).json({
+        success: true,
+        message: 'Comment updated successfully',
+        comments
+      })
+    } catch (error) {
+      console.error('Error updating comment:', error)
+      return res.status(500).json({ 
+        error: 'Failed to update comment',
         message: error instanceof Error ? error.message : 'Unknown error'
       })
     }
