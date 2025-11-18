@@ -1084,6 +1084,74 @@
   cursor: not-allowed;
 }
 
+.comment-success-message {
+  padding: 0.75rem 1rem;
+  background: rgba(76, 175, 80, 0.1);
+  border: 2px solid rgba(76, 175, 80, 0.3);
+  border-radius: 8px;
+  color: rgba(76, 175, 80, 0.9);
+  font-weight: 500;
+  margin-bottom: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.theme-dark .comment-success-message {
+  background: rgba(76, 175, 80, 0.15);
+  border-color: rgba(76, 175, 80, 0.4);
+  color: rgba(76, 175, 80, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.saved-comment-display {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.03);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  border-left: 4px solid rgba(76, 175, 80, 0.6);
+}
+
+.theme-dark .saved-comment-display {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  border-left-color: rgba(76, 175, 80, 0.7);
+}
+
+.saved-comment-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.theme-dark .saved-comment-label {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.saved-comment-text {
+  font-size: 1rem;
+  color: rgba(0, 0, 0, 0.85);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.theme-dark .saved-comment-text {
+  color: rgba(255, 255, 255, 0.85);
+}
+
 @media (max-width: 768px) {
   .comment-section {
     padding: 1.5rem;

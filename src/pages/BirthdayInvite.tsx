@@ -34,6 +34,7 @@ const BirthdayInvite = () => {
   const [userComment, setUserComment] = useState<string>('')
   const [comments, setComments] = useState<Record<string, string>>({})
   const [isSavingComment, setIsSavingComment] = useState(false)
+  const [commentSaveSuccess, setCommentSaveSuccess] = useState(false)
   const [showFireworks, setShowFireworks] = useState(false)
   const [isContentExploding, setIsContentExploding] = useState(false)
   const [fireworkParticles, setFireworkParticles] = useState<Array<{ id: number; size: number; x: number; y: number; randomX: number; randomY: number }>>([])
@@ -374,7 +375,17 @@ const BirthdayInvite = () => {
       if (result.comments) {
         setComments(result.comments)
         localStorage.setItem('birthday-poll-comments', JSON.stringify(result.comments))
+        // Update user comment from the response
+        if (result.comments[userName]) {
+          setUserComment(result.comments[userName])
+        }
       }
+      
+      // Show success message
+      setCommentSaveSuccess(true)
+      setTimeout(() => {
+        setCommentSaveSuccess(false)
+      }, 3000) // Hide after 3 seconds
     } catch (error) {
       console.error('Error saving comment:', error)
       alert('Failed to save comment. Please try again.')
@@ -729,6 +740,22 @@ const BirthdayInvite = () => {
               <p className={`comment-section-description ${isContentExploding ? 'exploding' : ''}`}>
                 Share any additional thoughts or messages for the birthday celebration!
               </p>
+              
+              {/* Success message */}
+              {commentSaveSuccess && (
+                <div className="comment-success-message">
+                  ✓ Comment saved successfully!
+                </div>
+              )}
+              
+              {/* Display saved comment if it exists */}
+              {userComment && userComment.trim() && (
+                <div className="saved-comment-display">
+                  <div className="saved-comment-label">Your saved comment:</div>
+                  <div className="saved-comment-text">{userComment}</div>
+                </div>
+              )}
+              
               <form onSubmit={handleCommentSubmit} className="comment-form">
                 <textarea
                   value={userComment}
@@ -748,7 +775,7 @@ const BirthdayInvite = () => {
                     className="comment-submit-button"
                     disabled={isSavingComment}
                   >
-                    {isSavingComment ? 'Saving...' : 'Save Comment'}
+                    {isSavingComment ? 'Saving...' : userComment.trim() ? 'Update Comment' : 'Save Comment'}
                   </button>
                 </div>
               </form>
