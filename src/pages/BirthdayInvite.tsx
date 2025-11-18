@@ -731,6 +731,34 @@ const BirthdayInvite = () => {
             )}
           </div>
 
+          {/* All Comments Section - Show all comments from all users */}
+          <div className={`all-comments-section ${isContentExploding ? 'exploding' : ''}`}>
+            <h3 className={`all-comments-title ${isContentExploding ? 'exploding' : ''}`}>
+              Messages from Everyone ({Object.entries(comments).filter(([, comment]) => comment && comment.trim()).length})
+            </h3>
+            {Object.entries(comments).filter(([, comment]) => comment && comment.trim()).length > 0 ? (
+              <div className="all-comments-list">
+                {Object.entries(comments)
+                  .filter(([, comment]) => comment && comment.trim())
+                  .map(([name, comment]) => (
+                    <div key={name} className={`comment-item ${name === userName ? 'current-user-comment' : ''}`}>
+                      <div className="comment-item-header">
+                        <span className="comment-author">{name}</span>
+                        {name === userName && (
+                          <span className="comment-badge">You</span>
+                        )}
+                      </div>
+                      <div className="comment-item-text">{comment}</div>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <div className="no-comments-message">
+                <p>No messages yet. Be the first to share your thoughts!</p>
+              </div>
+            )}
+          </div>
+
           {/* Comment Section - Only show if user has voted */}
           {hasVoted && userName && (
             <div className={`comment-section ${isContentExploding ? 'exploding' : ''}`}>
@@ -745,14 +773,6 @@ const BirthdayInvite = () => {
               {commentSaveSuccess && (
                 <div className="comment-success-message">
                   ✓ Comment saved successfully!
-                </div>
-              )}
-              
-              {/* Display saved comment if it exists */}
-              {userComment && userComment.trim() && (
-                <div className="saved-comment-display">
-                  <div className="saved-comment-label">Your saved comment:</div>
-                  <div className="saved-comment-text">{userComment}</div>
                 </div>
               )}
               
