@@ -5,22 +5,24 @@ import './BuyMeACoffee.css'
 const BuyMeACoffee = () => {
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [searchParams, setSearchParams] = useSearchParams()
 
   useEffect(() => {
     // Check for success or canceled parameters from Stripe redirect
-    const success = searchParams.get('success')
+    const successParam = searchParams.get('success')
     const canceled = searchParams.get('canceled')
-    const sessionId = searchParams.get('session_id')
 
-    if (success && sessionId) {
-      // Payment was successful
-      alert('Thank you for your support! Your payment was successful. ☕')
+    if (successParam) {
+      // Payment was successful (sessionId is optional for testing, but Stripe always provides it)
+      setSuccess('Thank you for your support! Your payment was successful. You will be remembered and always be a part of this journey!')
+      setError(null)
       // Clean up URL parameters
       setSearchParams({}, { replace: true })
     } else if (canceled) {
       // Payment was canceled
       setError(null) // Don't show error for cancellation
+      setSuccess(null)
       // Clean up URL parameters
       setSearchParams({}, { replace: true })
     }
@@ -29,6 +31,7 @@ const BuyMeACoffee = () => {
   const handlePayment = async (amount: string) => {
     setIsProcessing(true)
     setError(null)
+    setSuccess(null)
 
     try {
       // Call our API endpoint to create a Stripe Checkout session
@@ -68,9 +71,20 @@ const BuyMeACoffee = () => {
     }
   }
 
+  // Test function to simulate successful payment (development only)
+  const handleTestSuccess = () => {
+    setSuccess('Thank you for your support! Your payment was successful. You will be remembered and always be a part of this journey!')
+    setError(null)
+  }
+
   return (
     <div className="buy-coffee-container">
       <div className="buy-coffee-content">
+        {success && (
+          <div className="buy-coffee-success">
+            {success}
+          </div>
+        )}
         {error && (
           <div className="buy-coffee-error">
             {error}
@@ -107,6 +121,26 @@ const BuyMeACoffee = () => {
         <p className="buy-coffee-note">
           Powered by Stripe. Secure payment processing.
         </p>
+
+        {/* Test button - only visible in development */}
+        {import.meta.env.DEV && (
+          <button
+            className="buy-coffee-test-button"
+            onClick={handleTestSuccess}
+            style={{
+              marginTop: '1rem',
+              padding: '0.5rem 1rem',
+              fontSize: '0.85rem',
+              background: 'rgba(0, 0, 0, 0.05)',
+              border: '1px dashed rgba(0, 0, 0, 0.2)',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              color: 'rgba(0, 0, 0, 0.6)',
+            }}
+          >
+            🧪 Test Success Message
+          </button>
+        )}
       </div>
     </div>
   )

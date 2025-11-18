@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import Layout from '../components/Layout'
 import BuyMeACoffee from '../components/BuyMeACoffee'
 import { isValidCoordinates, sanitizeApiResponse } from '../utils/inputSanitizer'
@@ -35,10 +36,19 @@ const Coffee = () => {
   const [coffeeRoasters, setCoffeeRoasters] = useState<CoffeeRoaster[]>([])
   const [drinkPlaces, setDrinkPlaces] = useState<DrinkPlace[]>([])
   const [searchMode, setSearchMode] = useState<'coffee' | 'drinks'>('coffee')
+  const [searchParams] = useSearchParams()
   
   // Prevent duplicate API calls
   const isFetchingRef = useRef(false)
   const lastSearchRef = useRef<{ lat: number; lon: number; mode: 'coffee' | 'drinks' } | null>(null)
+
+  // Auto-open buy coffee modal if success parameter is present (from Stripe redirect)
+  useEffect(() => {
+    const success = searchParams.get('success')
+    if (success) {
+      setIsBuyCoffeeModalOpen(true)
+    }
+  }, [searchParams])
 
   // Calculate distance between two coordinates using Haversine formula
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
