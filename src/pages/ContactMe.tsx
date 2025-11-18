@@ -98,7 +98,7 @@ const ContactMe = () => {
 
   // Initialize Audio Context, analyser when component mounts
   useEffect(() => {
-    // Initialize audio context
+    // Initialize audio context (but don't resume yet - mobile requires user interaction)
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
     }
@@ -120,6 +120,21 @@ const ContactMe = () => {
       cleanupAudioResources()
     }
   }, [cleanupAudioResources])
+
+  // Function to ensure audio context is resumed (required for mobile)
+  const ensureAudioContextResumed = async () => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+    }
+    
+    if (audioContextRef.current.state === 'suspended') {
+      try {
+        await audioContextRef.current.resume()
+      } catch (error) {
+        console.warn('Could not resume audio context:', error)
+      }
+    }
+  }
 
   // Handle page visibility changes (tab switching, minimizing window)
   useEffect(() => {
@@ -357,6 +372,9 @@ const ContactMe = () => {
       }
       setMicEnabled(false)
     } else {
+      // Enable microphone - ensure audio context is resumed first (critical for mobile)
+      await ensureAudioContextResumed()
+      
       // Enable microphone
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -379,9 +397,13 @@ const ContactMe = () => {
           source.connect(analyserRef.current)
           mediaStreamSourceRef.current = source
           
-          // Resume audio context if suspended (required by some browsers)
+          // Resume audio context if suspended (required by some browsers, especially mobile)
           if (audioContextRef.current.state === 'suspended') {
-            await audioContextRef.current.resume()
+            try {
+              await audioContextRef.current.resume()
+            } catch (error) {
+              console.warn('Could not resume audio context for microphone:', error)
+            }
           }
         }
       } catch (error) {
@@ -422,16 +444,27 @@ const ContactMe = () => {
   }
 
   const playDTMFTone = async (digit: string) => {
-    if (!audioContextRef.current) return
+    // Ensure audio context exists and is resumed (critical for mobile)
+    await ensureAudioContextResumed()
+    
+    if (!audioContextRef.current) {
+      console.warn('AudioContext not available')
+      return
+    }
 
     const frequencies = dtmfFrequencies[digit]
     if (!frequencies) return
 
     const context = audioContextRef.current
     
-    // Resume audio context if suspended (required by some browsers)
+    // Double-check context is running (mobile browsers can be finicky)
     if (context.state === 'suspended') {
-      await context.resume()
+      try {
+        await context.resume()
+      } catch (error) {
+        console.warn('Could not resume audio context for DTMF tone:', error)
+        return
+      }
     }
     // Standard DTMF tone duration: 50-100ms (using 80ms for better audibility)
     const duration = 0.08
@@ -501,7 +534,7 @@ const ContactMe = () => {
     }
   }
 
-  const handleKeypadClick = (digit: string) => {
+  const handleKeypadClick = async (digit: string) => {
     // Validate digit is safe (only allow keypad characters)
     const safeDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '#', '+']
     if (!safeDigits.includes(digit)) {
@@ -514,26 +547,27 @@ const ContactMe = () => {
       // Additional validation for defense in depth
       if (isValidPhoneNumber(newNumber, 15)) {
         setPhoneNumber(newNumber)
-        playDTMFTone(digit)
+        // Play tone - ensure audio context is resumed (critical for mobile)
+        await playDTMFTone(digit)
       }
     }
   }
 
-  const handleBackspace = () => {
+  const handleBackspace = async () => {
     setPhoneNumber(prev => {
       const newNumber = sanitizePhoneNumber(prev.slice(0, -1), 15)
       if (newNumber.length < prev.length) {
-        // Play a subtle tone for backspace
-        playDTMFTone('*')
+        // Play a subtle tone for backspace (async for mobile compatibility)
+        playDTMFTone('*').catch(err => console.warn('Could not play backspace tone:', err))
       }
       return newNumber
     })
   }
 
-  const handleClear = () => {
+  const handleClear = async () => {
     if (phoneNumber.length > 0) {
-      // Play a tone for clear
-      playDTMFTone('#')
+      // Play a tone for clear (async for mobile compatibility)
+      await playDTMFTone('#')
     }
     setPhoneNumber('')
   }
