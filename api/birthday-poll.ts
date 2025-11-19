@@ -156,23 +156,48 @@ async function registerVoter(name: string, restaurantId: string): Promise<void> 
 }
 
 // Helper function to get comments
-async function getComments(): Promise<Record<string, string>> {
+async function getComments(): Promise<Record<string, string[]>> {
   try {
     const redis = await getRedisClient()
     const commentsData = await redis.get(COMMENTS_KEY)
-    return commentsData ? JSON.parse(commentsData as string) as Record<string, string> : {}
+    if (!commentsData) return {}
+    
+    const parsed = JSON.parse(commentsData as string)
+    // Migrate old format (single string) to new format (array)
+    const migrated: Record<string, string[]> = {}
+    for (const [name, comment] of Object.entries(parsed)) {
+      if (typeof comment === 'string') {
+        // Old format: single string, convert to array
+        migrated[name] = comment.trim() ? [comment] : []
+      } else if (Array.isArray(comment)) {
+        // New format: already an array
+        migrated[name] = comment.filter((c: string) => c && c.trim())
+      }
+    }
+    return migrated
   } catch (error) {
     console.error('Error getting comments:', error)
     return {}
   }
 }
 
-// Helper function to save a comment
-async function saveComment(name: string, comment: string): Promise<void> {
+// Helper function to add a comment (supports multiple comments per user)
+async function addComment(name: string, comment: string): Promise<void> {
   try {
     const redis = await getRedisClient()
     const comments = await getComments()
-    comments[name] = comment
+    
+    // Initialize array if user doesn't have comments yet
+    if (!comments[name]) {
+      comments[name] = []
+    }
+    
+    // Add new comment to the array
+    const sanitizedComment = comment.trim().substring(0, 500)
+    if (sanitizedComment) {
+      comments[name].push(sanitizedComment)
+    }
+    
     await redis.set(COMMENTS_KEY, JSON.stringify(comments))
   } catch (error) {
     console.error('Error saving comment:', error)
@@ -296,7 +321,7 @@ export default async function handler(
     }
   }
 
-  // PATCH: Update comment for existing vote
+  // PATCH: Add a new comment for existing vote
   if (req.method === 'PATCH') {
     try {
       const { name, comment }: CommentRequest = req.body
@@ -305,6 +330,12 @@ export default async function handler(
       if (!name || typeof name !== 'string' || name.trim() === '') {
         return res.status(400).json({ 
           error: 'Name is required' 
+        })
+      }
+
+      if (!comment || typeof comment !== 'string' || !comment.trim()) {
+        return res.status(400).json({ 
+          error: 'Comment is required' 
         })
       }
 
@@ -317,21 +348,20 @@ export default async function handler(
         })
       }
 
-      // Save comment (can be empty string to delete)
-      const sanitizedComment = comment ? comment.trim().substring(0, 500) : ''
-      await saveComment(sanitizedName, sanitizedComment)
+      // Add new comment (supports multiple comments per user)
+      await addComment(sanitizedName, comment)
 
       const comments = await getComments()
 
       return res.status(200).json({
         success: true,
-        message: 'Comment updated successfully',
+        message: 'Comment added successfully',
         comments
       })
     } catch (error) {
-      console.error('Error updating comment:', error)
+      console.error('Error adding comment:', error)
       return res.status(500).json({ 
-        error: 'Failed to update comment',
+        error: 'Failed to add comment',
         message: error instanceof Error ? error.message : 'Unknown error'
       })
     }

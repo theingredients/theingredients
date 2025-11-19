@@ -32,7 +32,7 @@ const BirthdayInvite = () => {
   const [userName, setUserName] = useState<string | null>(null)
   const [guestCount, setGuestCount] = useState<number>(0)
   const [userComment, setUserComment] = useState<string>('')
-  const [comments, setComments] = useState<Record<string, string>>({})
+  const [comments, setComments] = useState<Record<string, string[]>>({})
   const [isSavingComment, setIsSavingComment] = useState(false)
   const [commentSaveSuccess, setCommentSaveSuccess] = useState(false)
   const [showFireworks, setShowFireworks] = useState(false)
@@ -61,8 +61,17 @@ const BirthdayInvite = () => {
           }
           // Load comments if available
           if (data.comments) {
-            setComments(data.comments)
-            localStorage.setItem('birthday-poll-comments', JSON.stringify(data.comments))
+            // Migrate old format to new format if needed
+            const migratedComments: Record<string, string[]> = {}
+            for (const [name, comment] of Object.entries(data.comments)) {
+              if (typeof comment === 'string') {
+                migratedComments[name] = comment.trim() ? [comment] : []
+              } else if (Array.isArray(comment)) {
+                migratedComments[name] = comment.filter((c: string) => c && c.trim())
+              }
+            }
+            setComments(migratedComments)
+            localStorage.setItem('birthday-poll-comments', JSON.stringify(migratedComments))
           }
         } else {
           // If API fails, fall back to localStorage
@@ -108,11 +117,16 @@ const BirthdayInvite = () => {
     if (savedComments) {
       try {
         const commentsData = JSON.parse(savedComments)
-        setComments(commentsData)
-        // Load user's comment if they have one
-        if (savedName && commentsData[savedName]) {
-          setUserComment(commentsData[savedName])
+        // Migrate old format to new format if needed
+        const migratedComments: Record<string, string[]> = {}
+        for (const [name, comment] of Object.entries(commentsData)) {
+          if (typeof comment === 'string') {
+            migratedComments[name] = comment.trim() ? [comment] : []
+          } else if (Array.isArray(comment)) {
+            migratedComments[name] = comment.filter((c: string) => c && c.trim())
+          }
         }
+        setComments(migratedComments)
       } catch (error) {
         console.error('Error loading comments from localStorage:', error)
       }
@@ -122,12 +136,15 @@ const BirthdayInvite = () => {
     // This will be handled in the loadPollData function above
   }, [])
 
-  // Sync user comment when comments state changes
+  // Clear comment input after successful save
   useEffect(() => {
-    if (userName && comments[userName] && comments[userName] !== userComment) {
-      setUserComment(comments[userName])
+    if (commentSaveSuccess) {
+      // Clear the input after a short delay to show success message
+      setTimeout(() => {
+        setUserComment('')
+      }, 100)
     }
-  }, [comments, userName]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [commentSaveSuccess])
 
   useEffect(() => {
     // Expose hidden function to view voting data (for admin/debugging)
@@ -373,15 +390,21 @@ const BirthdayInvite = () => {
       
       // Update comments state
       if (result.comments) {
-        setComments(result.comments)
-        localStorage.setItem('birthday-poll-comments', JSON.stringify(result.comments))
-        // Update user comment from the response
-        if (result.comments[userName]) {
-          setUserComment(result.comments[userName])
+        // Migrate old format to new format if needed
+        const migratedComments: Record<string, string[]> = {}
+        for (const [name, comment] of Object.entries(result.comments)) {
+          if (typeof comment === 'string') {
+            migratedComments[name] = comment.trim() ? [comment] : []
+          } else if (Array.isArray(comment)) {
+            migratedComments[name] = comment.filter((c: string) => c && c.trim())
+          }
         }
+        setComments(migratedComments)
+        localStorage.setItem('birthday-poll-comments', JSON.stringify(migratedComments))
       }
       
-      // Show success message
+      // Clear input and show success message
+      setUserComment('')
       setCommentSaveSuccess(true)
       setTimeout(() => {
         setCommentSaveSuccess(false)
@@ -630,9 +653,9 @@ const BirthdayInvite = () => {
           >
             Jerome's 39th Birthday Celebration!
           </h1>
-          <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>November 21st 2025 - 6:30-7pm start</p>
+          <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>November 21st 2025 - 7:30pm reservation time set</p>
           <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>This Scorpio has invited you out for dinner! Cast your vote for dinner!</p>
-          <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>PR post dinner!</p>
+          <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>Pickle Room post dinner!</p>
           
           <div className={`poll-container ${isContentExploding ? 'exploding' : ''}`}>
             <h2 className={`poll-title ${isContentExploding ? 'exploding' : ''}`}>Vote for Your Favorite Restaurant</h2>
@@ -734,14 +757,16 @@ const BirthdayInvite = () => {
           {/* All Comments Section - Show all comments from all users */}
           <div className={`all-comments-section ${isContentExploding ? 'exploding' : ''}`}>
             <h3 className={`all-comments-title ${isContentExploding ? 'exploding' : ''}`}>
-              Messages from Everyone ({Object.entries(comments).filter(([, comment]) => comment && comment.trim()).length})
+              Messages from Everyone ({Object.values(comments).flat().length})
             </h3>
-            {Object.entries(comments).filter(([, comment]) => comment && comment.trim()).length > 0 ? (
+            {Object.values(comments).flat().length > 0 ? (
               <div className="all-comments-list">
                 {Object.entries(comments)
-                  .filter(([, comment]) => comment && comment.trim())
-                  .map(([name, comment]) => (
-                    <div key={name} className={`comment-item ${name === userName ? 'current-user-comment' : ''}`}>
+                  .flatMap(([name, commentArray]) => 
+                    commentArray.map((comment, index) => ({ name, comment, index }))
+                  )
+                  .map(({ name, comment, index }) => (
+                    <div key={`${name}-${index}`} className={`comment-item ${name === userName ? 'current-user-comment' : ''}`}>
                       <div className="comment-item-header">
                         <span className="comment-author">{name}</span>
                         {name === userName && (
@@ -766,7 +791,7 @@ const BirthdayInvite = () => {
                 Add a Comment (Optional)
               </h3>
               <p className={`comment-section-description ${isContentExploding ? 'exploding' : ''}`}>
-                Share any additional thoughts or messages for the birthday celebration!
+                Share your thoughts or messages for the birthday celebration! You can add multiple comments.
               </p>
               
               {/* Success message */}
@@ -795,7 +820,7 @@ const BirthdayInvite = () => {
                     className="comment-submit-button"
                     disabled={isSavingComment}
                   >
-                    {isSavingComment ? 'Saving...' : userComment.trim() ? 'Update Comment' : 'Save Comment'}
+                    {isSavingComment ? 'Saving...' : 'Add Comment'}
                   </button>
                 </div>
               </form>
