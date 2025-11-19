@@ -46,6 +46,17 @@ const BirthdayInvite = () => {
   const pressStartTimeRef = useRef<number | null>(null)
   const fireworkIdCounterRef = useRef<number>(0)
 
+  // Set page title when component mounts
+  useEffect(() => {
+    const originalTitle = document.title
+    document.title = "Jerome's 39th Birthday Celebration - The Ingredients"
+    
+    // Restore original title when component unmounts
+    return () => {
+      document.title = originalTitle
+    }
+  }, [])
+
   // Load votes from API and localStorage on mount
   useEffect(() => {
     const loadPollData = async () => {
@@ -363,7 +374,15 @@ const BirthdayInvite = () => {
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!userName) {
+    // If user hasn't provided a name, show name modal
+    if (!userName || !userName.trim()) {
+      setIsNameModalOpen(true)
+      return
+    }
+
+    // Validate comment
+    if (!userComment || !userComment.trim()) {
+      alert('Please enter a comment')
       return
     }
 
@@ -376,7 +395,7 @@ const BirthdayInvite = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: userName,
+          name: userName.trim(),
           comment: userComment,
         }),
       })
@@ -784,15 +803,14 @@ const BirthdayInvite = () => {
             )}
           </div>
 
-          {/* Comment Section - Only show if user has voted */}
-          {hasVoted && userName && (
-            <div className={`comment-section ${isContentExploding ? 'exploding' : ''}`}>
-              <h3 className={`comment-section-title ${isContentExploding ? 'exploding' : ''}`}>
-                Add a Comment (Optional)
-              </h3>
-              <p className={`comment-section-description ${isContentExploding ? 'exploding' : ''}`}>
-                Share your thoughts or messages for the birthday celebration! You can add multiple comments.
-              </p>
+          {/* Comment Section - Available to everyone */}
+          <div className={`comment-section ${isContentExploding ? 'exploding' : ''}`}>
+            <h3 className={`comment-section-title ${isContentExploding ? 'exploding' : ''}`}>
+              Add a Comment
+            </h3>
+            <p className={`comment-section-description ${isContentExploding ? 'exploding' : ''}`}>
+              Share your thoughts or messages for the birthday celebration! You can add multiple comments. {!userName && 'Please enter your name to comment.'}
+            </p>
               
               {/* Success message */}
               {commentSaveSuccess && (
@@ -801,15 +819,81 @@ const BirthdayInvite = () => {
                 </div>
               )}
               
+              {!userName && (
+                <div className="comment-name-prompt">
+                  <p>Enter your name to add a comment:</p>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={handleNameChange}
+                    placeholder="Your Name"
+                    className={`email-input ${nameError ? 'error' : ''}`}
+                    maxLength={100}
+                    aria-label="Your name"
+                    aria-invalid={nameError ? 'true' : 'false'}
+                    aria-describedby={nameError ? 'name-error' : undefined}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && name.trim()) {
+                        setUserName(name.trim())
+                        localStorage.setItem('birthday-poll-user-name', name.trim())
+                        setName('')
+                      }
+                    }}
+                  />
+                  {nameError && (
+                    <p id="name-error" className="email-error-message" role="alert">
+                      {nameError}
+                    </p>
+                  )}
+                  {name.trim() && (
+                    <button
+                      type="button"
+                      className="comment-submit-button"
+                      onClick={() => {
+                        const sanitizedName = sanitizeInput(name, 100).trim()
+                        if (sanitizedName) {
+                          setUserName(sanitizedName)
+                          localStorage.setItem('birthday-poll-user-name', sanitizedName)
+                          setName('')
+                          setNameError(null)
+                        } else {
+                          setNameError('Please enter your name')
+                        }
+                      }}
+                    >
+                      Use This Name
+                    </button>
+                  )}
+                </div>
+              )}
+              
+              {userName && (
+                <div className="comment-user-info">
+                  <span className="comment-user-name">Commenting as: <strong>{userName}</strong></span>
+                  <button
+                    type="button"
+                    className="comment-change-name-button"
+                    onClick={() => {
+                      setUserName(null)
+                      localStorage.removeItem('birthday-poll-user-name')
+                      setName('')
+                    }}
+                  >
+                    Change Name
+                  </button>
+                </div>
+              )}
+              
               <form onSubmit={handleCommentSubmit} className="comment-form">
                 <textarea
                   value={userComment}
                   onChange={handleCommentChange}
-                  placeholder="Your comment here..."
+                  placeholder={userName ? "Your comment here..." : "Enter your name above to comment"}
                   className="comment-textarea"
                   rows={4}
                   maxLength={500}
                   aria-label="Comment"
+                  disabled={!userName}
                 />
                 <div className="comment-footer">
                   <span className="comment-character-count">
@@ -818,14 +902,13 @@ const BirthdayInvite = () => {
                   <button
                     type="submit"
                     className="comment-submit-button"
-                    disabled={isSavingComment}
+                    disabled={isSavingComment || !userName || !userComment.trim()}
                   >
                     {isSavingComment ? 'Saving...' : 'Add Comment'}
                   </button>
                 </div>
               </form>
-            </div>
-          )}
+          </div>
         </div>
       </div>
 

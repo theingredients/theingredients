@@ -1152,6 +1152,95 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
+.comment-name-prompt {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.03);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.theme-dark .comment-name-prompt {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.comment-name-prompt p {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.95rem;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.theme-dark .comment-name-prompt p {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.comment-name-prompt .email-input {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.comment-name-prompt button {
+  margin-top: 0.5rem;
+}
+
+.comment-user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(76, 175, 80, 0.1);
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  border-radius: 8px;
+}
+
+.theme-dark .comment-user-info {
+  background: rgba(76, 175, 80, 0.15);
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+.comment-user-name {
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.theme-dark .comment-user-name {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.comment-change-name-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  border-radius: 6px;
+  color: rgba(76, 175, 80, 0.9);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-dark .comment-change-name-button {
+  background: rgba(76, 175, 80, 0.25);
+  border-color: rgba(76, 175, 80, 0.5);
+  color: rgba(76, 175, 80, 1);
+}
+
+.comment-change-name-button:hover {
+  background: rgba(76, 175, 80, 0.3);
+  border-color: rgba(76, 175, 80, 0.6);
+}
+
+.comment-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.theme-dark .comment-textarea:disabled {
+  background: rgba(255, 255, 255, 0.05);
+}
+
 /* All Comments Section */
 .all-comments-section {
   margin-top: 2rem;

@@ -341,13 +341,7 @@ export default async function handler(
 
       const sanitizedName = name.trim()
 
-      // Check if this person has voted
-      if (!(await hasVoted(sanitizedName))) {
-        return res.status(404).json({ 
-          error: 'You must vote before adding a comment' 
-        })
-      }
-
+      // Allow comments from anyone with a name (no voting requirement)
       // Add new comment (supports multiple comments per user)
       await addComment(sanitizedName, comment)
 
