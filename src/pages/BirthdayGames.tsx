@@ -17,7 +17,7 @@ const BirthdayGames = () => {
   const [playerName, setPlayerName] = useState<string>('')
   const [playerNameInput, setPlayerNameInput] = useState('')
   const [nameError, setNameError] = useState<string | null>(null)
-  const [isWhichOnesFalseModalOpen, setIsWhichOnesFalseModalOpen] = useState(false)
+  const [currentGame, setCurrentGame] = useState<string | null>(null)
   const [statements, setStatements] = useState<string[]>(['', '', ''])
   const [statementErrors, setStatementErrors] = useState<string[]>(['', '', ''])
   const [submittedUsers, setSubmittedUsers] = useState<Record<string, { playerName: string; statements: string[]; submittedAt: number }>>({})
@@ -26,7 +26,6 @@ const BirthdayGames = () => {
   const [expandedSubmissions, setExpandedSubmissions] = useState<Set<string>>(new Set())
   const [showPlayerNames, setShowPlayerNames] = useState(false)
   const [showRevealConfirmation, setShowRevealConfirmation] = useState(false)
-  const [isWhoPickedModalOpen, setIsWhoPickedModalOpen] = useState(false)
   const [songs, setSongs] = useState<Array<{ id: string; songName: string; artist: string; addedBy: string; addedAt: number; videoId?: string }>>([])
   const [newSongName, setNewSongName] = useState('')
   const [newSongArtist, setNewSongArtist] = useState('')
@@ -35,7 +34,6 @@ const BirthdayGames = () => {
   const [youtubeResults, setYoutubeResults] = useState<Array<{ videoId: string; title: string; channelTitle: string; thumbnail: string }>>([])
   const [isSearchingYoutube, setIsSearchingYoutube] = useState(false)
   const [youtubeSearchError, setYoutubeSearchError] = useState<string | null>(null)
-  const [isGOATModalOpen, setIsGOATModalOpen] = useState(false)
   const [movies, setMovies] = useState<string[]>(['', '', ''])
   const [movieErrors, setMovieErrors] = useState<string[]>(['', '', ''])
   const [goatSubmissions, setGoatSubmissions] = useState<Record<string, { playerName: string; movies: string[]; submittedAt: number }>>({})
@@ -49,6 +47,10 @@ const BirthdayGames = () => {
   const [isSavingComment, setIsSavingComment] = useState(false)
   const [commentSaveSuccess, setCommentSaveSuccess] = useState(false)
   const [isCommentsCollapsed, setIsCommentsCollapsed] = useState(true)
+  const [longPressSongId, setLongPressSongId] = useState<string | null>(null)
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null)
+  const [longPressProgress, setLongPressProgress] = useState(0)
+  const [revealedSongs, setRevealedSongs] = useState<Set<string>>(new Set())
 
   // Set page title and load player name when component mounts
   useEffect(() => {
@@ -126,6 +128,15 @@ const BirthdayGames = () => {
     }
   }, [])
 
+  // Cleanup long press timer on unmount or game change
+  useEffect(() => {
+    return () => {
+      if (longPressTimer) {
+        clearInterval(longPressTimer)
+      }
+    }
+  }, [longPressTimer])
+
   // Clear comment input after successful save
   useEffect(() => {
     if (commentSaveSuccess) {
@@ -137,25 +148,35 @@ const BirthdayGames = () => {
 
   const handleGameSelect = async (gameName: string) => {
     if (gameName === "Which One's False") {
-      setIsWhichOnesFalseModalOpen(true)
-      // Fetch submissions first
+      // Fetch submissions first before opening game
       const submissions = await fetchSubmissions()
       // Show list if there are submissions, otherwise show form
       const hasSubmissions = Object.keys(submissions).length > 0
       setShowSubmissionsList(hasSubmissions)
+      setCurrentGame(gameName)
     } else if (gameName === "Who Picked") {
-      setIsWhoPickedModalOpen(true)
+      setCurrentGame(gameName)
     } else if (gameName === "GOAT") {
-      setIsGOATModalOpen(true)
-      // Fetch GOAT submissions first
+      // Fetch GOAT submissions first before opening game
       const submissions = await fetchGOATSubmissions()
       // Show list if there are submissions, otherwise show form
       const hasSubmissions = Object.keys(submissions).length > 0
       setShowGOATSubmissionsList(hasSubmissions)
+      setCurrentGame(gameName)
     } else {
       console.log(`Selected game: ${gameName} by ${playerName}`)
       // TODO: Implement other game logic
     }
+  }
+
+  const handleBackToGames = () => {
+    setCurrentGame(null)
+    setShowSubmissionsList(false)
+    setShowGOATSubmissionsList(false)
+    setStatements(['', '', ''])
+    setMovies(['', '', ''])
+    setExpandedSubmissions(new Set())
+    setExpandedGOATSubmissions(new Set())
   }
 
   const fetchSubmissions = async () => {
@@ -188,29 +209,6 @@ const BirthdayGames = () => {
     return {}
   }
 
-  const handleCloseWhichOnesFalseModal = () => {
-    setIsWhichOnesFalseModalOpen(false)
-    setStatements(['', '', ''])
-    setStatementErrors(['', '', ''])
-    setShowSubmissionsList(false)
-  }
-
-  const handleCloseWhoPickedModal = () => {
-    setIsWhoPickedModalOpen(false)
-    setNewSongName('')
-    setNewSongArtist('')
-    setSongError(null)
-    setYoutubeSearchQuery('')
-    setYoutubeResults([])
-    setYoutubeSearchError(null)
-  }
-
-  const handleCloseGOATModal = () => {
-    setIsGOATModalOpen(false)
-    setMovies(['', '', ''])
-    setMovieErrors(['', '', ''])
-    setShowGOATSubmissionsList(false)
-  }
 
   const handleMovieChange = (index: number, value: string) => {
     const sanitized = sanitizeInputForTyping(value, 200) // Max 200 characters per movie
@@ -468,6 +466,43 @@ const BirthdayGames = () => {
     // You could add a success state here if desired
   }
 
+  const handleLongPressStart = (songId: string) => {
+    // Clear any existing timer
+    if (longPressTimer) {
+      clearInterval(longPressTimer)
+    }
+    
+    setLongPressSongId(songId)
+    setLongPressProgress(0)
+    
+    // Update progress every 100ms
+    const progressInterval = setInterval(() => {
+      setLongPressProgress((prev) => {
+        const newProgress = prev + 2 // 100ms * 50 = 5000ms (5 seconds), so 2% per 100ms
+        if (newProgress >= 100) {
+          clearInterval(progressInterval)
+          // Reveal the song
+          setRevealedSongs((prev) => new Set([...prev, songId]))
+          setLongPressSongId(null)
+          setLongPressProgress(0)
+          return 100
+        }
+        return newProgress
+      })
+    }, 100)
+    
+    setLongPressTimer(progressInterval)
+  }
+
+  const handleLongPressEnd = () => {
+    if (longPressTimer) {
+      clearInterval(longPressTimer)
+      setLongPressTimer(null)
+    }
+    setLongPressSongId(null)
+    setLongPressProgress(0)
+  }
+
   // Sanitize input without trimming (preserves spaces during typing)
   const sanitizeInputForTyping = (input: string, maxLength: number = 100): string => {
     if (typeof input !== 'string') {
@@ -716,10 +751,10 @@ const BirthdayGames = () => {
                 </button>
               </form>
             </div>
-          ) : (
+          ) : !currentGame ? (
             <>
               <p className={`games-subtitle ${isContentExploding ? 'exploding' : ''}`}>
-                Welcome to Jerome's Birthday Day Games, {playerName}! Choose a game to play!
+                It's my Birthday games, {playerName}! Choose a game to play!
               </p>
               <button
                 onClick={handleChangeName}
@@ -864,66 +899,65 @@ const BirthdayGames = () => {
                   </div>
                 </form>
               </div>
-            </>
-          )}
 
-          {/* Scan to Share Button */}
-          {qrUrl && (
-            <div className="scan-to-share-section">
-              <button
-                className="scan-to-share-button"
-                onClick={() => setIsQrCollapsed(!isQrCollapsed)}
-                aria-label={isQrCollapsed ? 'Show QR code' : 'Hide QR code'}
-                aria-expanded={!isQrCollapsed}
-              >
-                {isQrCollapsed ? '▶ Scan to Share' : '▼ Scan to Share'}
-              </button>
-              {!isQrCollapsed && (
-                <div className="scan-to-share-content">
-                  <div className="scan-to-share-qr-container">
-                    <QRCodeSVG
-                      value={qrUrl}
-                      size={200}
-                      level="H"
-                      includeMargin={true}
-                      fgColor="#000000"
-                      bgColor="#ffffff"
-                    />
-                  </div>
-                  <p className="scan-to-share-url">{qrUrl}</p>
+              {/* Scan to Share Button */}
+              {qrUrl && (
+                <div className="scan-to-share-section">
+                  <button
+                    className="scan-to-share-button"
+                    onClick={() => setIsQrCollapsed(!isQrCollapsed)}
+                    aria-label={isQrCollapsed ? 'Show QR code' : 'Hide QR code'}
+                    aria-expanded={!isQrCollapsed}
+                  >
+                    {isQrCollapsed ? '▶ Scan to Share' : '▼ Scan to Share'}
+                  </button>
+                  {!isQrCollapsed && (
+                    <div className="scan-to-share-content">
+                      <div className="scan-to-share-qr-container">
+                        <QRCodeSVG
+                          value={qrUrl}
+                          size={200}
+                          level="H"
+                          includeMargin={true}
+                          fgColor="#000000"
+                          bgColor="#ffffff"
+                        />
+                      </div>
+                      <p className="scan-to-share-url">{qrUrl}</p>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          )}
 
-          {/* Back to Invite Button */}
-          <div className="back-to-invite-section">
-            <button
-              className="back-to-invite-button"
-              onClick={() => navigate('/jda11202025')}
-              aria-label="Back to birthday invite"
-            >
-              ← Back to Invite
-            </button>
-          </div>
+              {/* Back to Invite Button */}
+              <div className="back-to-invite-section">
+                <button
+                  className="back-to-invite-button"
+                  onClick={() => navigate('/jda11202025')}
+                  aria-label="Back to birthday invite"
+                >
+                  ← Back to Invite
+                </button>
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
 
-      {/* Which One's False Modal */}
-      {isWhichOnesFalseModalOpen && (
-        <div className="game-modal-overlay" onClick={handleCloseWhichOnesFalseModal}>
-          <div className="game-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="game-modal-header">
-              <h2 className="game-modal-title">Which One's False</h2>
-              <button
-                className="game-modal-close"
-                onClick={handleCloseWhichOnesFalseModal}
-                aria-label="Close modal"
-              >
-                ×
-              </button>
-            </div>
-            <div className="game-modal-content">
+      {/* Which One's False Game View */}
+      {currentGame === "Which One's False" && (
+        <div className="game-full-page">
+          <div className="game-full-page-header">
+            <button
+              className="game-back-button"
+              onClick={handleBackToGames}
+              aria-label="Back to games"
+            >
+              ← Back to Games
+            </button>
+            <h2 className="game-full-page-title">Which One's False</h2>
+          </div>
+          <div className="game-full-page-content">
               {!showSubmissionsList ? (
                 <>
                   <p className="game-modal-description">
@@ -962,7 +996,7 @@ const BirthdayGames = () => {
                   <button
                     type="button"
                     className="game-modal-cancel"
-                    onClick={handleCloseWhichOnesFalseModal}
+                    onClick={handleBackToGames}
                   >
                     Cancel
                   </button>
@@ -978,120 +1012,143 @@ const BirthdayGames = () => {
                 </>
               ) : (
                 <div className="submissions-list">
-                  <div className="submissions-list-header">
-                    <div>
-                      <h3 className="submissions-list-title">Submitted Players</h3>
-                      <p className="submissions-list-description">
-                        {Object.keys(submittedUsers).length} player{Object.keys(submittedUsers).length !== 1 ? 's' : ''} have submitted their statements!
+                  {Object.keys(submittedUsers).length === 0 ? (
+                    <div className="no-submissions-message">
+                      <h3 className="no-submissions-title">Add First Answer!</h3>
+                      <p className="no-submissions-description">
+                        Be the first to submit your statements!
                       </p>
-                    </div>
-                    {!showPlayerNames && (
                       <button
                         type="button"
-                        className="reveal-names-button"
-                        onClick={() => setShowRevealConfirmation(true)}
+                        className="game-modal-submit"
+                        onClick={() => setShowSubmissionsList(false)}
                       >
-                        Reveal Names
+                        Add Your Answer
                       </button>
-                    )}
-                  </div>
-                  <div className="submissions-list-items">
-                    {Object.entries(submittedUsers)
-                      .sort(([, a], [, b]) => b.submittedAt - a.submittedAt)
-                      .map(([key, submission], index) => {
-                        const isExpanded = expandedSubmissions.has(key)
-                        return (
-                          <div key={key} className={`submission-item ${isExpanded ? 'expanded' : ''}`}>
-                            <div 
-                              className="submission-header"
-                              onClick={() => {
-                                const newExpanded = new Set(expandedSubmissions)
-                                if (isExpanded) {
-                                  newExpanded.delete(key)
-                                } else {
-                                  newExpanded.add(key)
-                                }
-                                setExpandedSubmissions(newExpanded)
-                              }}
-                              style={{ cursor: 'pointer' }}
-                            >
-                              <h4 className="submission-player-name">
-                                {showPlayerNames ? submission.playerName : `Player ${index + 1}`}
-                              </h4>
-                              <span className="submission-toggle-icon">
-                                {isExpanded ? '▼' : '▶'}
-                              </span>
-                            </div>
-                            {isExpanded && (
-                              <div className="submission-statements">
-                                {submission.statements.map((statement, statementIndex) => (
-                                  <div key={statementIndex} className="submission-statement">
-                                    <span className="submission-statement-number">{statementIndex + 1}.</span>
-                                    <span className="submission-statement-text">{statement}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
-                  </div>
-                  {showPlayerNames && (
-                    <div className="players-summary">
-                      <h4 className="players-summary-title">Players:</h4>
-                      <div className="players-summary-list">
+                      <button
+                        type="button"
+                        className="game-modal-cancel"
+                        onClick={handleBackToGames}
+                      >
+                        Close
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="submissions-list-header">
+                        <div>
+                          <h3 className="submissions-list-title">Submitted Players</h3>
+                          <p className="submissions-list-description">
+                            {Object.keys(submittedUsers).length} player{Object.keys(submittedUsers).length !== 1 ? 's' : ''} have submitted their statements!
+                          </p>
+                        </div>
+                        {!showPlayerNames && (
+                          <button
+                            type="button"
+                            className="reveal-names-button"
+                            onClick={() => setShowRevealConfirmation(true)}
+                          >
+                            Reveal Names
+                          </button>
+                        )}
+                      </div>
+                      <div className="submissions-list-items">
                         {Object.entries(submittedUsers)
                           .sort(([, a], [, b]) => b.submittedAt - a.submittedAt)
-                          .map(([key, submission], index) => (
-                            <span key={key} className="player-summary-item">
-                              {submission.playerName}
-                              {index < Object.keys(submittedUsers).length - 1 && ','}
-                            </span>
-                          ))}
+                          .map(([key, submission], index) => {
+                            const isExpanded = expandedSubmissions.has(key)
+                            return (
+                              <div key={key} className={`submission-item ${isExpanded ? 'expanded' : ''}`}>
+                                <div 
+                                  className="submission-header"
+                                  onClick={() => {
+                                    const newExpanded = new Set(expandedSubmissions)
+                                    if (isExpanded) {
+                                      newExpanded.delete(key)
+                                    } else {
+                                      newExpanded.add(key)
+                                    }
+                                    setExpandedSubmissions(newExpanded)
+                                  }}
+                                  style={{ cursor: 'pointer' }}
+                                >
+                                  <h4 className="submission-player-name">
+                                    {showPlayerNames ? submission.playerName : `Player ${index + 1}`}
+                                  </h4>
+                                  <span className="submission-toggle-icon">
+                                    {isExpanded ? '▼' : '▶'}
+                                  </span>
+                                </div>
+                                {isExpanded && (
+                                  <div className="submission-statements">
+                                    {submission.statements.map((statement, statementIndex) => (
+                                      <div key={statementIndex} className="submission-statement">
+                                        <span className="submission-statement-number">{statementIndex + 1}.</span>
+                                        <span className="submission-statement-text">{statement}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
                       </div>
-                    </div>
+                      {showPlayerNames && (
+                        <div className="players-summary">
+                          <h4 className="players-summary-title">Players:</h4>
+                          <div className="players-summary-list">
+                            {Object.entries(submittedUsers)
+                              .sort(([, a], [, b]) => b.submittedAt - a.submittedAt)
+                              .map(([key, submission], index) => (
+                                <span key={key} className="player-summary-item">
+                                  {submission.playerName}
+                                  {index < Object.keys(submittedUsers).length - 1 && ','}
+                                </span>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+                      <div className="submissions-list-actions">
+                        <button
+                          type="button"
+                          className="game-modal-submit"
+                          onClick={() => {
+                            setShowSubmissionsList(false)
+                            setStatements(['', '', ''])
+                          }}
+                        >
+                          Add Another Entry
+                        </button>
+                      <button
+                        type="button"
+                        className="game-modal-cancel"
+                        onClick={handleBackToGames}
+                      >
+                        Close
+                      </button>
+                      </div>
+                    </>
                   )}
-                  <div className="submissions-list-actions">
-                    <button
-                      type="button"
-                      className="game-modal-submit"
-                      onClick={() => {
-                        setShowSubmissionsList(false)
-                        setStatements(['', '', ''])
-                      }}
-                    >
-                      Add Another Entry
-                    </button>
-                    <button
-                      type="button"
-                      className="game-modal-cancel"
-                      onClick={handleCloseWhichOnesFalseModal}
-                    >
-                      Close
-                    </button>
-                  </div>
                 </div>
               )}
-            </div>
           </div>
         </div>
       )}
 
-      {/* Who Picked Modal */}
-      {isWhoPickedModalOpen && (
-        <div className="game-modal-overlay" onClick={handleCloseWhoPickedModal}>
-          <div className="game-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="game-modal-header">
-              <h2 className="game-modal-title">Who Picked</h2>
-              <button
-                className="game-modal-close"
-                onClick={handleCloseWhoPickedModal}
-                aria-label="Close modal"
-              >
-                ×
-              </button>
-            </div>
-            <div className="game-modal-content">
+      {/* Who Picked Game View */}
+      {currentGame === "Who Picked" && (
+        <div className="game-full-page">
+          <div className="game-full-page-header">
+            <button
+              className="game-back-button"
+              onClick={handleBackToGames}
+              aria-label="Back to games"
+            >
+              ← Back to Games
+            </button>
+            <h2 className="game-full-page-title">Who Picked</h2>
+          </div>
+          <div className="game-full-page-content">
               <p className="game-modal-description">
                 Add songs to the list! Others will try to guess who picked each song.
               </p>
@@ -1209,60 +1266,79 @@ const BirthdayGames = () => {
                   <p className="no-songs-message">No songs added yet. Be the first to add one!</p>
                 ) : (
                   <div className="songs-list">
-                    {songs.map((song) => (
-                      <div key={song.id} className="song-item">
-                        <div className="song-info">
-                          <div className="song-name">{song.songName}</div>
-                          <div className="song-artist">by {song.artist}</div>
+                    {songs.map((song) => {
+                      const isLongPressing = longPressSongId === song.id
+                      const isRevealed = revealedSongs.has(song.id)
+                      
+                      return (
+                        <div 
+                          key={song.id} 
+                          className={`song-item ${isLongPressing ? 'long-pressing' : ''} ${isRevealed ? 'revealed' : ''}`}
+                          onMouseDown={() => handleLongPressStart(song.id)}
+                          onMouseUp={handleLongPressEnd}
+                          onMouseLeave={handleLongPressEnd}
+                          onTouchStart={() => handleLongPressStart(song.id)}
+                          onTouchEnd={handleLongPressEnd}
+                          onTouchCancel={handleLongPressEnd}
+                        >
+                          {isLongPressing && (
+                            <div className="long-press-progress">
+                              <div 
+                                className="long-press-progress-bar" 
+                                style={{ width: `${longPressProgress}%` }}
+                              />
+                              <span className="long-press-progress-text">
+                                {Math.round(longPressProgress / 20)}s
+                              </span>
+                            </div>
+                          )}
+                          <div className="song-info">
+                            <div className="song-name">{song.songName}</div>
+                            <div className="song-artist">by {song.artist}</div>
+                            {isRevealed && (
+                              <div className="song-added-by">
+                                Added by: {song.addedBy}
+                              </div>
+                            )}
+                          </div>
+                          {song.videoId && (
+                            <a
+                              href={`https://www.youtube.com/watch?v=${song.videoId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="song-youtube-link"
+                              onClick={(e) => e.stopPropagation()}
+                              aria-label={`Open ${song.songName} on YouTube`}
+                            >
+                              <span className="youtube-icon">▶</span>
+                              Watch on YouTube
+                            </a>
+                          )}
                         </div>
-                        {song.videoId && (
-                          <a
-                            href={`https://www.youtube.com/watch?v=${song.videoId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="song-youtube-link"
-                            onClick={(e) => e.stopPropagation()}
-                            aria-label={`Open ${song.songName} on YouTube`}
-                          >
-                            <span className="youtube-icon">▶</span>
-                            Watch on YouTube
-                          </a>
-                        )}
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
               </div>
 
-              <div className="game-modal-actions">
-                <button
-                  type="button"
-                  className="game-modal-cancel"
-                  onClick={handleCloseWhoPickedModal}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       )}
 
-      {/* GOAT Modal */}
-      {isGOATModalOpen && (
-        <div className="game-modal-overlay" onClick={handleCloseGOATModal}>
-          <div className="game-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="game-modal-header">
-              <h2 className="game-modal-title">GOAT</h2>
-              <button
-                className="game-modal-close"
-                onClick={handleCloseGOATModal}
-                aria-label="Close modal"
-              >
-                ×
-              </button>
-            </div>
-            <div className="game-modal-content">
+      {/* GOAT Game View */}
+      {currentGame === "GOAT" && (
+        <div className="game-full-page">
+          <div className="game-full-page-header">
+            <button
+              className="game-back-button"
+              onClick={handleBackToGames}
+              aria-label="Back to games"
+            >
+              ← Back to Games
+            </button>
+            <h2 className="game-full-page-title">GOAT</h2>
+          </div>
+          <div className="game-full-page-content">
               {!showGOATSubmissionsList ? (
                 <>
                   <p className="game-modal-description">
@@ -1301,7 +1377,7 @@ const BirthdayGames = () => {
                       <button
                         type="button"
                         className="game-modal-cancel"
-                        onClick={handleCloseGOATModal}
+                        onClick={handleBackToGames}
                       >
                         Cancel
                       </button>
@@ -1317,101 +1393,125 @@ const BirthdayGames = () => {
                 </>
               ) : (
                 <div className="submissions-list">
-                  <div className="submissions-list-header">
-                    <div>
-                      <h3 className="submissions-list-title">Submitted Players</h3>
-                      <p className="submissions-list-description">
-                        {Object.keys(goatSubmissions).length} player{Object.keys(goatSubmissions).length !== 1 ? 's' : ''} have submitted their movies!
+                  {Object.keys(goatSubmissions).length === 0 ? (
+                    <div className="no-submissions-message">
+                      <h3 className="no-submissions-title">Add First Answer!</h3>
+                      <p className="no-submissions-description">
+                        Be the first to submit your top 3 movies!
                       </p>
-                    </div>
-                    {!showGOATPlayerNames && (
                       <button
                         type="button"
-                        className="reveal-names-button"
-                        onClick={() => setShowGOATRevealConfirmation(true)}
+                        className="game-modal-submit"
+                        onClick={() => setShowGOATSubmissionsList(false)}
                       >
-                        Reveal Names
+                        Add Your Answer
                       </button>
-                    )}
-                  </div>
-                  <div className="submissions-list-items">
-                    {Object.entries(goatSubmissions)
-                      .sort(([, a], [, b]) => b.submittedAt - a.submittedAt)
-                      .map(([key, submission], index) => {
-                        const isExpanded = expandedGOATSubmissions.has(key)
-                        return (
-                          <div key={key} className={`submission-item ${isExpanded ? 'expanded' : ''}`}>
-                            <div 
-                              className="submission-header"
-                              onClick={() => {
-                                const newExpanded = new Set(expandedGOATSubmissions)
-                                if (isExpanded) {
-                                  newExpanded.delete(key)
-                                } else {
-                                  newExpanded.add(key)
-                                }
-                                setExpandedGOATSubmissions(newExpanded)
-                              }}
-                              style={{ cursor: 'pointer' }}
-                            >
-                              <h4 className="submission-player-name">
-                                {showGOATPlayerNames ? submission.playerName : `Player ${index + 1}`}
-                              </h4>
-                              <span className="submission-toggle-icon">
-                                {isExpanded ? '▼' : '▶'}
-                              </span>
-                            </div>
-                            {isExpanded && (
-                              <div className="submission-statements">
-                                {submission.movies.map((movie, movieIndex) => (
-                                  <div key={movieIndex} className="submission-statement">
-                                    <span className="submission-statement-number">{movieIndex + 1}.</span>
-                                    <span className="submission-statement-text">{movie}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
-                  </div>
-                  {showGOATPlayerNames && (
-                    <div className="players-summary">
-                      <h4 className="players-summary-title">Players:</h4>
-                      <div className="players-summary-list">
+                      <button
+                        type="button"
+                        className="game-modal-cancel"
+                        onClick={handleBackToGames}
+                      >
+                        Close
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="submissions-list-header">
+                        <div>
+                          <h3 className="submissions-list-title">Submitted Players</h3>
+                          <p className="submissions-list-description">
+                            {Object.keys(goatSubmissions).length} player{Object.keys(goatSubmissions).length !== 1 ? 's' : ''} have submitted their movies!
+                          </p>
+                        </div>
+                        {!showGOATPlayerNames && (
+                          <button
+                            type="button"
+                            className="reveal-names-button"
+                            onClick={() => setShowGOATRevealConfirmation(true)}
+                          >
+                            Reveal Names
+                          </button>
+                        )}
+                      </div>
+                      <div className="submissions-list-items">
                         {Object.entries(goatSubmissions)
                           .sort(([, a], [, b]) => b.submittedAt - a.submittedAt)
-                          .map(([key, submission], index) => (
-                            <span key={key} className="player-summary-item">
-                              {submission.playerName}
-                              {index < Object.keys(goatSubmissions).length - 1 && ','}
-                            </span>
-                          ))}
+                          .map(([key, submission], index) => {
+                            const isExpanded = expandedGOATSubmissions.has(key)
+                            return (
+                              <div key={key} className={`submission-item ${isExpanded ? 'expanded' : ''}`}>
+                                <div 
+                                  className="submission-header"
+                                  onClick={() => {
+                                    const newExpanded = new Set(expandedGOATSubmissions)
+                                    if (isExpanded) {
+                                      newExpanded.delete(key)
+                                    } else {
+                                      newExpanded.add(key)
+                                    }
+                                    setExpandedGOATSubmissions(newExpanded)
+                                  }}
+                                  style={{ cursor: 'pointer' }}
+                                >
+                                  <h4 className="submission-player-name">
+                                    {showGOATPlayerNames ? submission.playerName : `Player ${index + 1}`}
+                                  </h4>
+                                  <span className="submission-toggle-icon">
+                                    {isExpanded ? '▼' : '▶'}
+                                  </span>
+                                </div>
+                                {isExpanded && (
+                                  <div className="submission-statements">
+                                    {submission.movies.map((movie, movieIndex) => (
+                                      <div key={movieIndex} className="submission-statement">
+                                        <span className="submission-statement-number">{movieIndex + 1}.</span>
+                                        <span className="submission-statement-text">{movie}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
                       </div>
-                    </div>
+                      {showGOATPlayerNames && (
+                        <div className="players-summary">
+                          <h4 className="players-summary-title">Players:</h4>
+                          <div className="players-summary-list">
+                            {Object.entries(goatSubmissions)
+                              .sort(([, a], [, b]) => b.submittedAt - a.submittedAt)
+                              .map(([key, submission], index) => (
+                                <span key={key} className="player-summary-item">
+                                  {submission.playerName}
+                                  {index < Object.keys(goatSubmissions).length - 1 && ','}
+                                </span>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+                      <div className="submissions-list-actions">
+                        <button
+                          type="button"
+                          className="game-modal-submit"
+                          onClick={() => {
+                            setShowGOATSubmissionsList(false)
+                            setMovies(['', '', ''])
+                          }}
+                        >
+                          Add Another Entry
+                        </button>
+                        <button
+                          type="button"
+                          className="game-modal-cancel"
+                          onClick={handleBackToGames}
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </>
                   )}
-                  <div className="submissions-list-actions">
-                    <button
-                      type="button"
-                      className="game-modal-submit"
-                      onClick={() => {
-                        setShowGOATSubmissionsList(false)
-                        setMovies(['', '', ''])
-                      }}
-                    >
-                      Add Another Entry
-                    </button>
-                    <button
-                      type="button"
-                      className="game-modal-cancel"
-                      onClick={handleCloseGOATModal}
-                    >
-                      Close
-                    </button>
-                  </div>
                 </div>
               )}
-            </div>
           </div>
         </div>
       )}

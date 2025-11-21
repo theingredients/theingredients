@@ -558,6 +558,91 @@
 }
 
 /* Game Modal Styles */
+/* Full Page Game View */
+.game-full-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 1);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.theme-dark .game-full-page {
+  background: rgba(20, 20, 20, 1);
+}
+
+.game-full-page-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 1);
+}
+
+.theme-dark .game-full-page-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+  background: rgba(20, 20, 20, 1);
+}
+
+.game-back-button {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.7);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.theme-dark .game-back-button {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.game-back-button:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.theme-dark .game-back-button:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.game-back-button:active {
+  transform: scale(0.95);
+}
+
+.game-full-page-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  margin: 0;
+}
+
+.theme-dark .game-full-page-title {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.game-full-page-content {
+  padding: 2rem;
+  overflow-y: auto;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
 .game-modal-overlay {
   position: fixed;
   top: 0;
@@ -852,6 +937,44 @@
   transform: translateY(0);
 }
 
+/* Responsive full-page game styles */
+@media (max-width: 768px) {
+  .game-full-page-header {
+    padding: 1rem 1.5rem;
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+
+  .game-full-page-title {
+    font-size: 1.5rem;
+  }
+
+  .game-full-page-content {
+    padding: 1.5rem;
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 480px) {
+  .game-full-page-header {
+    padding: 0.75rem 1rem;
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+  }
+
+  .game-full-page-title {
+    font-size: 1.25rem;
+  }
+
+  .game-full-page-content {
+    padding: 1rem;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .game-back-button {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.75rem;
+  }
+}
+
 /* Responsive modal styles */
 @media (max-width: 768px) {
   .game-modal-overlay {
@@ -970,6 +1093,42 @@
 
 .theme-dark .submissions-list-description {
   color: rgba(255, 255, 255, 0.6);
+}
+
+.no-submissions-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.no-submissions-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.85);
+  margin: 0;
+}
+
+.theme-dark .no-submissions-title {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.no-submissions-description {
+  font-size: 1.1rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin: 0;
+}
+
+.theme-dark .no-submissions-description {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.no-submissions-message .game-modal-submit,
+.no-submissions-message .game-modal-cancel {
+  min-width: 200px;
 }
 
 .reveal-names-button {
@@ -1566,6 +1725,11 @@
   border-radius: 8px;
   padding: 1rem;
   display: flex;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
@@ -1610,6 +1774,83 @@
 
 .theme-dark .song-artist {
   color: rgba(255, 255, 255, 0.6);
+}
+
+.song-added-by {
+  font-size: 0.85rem;
+  color: rgba(76, 175, 80, 0.9);
+  font-weight: 500;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.theme-dark .song-added-by {
+  color: rgba(76, 175, 80, 0.8);
+  border-top-color: rgba(76, 175, 80, 0.3);
+}
+
+.song-item.long-pressing {
+  background: rgba(76, 175, 80, 0.1) !important;
+  border-color: rgba(76, 175, 80, 0.3) !important;
+}
+
+.theme-dark .song-item.long-pressing {
+  background: rgba(76, 175, 80, 0.15) !important;
+  border-color: rgba(76, 175, 80, 0.4) !important;
+}
+
+.song-item.revealed {
+  border-color: rgba(76, 175, 80, 0.5);
+}
+
+.theme-dark .song-item.revealed {
+  border-color: rgba(76, 175, 80, 0.6);
+}
+
+.long-press-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.theme-dark .long-press-progress {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.long-press-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(76, 175, 80, 0.8), rgba(76, 175, 80, 1));
+  transition: width 0.1s linear;
+  border-radius: 8px 0 0 0;
+}
+
+.long-press-progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(76, 175, 80, 0.9);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.theme-dark .long-press-progress-text {
+  color: rgba(76, 175, 80, 0.8);
+  background: rgba(20, 20, 20, 0.95);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .song-youtube-link {

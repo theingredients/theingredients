@@ -89,6 +89,24 @@
         console.log(`${(index + 1).toString().padStart(3, ' ')}. ${voter.name.padEnd(25, ' ')} → ${voter.restaurant.padEnd(25, ' ')} (${voter.total} person${voter.total !== 1 ? 's' : ''})`);
       });
     
+    // Show voter registry if available (who voted for what)
+    if (data.voterRegistry) {
+      console.log(`\n\n🗳️  VOTER REGISTRY (Who Voted For What):\n`);
+      console.log('═'.repeat(60));
+      const registryEntries = Object.entries(data.voterRegistry);
+      if (registryEntries.length > 0) {
+        registryEntries
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .forEach(([name, restaurantId]) => {
+            const restaurant = data.restaurants.find(r => r.id === restaurantId);
+            const restaurantName = restaurant ? restaurant.name : `Restaurant ID: ${restaurantId}`;
+            console.log(`  ${name.padEnd(25, ' ')} → ${restaurantName}`);
+          });
+      } else {
+        console.log('  No voter registry data available');
+      }
+    }
+    
     console.log('\n' + '═'.repeat(60));
     console.log('✅ Done! Data also available in returned object.');
     
@@ -98,7 +116,8 @@
       allVoters,
       totalPeople,
       totalInvites: allVoters.length,
-      summary: byRestaurant
+      summary: byRestaurant,
+      voterRegistry: data.voterRegistry || {}
     };
     
   } catch (error) {
