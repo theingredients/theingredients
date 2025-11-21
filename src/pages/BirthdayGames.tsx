@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import Layout from '../components/Layout'
 import { sanitizeInput } from '../utils/inputSanitizer'
+import { useTheme } from '../contexts/ThemeContext'
 import './PageStyles.css'
 import './BirthdayGames.css'
 import './BirthdayInvite.css'
 
 const BirthdayGames = () => {
   const navigate = useNavigate()
+  const { toggleTheme } = useTheme()
   const [isContentExploding] = useState(false)
   const [qrUrl, setQrUrl] = useState('')
   const [isQrCollapsed, setIsQrCollapsed] = useState(false)
@@ -666,7 +668,20 @@ const BirthdayGames = () => {
     <Layout>
       <div className="page-container">
         <div className={`birthday-games ${isContentExploding ? 'content-exploding' : ''}`}>
-          <h1 className={`page-title ${isContentExploding ? 'exploding' : ''}`}>
+          <h1 
+            className={`page-title birthday-games-title-toggle ${isContentExploding ? 'exploding' : ''}`}
+            onClick={toggleTheme}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                toggleTheme()
+              }
+            }}
+            aria-label="Toggle light/dark mode"
+            title="Click to toggle light/dark mode"
+          >
             Birthday Games
           </h1>
           

@@ -5,6 +5,33 @@
   position: relative;
 }
 
+/* Birthday Games Title Toggle */
+.birthday-games-title-toggle {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.birthday-games-title-toggle:hover {
+  opacity: 0.8;
+  transform: scale(1.02);
+}
+
+.birthday-games-title-toggle:active {
+  transform: scale(0.98);
+}
+
+.birthday-games-title-toggle:focus {
+  outline: 2px solid var(--accent-color, #4a90e2);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.theme-dark .birthday-games-title-toggle:focus {
+  outline-color: var(--accent-color-dark, #6ba3f5);
+}
+
 /* QR Code Section */
 .qr-code-section {
   background: rgba(255, 255, 255, 0.5);
