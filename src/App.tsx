@@ -12,6 +12,7 @@ import Blog from './pages/blog/Blog'
 import BlogPost from './pages/blog/BlogPost'
 import Coffee from './pages/Coffee'
 import BirthdayInvite from './pages/BirthdayInvite'
+import BirthdayGames from './pages/BirthdayGames'
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/coffee" element={<Coffee />} />
           <Route path="/jda11202025" element={<BirthdayInvite />} />
+          <Route path="/bdaygame" element={<BirthdayGames />} />
         </Routes>
       </Router>
       <Analytics

@@ -223,9 +223,21 @@ export default async function handler(
     try {
       const pollData = await getPollData()
       const comments = await getComments()
+      
+      // Get voter registry to show who voted for what
+      let voterRegistry: Record<string, string> = {}
+      try {
+        const redis = await getRedisClient()
+        const voterRegistryData = await redis.get(VOTER_REGISTRY_KEY)
+        voterRegistry = voterRegistryData ? JSON.parse(voterRegistryData as string) as Record<string, string> : {}
+      } catch (error) {
+        console.error('Error getting voter registry:', error)
+      }
+      
       return res.status(200).json({
         ...pollData,
-        comments
+        comments,
+        voterRegistry // Map of name -> restaurantId
       })
     } catch (error) {
       console.error('Error getting poll data:', error)

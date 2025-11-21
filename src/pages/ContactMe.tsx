@@ -15,6 +15,7 @@ const ContactMe = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const animationFrameRef = useRef<number | null>(null)
   const visualizationTimeoutRef = useRef<number | null>(null)
+  const audioUnlockedRef = useRef<boolean>(false)
 
   // Lock orientation to portrait when component mounts
   useEffect(() => {
@@ -121,17 +122,82 @@ const ContactMe = () => {
     }
   }, [cleanupAudioResources])
 
-  // Function to ensure audio context is resumed (required for mobile)
+  // Function to unlock audio for Safari/iOS (plays silent buffer to unlock audio)
+  const unlockAudioForSafari = async (context: AudioContext): Promise<boolean> => {
+    try {
+      // Create a very short silent buffer
+      const buffer = context.createBuffer(1, 1, 22050)
+      const source = context.createBufferSource()
+      source.buffer = buffer
+      source.connect(context.destination)
+      
+      // Play and immediately stop to unlock audio
+      source.start(0)
+      source.stop(context.currentTime + 0.001)
+      
+      // Wait a bit for Safari to process
+      await new Promise(resolve => setTimeout(resolve, 10))
+      return true
+    } catch (error) {
+      console.warn('Could not unlock audio for Safari:', error)
+      return false
+    }
+  }
+
+  // Function to ensure audio context is resumed (required for mobile, especially Safari)
   const ensureAudioContextResumed = async () => {
+    // For Safari/iOS, we may need to create a fresh context on user interaction
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || 
+                     /iPad|iPhone|iPod/.test(navigator.userAgent)
+    
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+      
+      // Recreate analyser if needed
+      if (!analyserRef.current && audioContextRef.current) {
+        analyserRef.current = audioContextRef.current.createAnalyser()
+        analyserRef.current.fftSize = 2048
+        analyserRef.current.smoothingTimeConstant = 0.8
+      }
     }
     
-    if (audioContextRef.current.state === 'suspended') {
+    const context = audioContextRef.current
+    
+    // For Safari, unlock audio first if not already unlocked
+    if (isSafari && !audioUnlockedRef.current) {
+      const unlocked = await unlockAudioForSafari(context)
+      if (unlocked) {
+        audioUnlockedRef.current = true
+      }
+    }
+    
+    // Resume if suspended
+    if (context.state === 'suspended') {
       try {
-        await audioContextRef.current.resume()
+        await context.resume()
+        // Double-check after resume
+        if (context.state === 'suspended') {
+          // Sometimes Safari needs multiple resume attempts
+          await new Promise(resolve => setTimeout(resolve, 50))
+          await context.resume()
+        }
       } catch (error) {
         console.warn('Could not resume audio context:', error)
+        // Try creating a new context as fallback
+        if (isSafari) {
+          try {
+            const newContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+            if (newContext.state === 'running') {
+              audioContextRef.current = newContext
+              analyserRef.current = newContext.createAnalyser()
+              analyserRef.current.fftSize = 2048
+              analyserRef.current.smoothingTimeConstant = 0.8
+              audioUnlockedRef.current = true
+            }
+          } catch (fallbackError) {
+            console.warn('Could not create fallback audio context:', fallbackError)
+          }
+        }
       }
     }
   }
@@ -444,7 +510,7 @@ const ContactMe = () => {
   }
 
   const playDTMFTone = async (digit: string) => {
-    // Ensure audio context exists and is resumed (critical for mobile)
+    // Ensure audio context exists and is resumed (critical for mobile, especially Safari)
     await ensureAudioContextResumed()
     
     if (!audioContextRef.current) {
@@ -457,10 +523,21 @@ const ContactMe = () => {
 
     const context = audioContextRef.current
     
-    // Double-check context is running (mobile browsers can be finicky)
+    // Triple-check context is running (Safari can be very finicky)
     if (context.state === 'suspended') {
       try {
         await context.resume()
+        // Wait a bit and check again
+        await new Promise(resolve => setTimeout(resolve, 10))
+        if (context.state === 'suspended') {
+          // Try one more time
+          await context.resume()
+          await new Promise(resolve => setTimeout(resolve, 10))
+        }
+        if (context.state === 'suspended') {
+          console.warn('Audio context still suspended after resume attempts')
+          return
+        }
       } catch (error) {
         console.warn('Could not resume audio context for DTMF tone:', error)
         return
@@ -508,13 +585,22 @@ const ContactMe = () => {
 
     // Play through Web Audio API and connect to analyser for visualization
     try {
+      // Final check that context is running before playing
+      if (context.state !== 'running') {
+        console.warn('Audio context not running, cannot play tone')
+        return
+      }
+      
       const source = context.createBufferSource()
       const gainNode = context.createGain()
       
-      gainNode.gain.setValueAtTime(0, context.currentTime)
-      gainNode.gain.linearRampToValueAtTime(0.4, context.currentTime + 0.01)
-      gainNode.gain.linearRampToValueAtTime(0.4, context.currentTime + duration - 0.01)
-      gainNode.gain.linearRampToValueAtTime(0, context.currentTime + duration)
+      // Use currentTime to ensure timing is correct
+      const now = context.currentTime
+      
+      gainNode.gain.setValueAtTime(0, now)
+      gainNode.gain.linearRampToValueAtTime(0.4, now + 0.01)
+      gainNode.gain.linearRampToValueAtTime(0.4, now + duration - 0.01)
+      gainNode.gain.linearRampToValueAtTime(0, now + duration)
 
       source.buffer = buffer
       source.connect(gainNode)
@@ -527,10 +613,15 @@ const ContactMe = () => {
       // Also connect to destination for audio output
       gainNode.connect(context.destination)
       
-      source.start(0)
-      source.stop(context.currentTime + duration)
+      // Start immediately (Safari requires immediate start after user interaction)
+      source.start(now)
+      source.stop(now + duration)
     } catch (error) {
       console.warn('Could not play DTMF tone:', error)
+      // Try to unlock audio again if it failed
+      if (!audioUnlockedRef.current) {
+        audioUnlockedRef.current = false
+      }
     }
   }
 

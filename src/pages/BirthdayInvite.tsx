@@ -1,43 +1,112 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { QRCodeSVG } from 'qrcode.react'
 import Layout from '../components/Layout'
 import { sanitizeInput } from '../utils/inputSanitizer'
 import './PageStyles.css'
 import './BirthdayInvite.css'
 
-interface Restaurant {
-  id: string
+interface MenuItem {
   name: string
   description?: string
-  votes: number
-  voters: string[] // Array of voter names
-  link?: string
+  price: string
+}
+
+interface MenuCategory {
+  name: string
+  items: MenuItem[]
 }
 
 const BirthdayInvite = () => {
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([
-    { id: '1', name: `Arnoldi's`, description: 'Italian cuisine', votes: 0, voters: [], link: 'https://www.arnoldis.com/' },
-    { id: '2', name: 'La Paloma', description: 'Mexican cuisine', votes: 0, voters: [], link: 'https://lapalomasb.com/' },
-    { id: '3', name: 'Third Window Brewery', description: 'American', votes: 0, voters: [], link: 'https://www.thirdwindowbrewing.com/' },
-    { id: '4', name: 'SB Public Market', description: 'American/Mexican/Japanese/Korean', votes: 0, voters: [], link: 'https://www.sbpublicmarket.com/' },
-    { id: '5', name: 'M Special', description: 'American', votes: 0, voters: [], link: 'https://mspecialbrewco.com/' },
-    { id: '6', name: 'Cant Go', description: 'Happy Birthday!', votes: 0, voters: [], link: 'https://www.theingredients.io/coffee' },
-  ])
-  const [hasVoted, setHasVoted] = useState(false)
-  const [selectedRestaurant, setSelectedRestaurant] = useState<string | null>(null)
-  const [isNameModalOpen, setIsNameModalOpen] = useState(false)
-  const [pendingRestaurantId, setPendingRestaurantId] = useState<string | null>(null)
-  const [isCantGoVote, setIsCantGoVote] = useState(false)
-  const [name, setName] = useState('')
-  const [nameError, setNameError] = useState<string | null>(null)
+  const navigate = useNavigate()
+  
+  const menuCategories: MenuCategory[] = [
+    {
+      name: 'Appetizers',
+      items: [
+        { name: 'Shrimp Gamberi', description: 'Sautéed grilled shrimp served in a spicy white wine tomato sauce', price: '$26.00' },
+        { name: 'Calamari Fritti', description: 'Fried wild calamari served with a spicy tomato sauce', price: '$25.00' },
+        { name: 'Pane Aglio', description: 'Garlic bread served with our arrabiata dipping sauce', price: '$16.00' },
+        { name: 'Arancini', description: 'Fried Italian balls stuffed with mozz cheese served with dipping sauce', price: '$18.00' },
+        { name: 'Pizzeta Olive Oil', price: '$18.00' },
+        { name: 'Pizzetta Rosemary', description: 'Oval pinsa with rosemary and EVOO', price: '$18.00' },
+        { name: 'Flor di Zucca', description: 'Fried zucchini blossoms filled with mascarpone and ricotta cheese served with spicy tomato arrabiatta sauce', price: '$18.00' },
+        { name: 'Pizzeta', price: '$18.00' },
+        { name: 'Burrata in Carrozza', description: 'Fried breaded burrata cheese in a sun dried tomato and spicy tomato sauce in a small cast iron pan, served with garlic bread', price: '$22.00' },
+      ]
+    },
+    {
+      name: 'Secondi Piatti - Meat Entrees',
+      items: [
+        { name: 'Salmone alla Griglia', description: 'Fresh salmon fillet marinated in herbs drizzled with extra virgin olive oil served with our midnight pasta and spinach', price: '$45.00' },
+        { name: 'Tuscan Chicken', description: 'Grilled chicken breast topped with sundried tomato alfredo sauce served with spaghetti in your choice of pomodoro sauce or alfredo sauce', price: '$35.00' },
+        { name: 'Milanese de Norte', description: 'Thinly pounded meat, breaded, sautéed, then finished with a drizzle of fresh squeezed lemon juice served with spaghetti pomodoro', price: '$39.00+' },
+        { name: 'Chicken Parmesan', description: 'Breaded chicken breast topped with tomato sauce and mozzarella cheese served with spaghetti pomodoro', price: '$36.00' },
+        { name: 'Chicken Picatta', description: 'Chicken picatta with linguine alfredo', price: '$33.00+' },
+        { name: 'Chicken Marsala', description: 'Sauteed chicken with marsala mushroom sauce, served with linguine alfredo', price: '$36.00' },
+      ]
+    },
+    {
+      name: 'Pastas',
+      items: [
+        { name: 'Spaghetti Carbonara', description: 'Spaghetti with an egg, cream, Pancetta and cheese sauce', price: '$19.00+' },
+        { name: 'Penne All\'Arrabbiata', description: 'Quill shaped pasta in a spicy tomato and garlic sauce', price: '$28.00+' },
+        { name: 'Lasagne alla Bolognese', description: 'Homemade meat lasagna in a pomodoro sauce', price: '$35.00' },
+        { name: 'Spaghetti alle Vongole', description: 'Spaghetti with fresh clams in a choice of white wine or our tomato sauce', price: '$30.00+' },
+        { name: 'Spaghetti ai Frutti di Mare', description: 'Spaghetti with fresh assorted seafood in a light spicy tomato sauce', price: '$24.00+' },
+        { name: 'Pasta al Pomodoro', description: 'Your choice of pasta in our traditional fresh tomato and basil sauce', price: '$26.00+' },
+        { name: 'Linguine Primavera', description: 'Fresh seasoned vegetables, garlic extra virgin olive oil and fresh herbs', price: '$31.00+' },
+        { name: 'Rotolo di Ricotta e Spinaci', description: 'Housemade pasta filled with ricotta and spinach in a spinach sauce', price: '$30.00' },
+        { name: 'Spaghetti alla Bolognese', description: 'Spaghetti with housemade meatballs in a ragù sauce', price: '$32.00+' },
+        { name: 'Penne Filanti al Quattro Formaggi', description: 'Quill shaped pasta in a cream sauce with Parmesan, Mozzarella and Pecorino cheese, prosciutto cotto and walnuts', price: '$32.00+' },
+        { name: 'Linguine al Pesto', description: 'Pasta in a traditional Genovese basil and pine nut pesto sauce', price: '$18.00+' },
+        { name: 'Gnocchi Tricolore', description: 'Traditional housemade potato dumplings in a Pomodoro, Gorgonzola and Pesto sauce', price: '$35.00+' },
+        { name: 'Ravioli Di Carne', description: 'Short rib ravioli in a gorgonzola cream sauce', price: '$35.00' },
+        { name: 'Pasta al Pomodoro (1)', description: 'Your choice of pasta in our traditional fresh tomato and basil sauce', price: '$28.00' },
+        { name: 'Pinsa EVOO/Rosemary Garlic Sauce', price: '$18.00' },
+        { name: 'Pinsa Pesto Sauce', price: '$18.00' },
+        { name: 'Pinsa White Sauce and Onions', price: '$18.00' },
+      ]
+    },
+    {
+      name: 'Desserts',
+      items: [
+        { name: 'Coffee Tiramisu', description: 'Traditional Coffee Tiramisu', price: '$14.00' },
+        { name: 'Chocolate Mousse', price: '$12.00' },
+        { name: 'Passion Fruit Sorbet', price: '$12.00' },
+        { name: 'Gelato', description: 'Vanilla bean gelato with a choice of chocolate or strawberry sauce', price: '$12.00' },
+        { name: 'Vanilla Gelato with Strawberry', price: '$12.00' },
+        { name: 'Cannoli', description: 'Fresh stuffed mini cannoli shells', price: '$14.00' },
+        { name: 'Cheesecake Monterosa', description: 'Creamy mix of mascarpone and ricotta cheese, divided by a delicate layer of sponge cake, topped with wild strawberries', price: '$14.00' },
+        { name: 'Gluten Free Rosso Velvet', description: 'Alternating layers of gluten free red heid mini chocolate sponge cake, and cream cheese icing topped with gluten free crumbs', price: '$12.00' },
+        { name: 'Limoncello Truffle', description: 'Lemon gelato ball with limoncello in the center', price: '$12.00' },
+        { name: 'Cappucino Gelato Ball', description: 'Italian coffee gelato with espresso core', price: '$8.00' },
+        { name: 'Lemon Blueberry Crumb Cheesecake', price: '$14.00' },
+      ]
+    },
+    {
+      name: 'Beverages',
+      items: [
+        { name: 'Shirley Temple', price: '$4.00' },
+        { name: 'Roy Roger', price: '$4.00' },
+        { name: 'Soda', price: '$4.00' },
+        { name: 'Coffee Regular', price: '$4.00' },
+      ]
+    },
+  ]
+  
   const [userName, setUserName] = useState<string | null>(null)
-  const [guestCount, setGuestCount] = useState<number>(0)
   const [userComment, setUserComment] = useState<string>('')
   const [comments, setComments] = useState<Record<string, string[]>>({})
   const [isSavingComment, setIsSavingComment] = useState(false)
   const [commentSaveSuccess, setCommentSaveSuccess] = useState(false)
+  const [name, setName] = useState('')
+  const [nameError, setNameError] = useState<string | null>(null)
   const [showFireworks, setShowFireworks] = useState(false)
   const [isContentExploding, setIsContentExploding] = useState(false)
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
   const [fireworkParticles, setFireworkParticles] = useState<Array<{ id: number; size: number; x: number; y: number; randomX: number; randomY: number }>>([])
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const titlePressTimerRef = useRef<NodeJS.Timeout | null>(null)
   const fireworkIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const contentExplodeTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -57,20 +126,13 @@ const BirthdayInvite = () => {
     }
   }, [])
 
-  // Load votes from API and localStorage on mount
+  // Load comments from API and localStorage on mount
   useEffect(() => {
-    const loadPollData = async () => {
+    const loadComments = async () => {
       try {
-        // First, try to load from API (server-side storage)
         const response = await fetch('/api/birthday-poll')
         if (response.ok) {
           const data = await response.json()
-          if (data.restaurants && data.restaurants.length > 0) {
-            setRestaurants(data.restaurants)
-            // Also save to localStorage as backup
-            localStorage.setItem('birthday-poll-restaurants', JSON.stringify(data.restaurants))
-          }
-          // Load comments if available
           if (data.comments) {
             // Migrate old format to new format if needed
             const migratedComments: Record<string, string[]> = {}
@@ -84,47 +146,22 @@ const BirthdayInvite = () => {
             setComments(migratedComments)
             localStorage.setItem('birthday-poll-comments', JSON.stringify(migratedComments))
           }
-        } else {
-          // If API fails, fall back to localStorage
-          const savedRestaurants = localStorage.getItem('birthday-poll-restaurants')
-          if (savedRestaurants) {
-            try {
-              const restaurantsData = JSON.parse(savedRestaurants)
-              setRestaurants(restaurantsData)
-            } catch (error) {
-              console.error('Error loading restaurants from localStorage:', error)
-            }
-          }
         }
       } catch (error) {
-        console.error('Error loading poll data from API:', error)
-        // Fall back to localStorage
-        const savedRestaurants = localStorage.getItem('birthday-poll-restaurants')
-        if (savedRestaurants) {
-          try {
-            const restaurantsData = JSON.parse(savedRestaurants)
-            setRestaurants(restaurantsData)
-          } catch (err) {
-            console.error('Error loading restaurants from localStorage:', err)
-          }
-        }
+        console.error('Error loading comments from API:', error)
       }
     }
 
-    loadPollData()
+    loadComments()
 
-    // Check if user has already voted (from localStorage)
-    const savedVote = localStorage.getItem('birthday-poll-user-vote')
+    // Check if user has already provided a name
     const savedName = localStorage.getItem('birthday-poll-user-name')
-    const savedComments = localStorage.getItem('birthday-poll-comments')
-    
-    if (savedName && savedVote) {
+    if (savedName) {
       setUserName(savedName)
-      setHasVoted(true)
-      setSelectedRestaurant(savedVote)
     }
     
-    // Load saved comments
+    // Load saved comments from localStorage
+    const savedComments = localStorage.getItem('birthday-poll-comments')
     if (savedComments) {
       try {
         const commentsData = JSON.parse(savedComments)
@@ -142,204 +179,16 @@ const BirthdayInvite = () => {
         console.error('Error loading comments from localStorage:', error)
       }
     }
-    
-    // Also check comments from API response if available
-    // This will be handled in the loadPollData function above
   }, [])
 
   // Clear comment input after successful save
   useEffect(() => {
     if (commentSaveSuccess) {
-      // Clear the input after a short delay to show success message
       setTimeout(() => {
         setUserComment('')
       }, 100)
     }
   }, [commentSaveSuccess])
-
-  useEffect(() => {
-    // Expose hidden function to view voting data (for admin/debugging)
-    // Access via: window.getBirthdayPollData() in browser console
-    if (typeof window !== 'undefined') {
-      (window as any).getBirthdayPollData = async () => {
-        try {
-          // Try to fetch from API first
-          const response = await fetch('/api/birthday-poll')
-          if (response.ok) {
-            const data = await response.json()
-            console.log('📊 Birthday Poll Voting Data (from API):')
-            console.log(JSON.stringify(data, null, 2))
-            return data
-          }
-        } catch (error) {
-          console.warn('Failed to fetch from API, trying localStorage:', error)
-        }
-        
-        // Fall back to localStorage
-        const restaurantsData = localStorage.getItem('birthday-poll-restaurants')
-        if (restaurantsData) {
-          try {
-            const data = JSON.parse(restaurantsData)
-            console.log('📊 Birthday Poll Voting Data (from localStorage):')
-            console.log(JSON.stringify(data, null, 2))
-            return data
-          } catch (error) {
-            console.error('Error parsing voting data:', error)
-            return null
-          }
-        } else {
-          console.log('No voting data found')
-          return null
-        }
-      }
-      
-      // Also expose as a simple JSON accessor (async)
-      (window as any).birthdayPollData = async () => {
-        try {
-          const response = await fetch('/api/birthday-poll')
-          if (response.ok) {
-            return await response.json()
-          }
-        } catch (error) {
-          console.warn('Failed to fetch from API, trying localStorage:', error)
-        }
-        
-        const restaurantsData = localStorage.getItem('birthday-poll-restaurants')
-        return restaurantsData ? JSON.parse(restaurantsData) : null
-      }
-    }
-  }, [])
-
-  const handleRestaurantClick = (restaurantId: string) => {
-    // Prevent voting if user has already voted
-    if (hasVoted) {
-      return // User has already voted, don't allow changes
-    }
-    
-    const isCantGo = restaurantId === '6'
-    
-    // If user already has a name, allow direct voting
-    if (userName) {
-      handleVote(restaurantId, undefined, isCantGo ? 0 : guestCount)
-    } else {
-      // Show name modal first
-      setPendingRestaurantId(restaurantId)
-      setIsCantGoVote(isCantGo)
-      setIsNameModalOpen(true)
-    }
-  }
-
-  const handleNameSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    const sanitizedName = sanitizeInput(name, 100) // Max name length
-    
-    if (!sanitizedName || sanitizedName.trim() === '') {
-      setNameError('Please enter your name')
-      return
-    }
-    
-    // Save name first
-    setUserName(sanitizedName.trim())
-    localStorage.setItem('birthday-poll-user-name', sanitizedName.trim())
-    setNameError(null)
-    
-    // Process the pending vote with the name passed directly
-    // For "Can't Go", always use 0 guests
-    if (pendingRestaurantId) {
-      const guests = isCantGoVote ? 0 : guestCount
-      handleVote(pendingRestaurantId, sanitizedName.trim(), guests)
-      setPendingRestaurantId(null)
-    }
-    
-    // Close modal and clear inputs
-    setIsNameModalOpen(false)
-    setName('')
-    setGuestCount(0)
-    setIsCantGoVote(false)
-  }
-
-  const handleVote = async (restaurantId: string, nameOverride?: string, guestCountOverride?: number) => {
-    // Prevent voting if user has already voted
-    if (hasVoted) {
-      return
-    }
-    
-    // Use nameOverride if provided, otherwise use userName state
-    const nameToUse = nameOverride || userName
-    const guests = guestCountOverride !== undefined ? guestCountOverride : guestCount
-    
-    // Require name before voting
-    if (!nameToUse) {
-      setPendingRestaurantId(restaurantId)
-      setIsNameModalOpen(true)
-      return
-    }
-    
-    try {
-      // Submit vote to API
-      const response = await fetch('/api/birthday-poll', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          restaurantId,
-          name: nameToUse,
-          guestCount: guests,
-        }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        if (response.status === 409) {
-          // User already voted
-          alert(errorData.message || 'You have already voted')
-          setHasVoted(true)
-          if (errorData.previousVote) {
-            setSelectedRestaurant(errorData.previousVote)
-          }
-          return
-        }
-        throw new Error(errorData.error || 'Failed to submit vote')
-      }
-
-      const result = await response.json()
-      
-      // Update local state with server response
-      if (result.pollData && result.pollData.restaurants) {
-        setRestaurants(result.pollData.restaurants)
-        // Also save to localStorage as backup
-        localStorage.setItem('birthday-poll-restaurants', JSON.stringify(result.pollData.restaurants))
-      }
-      
-      // Update comments if provided
-      if (result.comments) {
-        setComments(result.comments)
-        localStorage.setItem('birthday-poll-comments', JSON.stringify(result.comments))
-      }
-      
-      // Mark as voted and save to localStorage
-      setHasVoted(true)
-      setSelectedRestaurant(restaurantId)
-      localStorage.setItem('birthday-poll-user-vote', restaurantId)
-      localStorage.setItem('birthday-poll-user-name', nameToUse)
-    } catch (error) {
-      console.error('Error submitting vote:', error)
-      alert('Failed to submit vote. Please try again.')
-      // Optionally fall back to localStorage-only voting
-      // For now, we'll just show an error
-    }
-  }
-
-  const handleCloseNameModal = () => {
-    setIsNameModalOpen(false)
-    setPendingRestaurantId(null)
-    setName('')
-    setNameError(null)
-    setGuestCount(0)
-    setIsCantGoVote(false)
-  }
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value
@@ -347,19 +196,6 @@ const BirthdayInvite = () => {
     setName(sanitized)
     if (nameError) {
       setNameError(null)
-    }
-  }
-
-  const handleGuestCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    // Allow empty string, 0, or positive numbers
-    if (value === '') {
-      setGuestCount(0)
-    } else {
-      const num = parseInt(value, 10)
-      if (!isNaN(num) && num >= 0 && num <= 50) {
-        setGuestCount(num)
-      }
     }
   }
 
@@ -374,10 +210,22 @@ const BirthdayInvite = () => {
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // If user hasn't provided a name, show name modal
+    // If user hasn't provided a name, show name prompt
     if (!userName || !userName.trim()) {
-      setIsNameModalOpen(true)
-      return
+      if (!name.trim()) {
+        setNameError('Please enter your name to comment')
+        return
+      }
+      const sanitizedName = sanitizeInput(name, 100).trim()
+      if (sanitizedName) {
+        setUserName(sanitizedName)
+        localStorage.setItem('birthday-poll-user-name', sanitizedName)
+        setName('')
+        setNameError(null)
+      } else {
+        setNameError('Please enter your name')
+        return
+      }
     }
 
     // Validate comment
@@ -395,7 +243,7 @@ const BirthdayInvite = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: userName.trim(),
+          name: userName!.trim(),
           comment: userComment,
         }),
       })
@@ -440,17 +288,17 @@ const BirthdayInvite = () => {
   const createFirework = (size: number = 1) => {
     // Detect mobile for reduced particle count
     const isMobile = window.innerWidth <= 768
-    const baseParticleCount = isMobile ? 12 : 20 // Reduced from 50
+    const baseParticleCount = isMobile ? 12 : 20
     const id = fireworkIdCounterRef.current++
     const centerX = 50 // Center of screen
     const centerY = 50
-    // Cap size at 2x for mobile, 3x for desktop (reduced from 4x)
+    // Cap size at 2x for mobile, 3x for desktop
     const cappedSize = isMobile ? Math.min(size, 2) : Math.min(size, 3)
     const particleCount = Math.floor(baseParticleCount * cappedSize)
     
     // Limit total particles to prevent memory issues
     setFireworkParticles(prev => {
-      const maxParticles = isMobile ? 60 : 120 // Max total particles
+      const maxParticles = isMobile ? 60 : 120
       if (prev.length >= maxParticles) {
         // Remove oldest particles if we're at the limit
         const toRemove = prev.length - maxParticles + particleCount
@@ -461,7 +309,7 @@ const BirthdayInvite = () => {
     
     const particles = Array.from({ length: particleCount }).map((_, i) => {
       const angle = (Math.PI * 2 * i) / particleCount
-      const distance = 80 * cappedSize + Math.random() * 40 * cappedSize // Reduced distance
+      const distance = 80 * cappedSize + Math.random() * 40 * cappedSize
       const randomX = Math.cos(angle) * distance
       const randomY = Math.sin(angle) * distance
       
@@ -477,7 +325,7 @@ const BirthdayInvite = () => {
     
     setFireworkParticles(prev => [...prev, ...particles])
     
-    // Remove particles after animation completes (reduced to 2.5 seconds)
+    // Remove particles after animation completes
     setTimeout(() => {
       setFireworkParticles(prev => prev.filter(p => Math.floor(p.id / 1000) !== id))
     }, 2500)
@@ -488,12 +336,11 @@ const BirthdayInvite = () => {
     setShowFireworks(true)
     createFirework(1)
     
-    // Keep creating fireworks while holding (slower interval for mobile)
-    const interval = isMobile ? 600 : 400 // Reduced frequency
+    // Keep creating fireworks while holding
+    const interval = isMobile ? 600 : 400
     fireworkIntervalRef.current = setInterval(() => {
       if (isPressingTitleRef.current && pressStartTimeRef.current) {
         const holdDuration = (Date.now() - pressStartTimeRef.current) / 1000
-        // Size increases more slowly: 1x at 1s, 1.5x at 2s, 2x at 3s, max 2.5x for mobile, 3x for desktop
         const maxSize = isMobile ? 2.5 : 3
         const size = Math.min(1 + (holdDuration - 1) / 2, maxSize)
         createFirework(size)
@@ -505,14 +352,14 @@ const BirthdayInvite = () => {
       }
     }, interval)
     
-    // Trigger content explosion after 5 seconds total (4 seconds after initial firework)
+    // Trigger content explosion after 5 seconds total
     contentExplodeTimerRef.current = setTimeout(() => {
       if (isPressingTitleRef.current) {
         setIsContentExploding(true)
       }
-    }, 4000) // 4 seconds after first firework = 5 seconds total from hold start
+    }, 4000)
     
-    // Reset everything after 10 seconds total (9 seconds after initial firework)
+    // Reset everything after 10 seconds total
     resetTimerRef.current = setTimeout(() => {
       if (isPressingTitleRef.current) {
         // Reset all effects
@@ -538,9 +385,9 @@ const BirthdayInvite = () => {
           if (isPressingTitleRef.current) {
             startFireworkCycle()
           }
-        }, 500) // Small delay before restarting
+        }, 500)
       }
-    }, 9000) // 9 seconds after first firework = 10 seconds total from hold start
+    }, 9000)
   }
 
   const handleTitlePressStart = () => {
@@ -635,19 +482,6 @@ const BirthdayInvite = () => {
     }
   }, [])
 
-  // Calculate total votes excluding "Can't Go" option (id: '6')
-  const totalVotes = restaurants
-    .filter(r => r.id !== '6')
-    .reduce((sum, r) => sum + r.votes, 0)
-  
-  // Calculate max votes excluding "Can't Go" option for winning indicator
-  const maxVotes = Math.max(
-    ...restaurants
-      .filter(r => r.id !== '6')
-      .map(r => r.votes),
-    0
-  )
-
   return (
     <Layout>
       <div className="page-container">
@@ -673,104 +507,95 @@ const BirthdayInvite = () => {
             Jerome's 39th Birthday Celebration!
           </h1>
           <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>November 21st 2025 - 7:30pm reservation time set</p>
-          <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>This Scorpio has invited you out for dinner! Cast your vote for dinner!</p>
-          <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>Pickle Room post dinner!</p>
+          <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>Join us at Arnoldi's for dinner!</p>
+
           
-          <div className={`poll-container ${isContentExploding ? 'exploding' : ''}`}>
-            <h2 className={`poll-title ${isContentExploding ? 'exploding' : ''}`}>Vote for Your Favorite Restaurant</h2>
-            <p className={`poll-description ${isContentExploding ? 'exploding' : ''}`}>
-              {hasVoted 
-                ? `You voted for: ${restaurants.find(r => r.id === selectedRestaurant)?.name || 'Unknown'}. Thank you for voting, ${userName}!`
-                : 'Select your preferred restaurant below'
-              }
+          {/* Menu Section */}
+          <div className={`menu-container ${isContentExploding ? 'exploding' : ''}`}>
+            <h2 className={`menu-title ${isContentExploding ? 'exploding' : ''}`}>Arnoldi's Menu</h2>
+            <p className={`menu-description ${isContentExploding ? 'exploding' : ''}`}>
+              Find what you'd enjoy eating!
             </p>
-            {hasVoted && (
-              <p className={`poll-note ${isContentExploding ? 'exploding' : ''}`}>
-                You can only vote once. Your vote has been recorded.
-              </p>
-            )}
             
-            <div className={`restaurants-list ${isContentExploding ? 'exploding' : ''}`}>
-              {restaurants.map((restaurant) => {
-                // Exclude "Can't Go" from percentage calculations
-                const isCantGo = restaurant.id === '6'
-                const percentage = !isCantGo && totalVotes > 0 ? (restaurant.votes / totalVotes) * 100 : 0
-                const isSelected = selectedRestaurant === restaurant.id
-                // "Can't Go" can't be winning
-                const isWinning = !isCantGo && restaurant.votes === maxVotes && maxVotes > 0
-                
-                return (
-                  <div
-                    key={restaurant.id}
-                    className={`restaurant-item ${isSelected ? 'selected' : ''} ${isWinning ? 'winning' : ''} ${hasVoted ? 'disabled' : ''} ${isContentExploding ? 'exploding' : ''}`}
-                    onClick={() => !hasVoted && handleRestaurantClick(restaurant.id)}
+            {menuCategories.map((category) => {
+              const isExpanded = expandedCategories.has(category.name)
+              return (
+                <div key={category.name} className={`menu-category ${isContentExploding ? 'exploding' : ''}`}>
+                  <div 
+                    className={`category-header ${isExpanded ? 'expanded' : ''}`}
+                    onClick={() => {
+                      const newExpanded = new Set(expandedCategories)
+                      if (isExpanded) {
+                        newExpanded.delete(category.name)
+                      } else {
+                        newExpanded.add(category.name)
+                      }
+                      setExpandedCategories(newExpanded)
+                    }}
                     role="button"
-                    tabIndex={hasVoted ? -1 : 0}
+                    tabIndex={0}
                     onKeyDown={(e) => {
-                      if (hasVoted) return
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
-                        handleRestaurantClick(restaurant.id)
+                        const newExpanded = new Set(expandedCategories)
+                        if (isExpanded) {
+                          newExpanded.delete(category.name)
+                        } else {
+                          newExpanded.add(category.name)
+                        }
+                        setExpandedCategories(newExpanded)
                       }
                     }}
-                    aria-label={hasVoted ? `You already voted for ${restaurant.name}` : `Vote for ${restaurant.name}`}
-                    aria-disabled={hasVoted}
+                    aria-expanded={isExpanded}
+                    aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${category.name} menu`}
                   >
-                    <div className="restaurant-info">
-                      <div className="restaurant-name-container">
-                        <h3 className="restaurant-name">{restaurant.name}</h3>
-                      </div>
-                      {restaurant.description && (
-                        <p className="restaurant-description">{restaurant.description}</p>
-                      )}
-                    </div>
-                    
-                    <div className="restaurant-votes">
-                      <div className="vote-bar-container">
-                        <div 
-                          className="vote-bar"
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                      <div className="vote-count">
-                        <span className="vote-number">{restaurant.votes}</span>
-                        <span className="vote-label">vote{restaurant.votes !== 1 ? 's' : ''}</span>
-                        {percentage > 0 && (
-                          <span className="vote-percentage">({percentage.toFixed(0)}%)</span>
-                        )}
-                      </div>
-                      {/* Voter names are not displayed - kept for internal tracking only */}
-                    </div>
-                    
-                    {isSelected && (
-                      <div className="vote-indicator">✓ Your Vote</div>
-                    )}
-                    {isWinning && maxVotes > 0 && (
-                      <div className="winning-indicator">🏆 Leading</div>
-                    )}
-                    
-                    {restaurant.link && (
-                      <a
-                        href={restaurant.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="restaurant-link restaurant-link-bottom"
-                        onClick={(e) => e.stopPropagation()}
-                        aria-label={`Visit ${restaurant.name} website`}
-                      >
-                        Visit Website ↗
-                      </a>
-                    )}
+                    <h3 className={`category-title ${isContentExploding ? 'exploding' : ''}`}>{category.name}</h3>
+                    <span className="category-toggle-icon" aria-hidden="true">
+                      {isExpanded ? '▼' : '▶'}
+                    </span>
                   </div>
-                )
-              })}
-            </div>
+                  {isExpanded && (
+                    <div className="menu-items-list">
+                      {category.items.map((item, index) => (
+                        <div key={`${category.name}-${index}`} className={`menu-item ${isContentExploding ? 'exploding' : ''}`}>
+                          <div className="menu-item-header">
+                            <h4 className="menu-item-name">{item.name}</h4>
+                            <span className="menu-item-price">{item.price}</span>
+                          </div>
+                          {item.description && (
+                            <p className="menu-item-description">{item.description}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
             
-            {totalVotes > 0 && (
-              <div className={`poll-summary ${isContentExploding ? 'exploding' : ''}`}>
-                <p className={`total-votes ${isContentExploding ? 'exploding' : ''}`}>Total Votes: {totalVotes}</p>
-              </div>
-            )}
+            <div className={`menu-footer ${isContentExploding ? 'exploding' : ''}`}>
+              <p>
+                <a 
+                  href="https://www.arnoldis.com/popmenu-order/arnoldis-cafe/menus/menu-online-ordering" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="menu-link"
+                >
+                  View Full Menu & Order Online ↗
+                </a>
+              </p>
+            </div>
+          </div>
+
+          {/* Help Pay Bill Button */}
+          <div className={`help-pay-bill-section ${isContentExploding ? 'exploding' : ''}`}>
+            <button
+              className="help-pay-bill-button"
+              onClick={() => setIsPaymentModalOpen(true)}
+              aria-label="Help pay the bill"
+            >
+              Help Pay Bill
+            </button>
           </div>
 
           {/* All Comments Section - Show all comments from all users */}
@@ -795,7 +620,7 @@ const BirthdayInvite = () => {
                       <div className="comment-item-text">{comment}</div>
                     </div>
                   ))}
-              </div>
+                  </div>
             ) : (
               <div className="no-comments-message">
                 <p>No messages yet. Be the first to share your thoughts!</p>
@@ -804,96 +629,102 @@ const BirthdayInvite = () => {
           </div>
 
           {/* Comment Section - Available to everyone */}
-          <div className={`comment-section ${isContentExploding ? 'exploding' : ''}`}>
-            <h3 className={`comment-section-title ${isContentExploding ? 'exploding' : ''}`}>
+            <div className={`comment-section ${isContentExploding ? 'exploding' : ''}`}>
+              <h3 className={`comment-section-title ${isContentExploding ? 'exploding' : ''}`}>
               Add a Comment
-            </h3>
-            <p className={`comment-section-description ${isContentExploding ? 'exploding' : ''}`}>
-              Share your thoughts or messages for the birthday celebration! You can add multiple comments. {!userName && 'Please enter your name to comment.'}
+              </h3>
+              <p className={`comment-section-description ${isContentExploding ? 'exploding' : ''}`}>
+              Share your thoughts and feelings {!userName && 'Please enter your name to comment.'}
             </p>
               
-              {/* Success message */}
-              {commentSaveSuccess && (
-                <div className="comment-success-message">
-                  ✓ Comment saved successfully!
-                </div>
-              )}
+            {/* Success message */}
+            {commentSaveSuccess && (
+              <div className="comment-success-message">
+                ✓ Comment saved successfully!
+              </div>
+            )}
               
-              {!userName && (
-                <div className="comment-name-prompt">
-                  <p>Enter your name to add a comment:</p>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={handleNameChange}
-                    placeholder="Your Name"
-                    className={`email-input ${nameError ? 'error' : ''}`}
-                    maxLength={100}
-                    aria-label="Your name"
-                    aria-invalid={nameError ? 'true' : 'false'}
-                    aria-describedby={nameError ? 'name-error' : undefined}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && name.trim()) {
-                        setUserName(name.trim())
-                        localStorage.setItem('birthday-poll-user-name', name.trim())
+            {!userName && (
+              <div className="comment-name-prompt">
+                <p>Enter your name to add a comment:</p>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={handleNameChange}
+                  placeholder="Your Name"
+                  className={`email-input ${nameError ? 'error' : ''}`}
+                  maxLength={100}
+                  aria-label="Your name"
+                  aria-invalid={nameError ? 'true' : 'false'}
+                  aria-describedby={nameError ? 'name-error' : undefined}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && name.trim()) {
+                      const sanitizedName = sanitizeInput(name, 100).trim()
+                      if (sanitizedName) {
+                        setUserName(sanitizedName)
+                        localStorage.setItem('birthday-poll-user-name', sanitizedName)
                         setName('')
+                        setNameError(null)
+                      } else {
+                        setNameError('Please enter your name')
                       }
-                    }}
-                  />
-                  {nameError && (
-                    <p id="name-error" className="email-error-message" role="alert">
-                      {nameError}
-                    </p>
-                  )}
-                  {name.trim() && (
-                    <button
-                      type="button"
-                      className="comment-submit-button"
-                      onClick={() => {
-                        const sanitizedName = sanitizeInput(name, 100).trim()
-                        if (sanitizedName) {
-                          setUserName(sanitizedName)
-                          localStorage.setItem('birthday-poll-user-name', sanitizedName)
-                          setName('')
-                          setNameError(null)
-                        } else {
-                          setNameError('Please enter your name')
-                        }
-                      }}
-                    >
-                      Use This Name
-                    </button>
-                  )}
-                </div>
-              )}
-              
-              {userName && (
-                <div className="comment-user-info">
-                  <span className="comment-user-name">Commenting as: <strong>{userName}</strong></span>
+                    }
+                  }}
+                />
+                {nameError && (
+                  <p id="name-error" className="email-error-message" role="alert">
+                    {nameError}
+                  </p>
+                )}
+                {name.trim() && (
                   <button
                     type="button"
-                    className="comment-change-name-button"
+                    className="comment-submit-button"
                     onClick={() => {
-                      setUserName(null)
-                      localStorage.removeItem('birthday-poll-user-name')
-                      setName('')
+                      const sanitizedName = sanitizeInput(name, 100).trim()
+                      if (sanitizedName) {
+                        setUserName(sanitizedName)
+                        localStorage.setItem('birthday-poll-user-name', sanitizedName)
+                        setName('')
+                        setNameError(null)
+                      } else {
+                        setNameError('Please enter your name')
+                      }
                     }}
                   >
-                    Change Name
+                    Use This Name
                   </button>
-                </div>
-              )}
+                )}
+              </div>
+            )}
+              
+            {userName && (
+              <div className="comment-user-info">
+                <span className="comment-user-name">Commenting as: <strong>{userName}</strong></span>
+                <button
+                  type="button"
+                  className="comment-change-name-button"
+                  onClick={() => {
+                    setUserName(null)
+                    localStorage.removeItem('birthday-poll-user-name')
+                    setName('')
+                  }}
+                >
+                  Change Name
+                </button>
+              </div>
+            )}
               
               <form onSubmit={handleCommentSubmit} className="comment-form">
                 <textarea
                   value={userComment}
                   onChange={handleCommentChange}
-                  placeholder={userName ? "Your comment here..." : "Enter your name above to comment"}
+                placeholder={userName ? "Your comment here..." : "Enter your name above to comment"}
                   className="comment-textarea"
                   rows={4}
                   maxLength={500}
                   aria-label="Comment"
-                  disabled={!userName}
+                disabled={!userName}
                 />
                 <div className="comment-footer">
                   <span className="comment-character-count">
@@ -902,12 +733,25 @@ const BirthdayInvite = () => {
                   <button
                     type="submit"
                     className="comment-submit-button"
-                    disabled={isSavingComment || !userName || !userComment.trim()}
+                  disabled={isSavingComment || !userName || !userComment.trim()}
                   >
-                    {isSavingComment ? 'Saving...' : 'Add Comment'}
+                  {isSavingComment ? 'Saving...' : 'Add Comment'}
                   </button>
                 </div>
               </form>
+            </div>
+
+          {/* Game Button */}
+          <div className={`game-button-section ${isContentExploding ? 'exploding' : ''}`}>
+            <button
+              type="button"
+              className="game-button"
+              onClick={() => {
+                navigate('/bdaygame')
+              }}
+            >
+              Let's Play A Game
+            </button>
           </div>
         </div>
       </div>
@@ -935,80 +779,76 @@ const BirthdayInvite = () => {
         </div>
       )}
 
-      {/* Name Modal */}
-      {isNameModalOpen && (
-        <div className="email-modal-overlay" onClick={handleCloseNameModal}>
-          <div className="email-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="email-modal-header">
-              <h2 className="email-modal-title">Enter Your Name</h2>
-              <button 
-                className="email-modal-close"
-                onClick={handleCloseNameModal}
-                aria-label="Close modal"
+      {/* Payment Modal */}
+      {isPaymentModalOpen && (
+        <div className="payment-modal-overlay" onClick={() => setIsPaymentModalOpen(false)}>
+          <div className="payment-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="payment-modal-header">
+              <h2 className="payment-modal-title">Thank You For Coming!</h2>
+              <button
+                className="payment-modal-close"
+                onClick={() => setIsPaymentModalOpen(false)}
+                aria-label="Close payment modal"
               >
                 ×
               </button>
             </div>
-            <form onSubmit={handleNameSubmit} className="email-modal-form">
-              <p className="email-modal-description">
-                Please enter your name to vote
+            <div className="payment-modal-content">
+              <p className="payment-modal-description">
+                I very much appreciate you coming and celebrating my 39th birthday! There's nothing better than having family and friends to celebrate. I made this to help pay the bill for the night. I hope this works!
               </p>
-              <input
-                type="text"
-                value={name}
-                onChange={handleNameChange}
-                placeholder="Your Name"
-                className={`email-input ${nameError ? 'error' : ''}`}
-                autoFocus
-                required
-                maxLength={100}
-                aria-label="Your name"
-                aria-invalid={nameError ? 'true' : 'false'}
-                aria-describedby={nameError ? 'name-error' : undefined}
-              />
-              {nameError && (
-                <p id="name-error" className="email-error-message" role="alert">
-                  {nameError}
-                </p>
-              )}
-              {/* Only show guest count for non-"Can't Go" votes */}
-              {!isCantGoVote && (
-                <div className="email-modal-field">
-                  <label htmlFor="guest-count" className="email-modal-label">
-                    Number of +1's (guests you're bringing)
-                  </label>
-                  <input
-                    type="number"
-                    id="guest-count"
-                    value={guestCount || ''}
-                    onChange={handleGuestCountChange}
-                    placeholder="0"
-                    min="0"
-                    max="50"
-                    className="email-input guest-count-input"
-                    aria-label="Number of guests"
+              
+              {/* Venmo Section */}
+              <div className="payment-option">
+                <h3 className="payment-option-title">Venmo</h3>
+                <p className="payment-option-description">Send payment via Venmo</p>
+                <div className="payment-qr-container">
+                  <QRCodeSVG
+                    value="https://venmo.com/u/Agustinjd"
+                    size={200}
+                    level="H"
+                    includeMargin={true}
+                    fgColor="#000000"
+                    bgColor="#ffffff"
                   />
-                  <p className="email-modal-hint">
-                    Enter 0 if it's just you, or the number of additional people you're bringing
-                  </p>
                 </div>
-              )}
-              <div className="email-modal-actions">
-                <button 
-                  type="button"
-                  onClick={handleCloseNameModal}
-                  className="email-modal-cancel"
+                <a
+                  href="https://venmo.com/u/Agustinjd"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="payment-link-button venmo-button"
                 >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  className="email-modal-submit"
-                >
-                  Submit & Vote
-                </button>
+                  Open Venmo ↗
+                </a>
+                <p className="payment-username">@Agustinjd</p>
               </div>
-            </form>
+
+              {/* Zelle Section */}
+              <div className="payment-option">
+                <h3 className="payment-option-title">Zelle®</h3>
+                <p className="payment-option-description">Scan QR code in your banking app to pay</p>
+                <div className="payment-qr-container">
+                  <QRCodeSVG
+                    value="zelle://send?recipient=jerome.agustin@example.com&amount="
+                    size={200}
+                    level="H"
+                    includeMargin={true}
+                    fgColor="#000000"
+                    bgColor="#ffffff"
+                  />
+                </div>
+                <a
+                  href="https://www.zelle.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="payment-link-button zelle-button"
+                >
+                  Open Zelle ↗
+                </a>
+                <p className="payment-username">Jerome Agustin</p>
+                <p className="payment-note">Scan with your banking app that supports Zelle</p>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1017,4 +857,3 @@ const BirthdayInvite = () => {
 }
 
 export default BirthdayInvite
-
