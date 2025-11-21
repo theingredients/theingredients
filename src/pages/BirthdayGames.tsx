@@ -46,6 +46,7 @@ const BirthdayGames = () => {
   const [comments, setComments] = useState<Record<string, string[]>>({})
   const [isSavingComment, setIsSavingComment] = useState(false)
   const [commentSaveSuccess, setCommentSaveSuccess] = useState(false)
+  const [isCommentsCollapsed, setIsCommentsCollapsed] = useState(true)
 
   // Set page title and load player name when component mounts
   useEffect(() => {
@@ -161,42 +162,11 @@ const BirthdayGames = () => {
       if (response.ok) {
         const data = await response.json()
         const submissions = data.submissions || {}
-        
-        // TODO: REMOVE BEFORE SHIPPING - Fake test data
-        const fakeSubmission = {
-          'test-user': {
-            playerName: 'Test User',
-            statements: [
-              'I have been to 15 different countries',
-              'I can speak 5 languages fluently',
-              'I once won a hot dog eating contest'
-            ],
-            submittedAt: Date.now() - 3600000 // 1 hour ago
-          }
-        }
-        const submissionsWithFake = { ...fakeSubmission, ...submissions }
-        // END TODO
-        
-        setSubmittedUsers(submissionsWithFake)
-        return submissionsWithFake
+        setSubmittedUsers(submissions)
+        return submissions
       }
     } catch (error) {
       console.error('Error fetching submissions:', error)
-      // TODO: REMOVE BEFORE SHIPPING - Fake test data for error case
-      const fakeSubmission = {
-        'test-user': {
-          playerName: 'Test User',
-          statements: [
-            'I have been to 15 different countries',
-            'I can speak 5 languages fluently',
-            'I once won a hot dog eating contest'
-          ],
-          submittedAt: Date.now() - 3600000
-        }
-      }
-      setSubmittedUsers(fakeSubmission)
-      return fakeSubmission
-      // END TODO
     }
     return {}
   }
@@ -207,42 +177,11 @@ const BirthdayGames = () => {
       if (response.ok) {
         const data = await response.json()
         const submissions = data.submissions || {}
-        
-        // TODO: REMOVE BEFORE SHIPPING - Fake test data
-        const fakeSubmission = {
-          'test-user': {
-            playerName: 'Test User',
-            movies: [
-              'The Shawshank Redemption',
-              'The Godfather',
-              'The Dark Knight'
-            ],
-            submittedAt: Date.now() - 3600000 // 1 hour ago
-          }
-        }
-        const submissionsWithFake = { ...fakeSubmission, ...submissions }
-        // END TODO
-        
-        setGoatSubmissions(submissionsWithFake)
-        return submissionsWithFake
+        setGoatSubmissions(submissions)
+        return submissions
       }
     } catch (error) {
       console.error('Error fetching GOAT submissions:', error)
-      // TODO: REMOVE BEFORE SHIPPING - Fake test data for error case
-      const fakeSubmission = {
-        'test-user': {
-          playerName: 'Test User',
-          movies: [
-            'The Shawshank Redemption',
-            'The Godfather',
-            'The Dark Knight'
-          ],
-          submittedAt: Date.now() - 3600000
-        }
-      }
-      setGoatSubmissions(fakeSubmission)
-      return fakeSubmission
-      // END TODO
     }
     return {}
   }
@@ -820,30 +759,52 @@ const BirthdayGames = () => {
 
               {/* All Comments Section - Show all comments from all users */}
               <div className={`all-comments-section ${isContentExploding ? 'exploding' : ''}`}>
-                <h3 className={`all-comments-title ${isContentExploding ? 'exploding' : ''}`}>
-                  Messages from Everyone ({Object.values(comments).flat().length})
-                </h3>
-                {Object.values(comments).flat().length > 0 ? (
-                  <div className="all-comments-list">
-                    {Object.entries(comments)
-                      .flatMap(([name, commentArray]) => 
-                        commentArray.map((comment, index) => ({ name, comment, index }))
-                      )
-                      .map(({ name, comment, index }) => (
-                        <div key={`${name}-${index}`} className={`comment-item ${name === playerName ? 'current-user-comment' : ''}`}>
-                          <div className="comment-item-header">
-                            <span className="comment-author">{name}</span>
-                            {name === playerName && (
-                              <span className="comment-badge">You</span>
-                            )}
-                          </div>
-                          <div className="comment-item-text">{comment}</div>
-                        </div>
-                      ))}
-                  </div>
-                ) : (
-                  <div className="no-comments-message">
-                    <p>No messages yet. Be the first to share your thoughts!</p>
+                <div 
+                  className={`all-comments-header ${isCommentsCollapsed ? 'collapsed' : ''}`}
+                  onClick={() => setIsCommentsCollapsed(!isCommentsCollapsed)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setIsCommentsCollapsed(!isCommentsCollapsed)
+                    }
+                  }}
+                  aria-expanded={!isCommentsCollapsed}
+                  aria-label={`${isCommentsCollapsed ? 'Expand' : 'Collapse'} messages from everyone`}
+                >
+                  <h3 className={`all-comments-title ${isContentExploding ? 'exploding' : ''}`}>
+                    Messages from Everyone ({Object.values(comments).flat().length})
+                  </h3>
+                  <span className="all-comments-toggle-icon" aria-hidden="true">
+                    {isCommentsCollapsed ? '▶' : '▼'}
+                  </span>
+                </div>
+                {!isCommentsCollapsed && (
+                  <div className="all-comments-content">
+                    {Object.values(comments).flat().length > 0 ? (
+                      <div className="all-comments-list">
+                        {Object.entries(comments)
+                          .flatMap(([name, commentArray]) => 
+                            commentArray.map((comment, index) => ({ name, comment, index }))
+                          )
+                          .map(({ name, comment, index }) => (
+                            <div key={`${name}-${index}`} className={`comment-item ${name === playerName ? 'current-user-comment' : ''}`}>
+                              <div className="comment-item-header">
+                                <span className="comment-author">{name}</span>
+                                {name === playerName && (
+                                  <span className="comment-badge">You</span>
+                                )}
+                              </div>
+                              <div className="comment-item-text">{comment}</div>
+                            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      <div className="no-comments-message">
+                        <p>No messages yet. Be the first to share your thoughts!</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1523,6 +1484,7 @@ const BirthdayGames = () => {
           </div>
         </div>
       )}
+
     </Layout>
   )
 }
