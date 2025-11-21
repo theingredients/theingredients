@@ -508,6 +508,7 @@ const BirthdayInvite = () => {
           </h1>
           <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>November 21st 2025 - 7:30pm reservation time set</p>
           <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>Join us at Arnoldi's for dinner!</p>
+          <p className={`birthday-subtitle ${isContentExploding ? 'exploding' : ''}`}>Downtown/Pickle Room post dinner</p>
 
           
           {/* Menu Section */}
@@ -591,7 +592,16 @@ const BirthdayInvite = () => {
           <div className={`help-pay-bill-section ${isContentExploding ? 'exploding' : ''}`}>
             <button
               className="help-pay-bill-button"
-              onClick={() => setIsPaymentModalOpen(true)}
+              onClick={() => {
+                setIsPaymentModalOpen(true)
+                // Scroll modal to top on mobile
+                setTimeout(() => {
+                  const modal = document.querySelector('.payment-modal-overlay')
+                  if (modal) {
+                    modal.scrollTop = 0
+                  }
+                }, 100)
+              }}
               aria-label="Help pay the bill"
             >
               Help Pay Bill
@@ -634,7 +644,7 @@ const BirthdayInvite = () => {
               Add a Comment
               </h3>
               <p className={`comment-section-description ${isContentExploding ? 'exploding' : ''}`}>
-              Share your thoughts and feelings {!userName && 'Please enter your name to comment.'}
+              Share some thoughts and feelings!
             </p>
               
             {/* Success message */}
@@ -646,7 +656,7 @@ const BirthdayInvite = () => {
               
             {!userName && (
               <div className="comment-name-prompt">
-                <p>Enter your name to add a comment:</p>
+                <p>Who are you?</p>
                 <input
                   type="text"
                   value={name}
@@ -719,7 +729,7 @@ const BirthdayInvite = () => {
                 <textarea
                   value={userComment}
                   onChange={handleCommentChange}
-                placeholder={userName ? "Your comment here..." : "Enter your name above to comment"}
+                placeholder={userName ? "Your comment here..." : "Enter your name first!"}
                   className="comment-textarea"
                   rows={4}
                   maxLength={500}

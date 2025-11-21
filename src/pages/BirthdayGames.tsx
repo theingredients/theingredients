@@ -143,8 +143,22 @@ const BirthdayGames = () => {
       // Show list if there are submissions, otherwise show form
       const hasSubmissions = Object.keys(submissions).length > 0
       setShowSubmissionsList(hasSubmissions)
+      // Scroll modal to top on mobile
+      setTimeout(() => {
+        const modal = document.querySelector('.game-modal-overlay')
+        if (modal) {
+          modal.scrollTop = 0
+        }
+      }, 100)
     } else if (gameName === "Who Picked") {
       setIsWhoPickedModalOpen(true)
+      // Scroll modal to top on mobile
+      setTimeout(() => {
+        const modal = document.querySelector('.game-modal-overlay')
+        if (modal) {
+          modal.scrollTop = 0
+        }
+      }, 100)
     } else if (gameName === "GOAT") {
       setIsGOATModalOpen(true)
       // Fetch GOAT submissions first
@@ -152,6 +166,13 @@ const BirthdayGames = () => {
       // Show list if there are submissions, otherwise show form
       const hasSubmissions = Object.keys(submissions).length > 0
       setShowGOATSubmissionsList(hasSubmissions)
+      // Scroll modal to top on mobile
+      setTimeout(() => {
+        const modal = document.querySelector('.game-modal-overlay')
+        if (modal) {
+          modal.scrollTop = 0
+        }
+      }, 100)
     } else {
       console.log(`Selected game: ${gameName} by ${playerName}`)
       // TODO: Implement other game logic
