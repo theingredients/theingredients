@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import Layout from '../components/Layout'
 import { sanitizeInput } from '../utils/inputSanitizer'
+import { useTheme } from '../contexts/ThemeContext'
 import './PageStyles.css'
 import './BirthdayInvite.css'
 
@@ -19,6 +20,7 @@ interface MenuCategory {
 
 const BirthdayInvite = () => {
   const navigate = useNavigate()
+  const { toggleTheme } = useTheme()
   
   const menuCategories: MenuCategory[] = [
     {
@@ -513,7 +515,22 @@ const BirthdayInvite = () => {
           
           {/* Menu Section */}
           <div className={`menu-container ${isContentExploding ? 'exploding' : ''}`}>
-            <h2 className={`menu-title ${isContentExploding ? 'exploding' : ''}`}>Arnoldi's Menu</h2>
+            <h2 
+              className={`menu-title menu-title-toggle ${isContentExploding ? 'exploding' : ''}`}
+              onClick={toggleTheme}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  toggleTheme()
+                }
+              }}
+              aria-label="Toggle light/dark mode"
+              title="Click to toggle light/dark mode"
+            >
+              Arnoldi's Menu
+            </h2>
             <p className={`menu-description ${isContentExploding ? 'exploding' : ''}`}>
               Find what you'd enjoy eating!
             </p>
@@ -592,16 +609,7 @@ const BirthdayInvite = () => {
           <div className={`help-pay-bill-section ${isContentExploding ? 'exploding' : ''}`}>
             <button
               className="help-pay-bill-button"
-              onClick={() => {
-                setIsPaymentModalOpen(true)
-                // Scroll modal to top on mobile
-                setTimeout(() => {
-                  const modal = document.querySelector('.payment-modal-overlay')
-                  if (modal) {
-                    modal.scrollTop = 0
-                  }
-                }, 100)
-              }}
+              onClick={() => setIsPaymentModalOpen(true)}
               aria-label="Help pay the bill"
             >
               Help Pay Bill
