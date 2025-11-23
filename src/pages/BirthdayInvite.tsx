@@ -22,6 +22,58 @@ const BirthdayInvite = () => {
   const navigate = useNavigate()
   const { toggleTheme } = useTheme()
   
+  // Password protection state
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [password, setPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [isVerifying, setIsVerifying] = useState(false)
+  
+  // Check if user is already authenticated on mount
+  useEffect(() => {
+    const authToken = sessionStorage.getItem('birthday-invite-auth')
+    if (authToken) {
+      setIsAuthenticated(true)
+    }
+  }, [])
+  
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setPasswordError('')
+    
+    if (!password.trim()) {
+      setPasswordError('Please enter a password')
+      return
+    }
+    
+    setIsVerifying(true)
+    
+    try {
+      const response = await fetch('/api/verify-birthday-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password: password.trim() }),
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok && data.success) {
+        // Store authentication token in sessionStorage
+        sessionStorage.setItem('birthday-invite-auth', data.token)
+        setIsAuthenticated(true)
+        setPassword('')
+      } else {
+        setPasswordError(data.error || 'Incorrect password')
+      }
+    } catch (error) {
+      console.error('Error verifying password:', error)
+      setPasswordError('Failed to verify password. Please try again.')
+    } finally {
+      setIsVerifying(false)
+    }
+  }
+  
   const menuCategories: MenuCategory[] = [
     {
       name: 'Appetizers',
@@ -483,6 +535,54 @@ const BirthdayInvite = () => {
       }
     }
   }, [])
+
+  // Show password form if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <Layout>
+        <div className="page-container">
+          <div className="password-protection-container">
+            <div className="password-protection-form">
+              <h2 className="password-protection-title">Birthday Invite</h2>
+              <p className="password-protection-description">Please enter the password to access this page</p>
+              <form onSubmit={handlePasswordSubmit} className="password-form">
+                <div className="password-form-group">
+                  <label htmlFor="password-input" className="password-label">
+                    Password
+                  </label>
+                  <input
+                    id="password-input"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={`password-input ${passwordError ? 'error' : ''}`}
+                    placeholder="Enter password"
+                    autoFocus
+                    disabled={isVerifying}
+                    aria-label="Password"
+                    aria-invalid={passwordError ? 'true' : 'false'}
+                    aria-describedby={passwordError ? 'password-error' : undefined}
+                  />
+                  {passwordError && (
+                    <p id="password-error" className="password-error" role="alert">
+                      {passwordError}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  className="password-submit-button"
+                  disabled={isVerifying || !password.trim()}
+                >
+                  {isVerifying ? 'Verifying...' : 'Enter'}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
 
   return (
     <Layout>

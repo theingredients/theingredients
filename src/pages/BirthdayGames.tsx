@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import Layout from '../components/Layout'
 import { sanitizeInput } from '../utils/inputSanitizer'
@@ -9,7 +8,6 @@ import './BirthdayGames.css'
 import './BirthdayInvite.css'
 
 const BirthdayGames = () => {
-  const navigate = useNavigate()
   const { toggleTheme } = useTheme()
   const [isContentExploding] = useState(false)
   const [qrUrl, setQrUrl] = useState('')
@@ -26,14 +24,6 @@ const BirthdayGames = () => {
   const [expandedSubmissions, setExpandedSubmissions] = useState<Set<string>>(new Set())
   const [showPlayerNames, setShowPlayerNames] = useState(false)
   const [showRevealConfirmation, setShowRevealConfirmation] = useState(false)
-  const [songs, setSongs] = useState<Array<{ id: string; songName: string; artist: string; addedBy: string; addedAt: number; videoId?: string }>>([])
-  const [newSongName, setNewSongName] = useState('')
-  const [newSongArtist, setNewSongArtist] = useState('')
-  const [songError, setSongError] = useState<string | null>(null)
-  const [youtubeSearchQuery, setYoutubeSearchQuery] = useState('')
-  const [youtubeResults, setYoutubeResults] = useState<Array<{ videoId: string; title: string; channelTitle: string; thumbnail: string }>>([])
-  const [isSearchingYoutube, setIsSearchingYoutube] = useState(false)
-  const [youtubeSearchError, setYoutubeSearchError] = useState<string | null>(null)
   const [movies, setMovies] = useState<string[]>(['', '', ''])
   const [movieErrors, setMovieErrors] = useState<string[]>(['', '', ''])
   const [goatSubmissions, setGoatSubmissions] = useState<Record<string, { playerName: string; movies: string[]; submittedAt: number }>>({})
@@ -47,10 +37,6 @@ const BirthdayGames = () => {
   const [isSavingComment, setIsSavingComment] = useState(false)
   const [commentSaveSuccess, setCommentSaveSuccess] = useState(false)
   const [isCommentsCollapsed, setIsCommentsCollapsed] = useState(true)
-  const [longPressSongId, setLongPressSongId] = useState<string | null>(null)
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null)
-  const [longPressProgress, setLongPressProgress] = useState(0)
-  const [revealedSongs, setRevealedSongs] = useState<Set<string>>(new Set())
 
   // Set page title and load player name when component mounts
   useEffect(() => {
@@ -66,56 +52,6 @@ const BirthdayGames = () => {
     if (savedPlayerName) {
       setPlayerName(savedPlayerName)
     }
-    
-    // Load songs from API (with localStorage fallback)
-    const loadSongs = async () => {
-      try {
-        console.log('🔄 [INITIAL LOAD] Fetching songs from API...')
-        const response = await fetch('/api/birthday-games?gameType=who-picked')
-        if (response.ok) {
-          const data = await response.json()
-          const songs = data.songs || []
-          console.log('✅ [INITIAL LOAD] Fetched songs from API:', songs.length, 'songs')
-          console.log('📋 [INITIAL LOAD] All songs:', JSON.stringify(songs, null, 2))
-          setSongs(songs)
-          // Also save to localStorage as backup
-          localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(songs))
-        } else {
-          console.warn('⚠️ [INITIAL LOAD] API failed, falling back to localStorage')
-          // Fallback to localStorage if API fails
-          const savedSongs = localStorage.getItem('birthday-games-who-picked-songs')
-          if (savedSongs) {
-            try {
-              const songs = JSON.parse(savedSongs)
-              console.log('📦 [INITIAL LOAD] Loaded songs from localStorage:', songs.length, 'songs')
-              console.log('📋 [INITIAL LOAD] All songs from localStorage:', JSON.stringify(songs, null, 2))
-              setSongs(songs)
-            } catch (error) {
-              console.error('❌ [INITIAL LOAD] Error loading songs from localStorage:', error)
-            }
-          } else {
-            console.log('📭 [INITIAL LOAD] No songs found in localStorage')
-          }
-        }
-      } catch (error) {
-        console.error('❌ [INITIAL LOAD] Error loading songs from API:', error)
-        // Fallback to localStorage if API fails
-        const savedSongs = localStorage.getItem('birthday-games-who-picked-songs')
-        if (savedSongs) {
-          try {
-            const songs = JSON.parse(savedSongs)
-            console.log('📦 [INITIAL LOAD] Fallback: Loaded songs from localStorage:', songs.length, 'songs')
-            console.log('📋 [INITIAL LOAD] Fallback: All songs from localStorage:', JSON.stringify(songs, null, 2))
-            setSongs(songs)
-          } catch (parseError) {
-            console.error('❌ [INITIAL LOAD] Error loading songs from localStorage:', parseError)
-          }
-        } else {
-          console.log('📭 [INITIAL LOAD] No songs found in localStorage (fallback)')
-        }
-      }
-    }
-    loadSongs()
     
     // Load comments from API
     const loadComments = async () => {
@@ -168,14 +104,6 @@ const BirthdayGames = () => {
     }
   }, [])
 
-  // Cleanup long press timer on unmount or game change
-  useEffect(() => {
-    return () => {
-      if (longPressTimer) {
-        clearInterval(longPressTimer)
-      }
-    }
-  }, [longPressTimer])
 
   // Clear comment input after successful save
   useEffect(() => {
@@ -186,62 +114,6 @@ const BirthdayGames = () => {
     }
   }, [commentSaveSuccess])
 
-  const fetchSongs = async () => {
-    try {
-      console.log('🔄 [GAME OPEN] Fetching songs from API...')
-      const response = await fetch('/api/birthday-games?gameType=who-picked')
-      console.log('📡 [GAME OPEN] Fetch response status:', response.status)
-      if (response.ok) {
-        const data = await response.json()
-        console.log('📦 [GAME OPEN] Fetched songs data:', data)
-        const songs = data.songs || []
-        console.log('✅ [GAME OPEN] Setting songs:', songs.length, 'songs')
-        console.log('📋 [GAME OPEN] All songs:', JSON.stringify(songs, null, 2))
-        setSongs(songs)
-        // Also save to localStorage as backup
-        localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(songs))
-        return songs
-      } else {
-        const errorText = await response.text()
-        console.error('❌ [GAME OPEN] API fetch failed with status:', response.status, 'Error:', errorText)
-      }
-      // Fallback to localStorage if API fails
-      const savedSongs = localStorage.getItem('birthday-games-who-picked-songs')
-      if (savedSongs) {
-        try {
-          const songs = JSON.parse(savedSongs)
-          console.log('📦 [GAME OPEN] Loaded songs from localStorage:', songs.length, 'songs')
-          console.log('📋 [GAME OPEN] All songs from localStorage:', JSON.stringify(songs, null, 2))
-          setSongs(songs)
-          return songs
-        } catch (error) {
-          console.error('❌ [GAME OPEN] Error loading songs from localStorage:', error)
-        }
-      } else {
-        console.log('📭 [GAME OPEN] No songs found in localStorage')
-      }
-      return []
-    } catch (error) {
-      console.error('❌ [GAME OPEN] Error fetching songs:', error)
-      // Fallback to localStorage if API fails
-      const savedSongs = localStorage.getItem('birthday-games-who-picked-songs')
-      if (savedSongs) {
-        try {
-          const songs = JSON.parse(savedSongs)
-          console.log('📦 [GAME OPEN] Fallback: Loaded songs from localStorage:', songs.length, 'songs')
-          console.log('📋 [GAME OPEN] Fallback: All songs from localStorage:', JSON.stringify(songs, null, 2))
-          setSongs(songs)
-          return songs
-        } catch (error) {
-          console.error('❌ [GAME OPEN] Error loading songs from localStorage:', error)
-        }
-      } else {
-        console.log('📭 [GAME OPEN] No songs found in localStorage (fallback)')
-      }
-      return []
-    }
-  }
-
   const handleGameSelect = async (gameName: string) => {
     if (gameName === "Which One's False") {
       // Fetch submissions first before opening game
@@ -249,10 +121,6 @@ const BirthdayGames = () => {
       // Show list if there are submissions, otherwise show form
       const hasSubmissions = Object.keys(submissions).length > 0
       setShowSubmissionsList(hasSubmissions)
-      setCurrentGame(gameName)
-    } else if (gameName === "Who Picked") {
-      // Fetch songs from API when opening game
-      await fetchSongs()
       setCurrentGame(gameName)
     } else if (gameName === "GOAT") {
       // Fetch GOAT submissions first before opening game
@@ -377,308 +245,6 @@ const BirthdayGames = () => {
     } finally {
       setIsSubmittingGOAT(false)
     }
-  }
-
-  const handleSongNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const sanitized = sanitizeInputForTyping(e.target.value, 100)
-    setNewSongName(sanitized)
-    if (songError) {
-      setSongError(null)
-    }
-  }
-
-  const handleSongArtistChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const sanitized = sanitizeInputForTyping(e.target.value, 100)
-    setNewSongArtist(sanitized)
-    if (songError) {
-      setSongError(null)
-    }
-  }
-
-  const handleYoutubeSearchQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const sanitized = sanitizeInputForTyping(e.target.value, 100)
-    setYoutubeSearchQuery(sanitized)
-    if (youtubeSearchError) {
-      setYoutubeSearchError(null)
-    }
-  }
-
-  const handleAddSong = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    const sanitizedSongName = sanitizeInput(newSongName, 100).trim()
-    const sanitizedArtist = sanitizeInput(newSongArtist, 100).trim()
-    
-    if (!sanitizedSongName || !sanitizedArtist) {
-      setSongError('Please enter both song name and artist')
-      return
-    }
-    
-    // Try to find the song on YouTube
-    let videoId: string | undefined = undefined
-    try {
-      const searchQuery = `${sanitizedSongName} ${sanitizedArtist}`
-      const response = await fetch('/api/youtube-search', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: searchQuery,
-        }),
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        if (result.results && result.results.length > 0) {
-          // Use the first result as the match
-          videoId = result.results[0].videoId
-        }
-      }
-    } catch (error) {
-      // Silently fail - if YouTube search doesn't work, just add the song without videoId
-      console.log('Could not find song on YouTube, adding without video link')
-    }
-    
-    const newSong = {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      songName: sanitizedSongName,
-      artist: sanitizedArtist,
-      addedBy: playerName,
-      addedAt: Date.now(),
-      ...(videoId && { videoId })
-    }
-    
-    // Save to API
-    try {
-      const response = await fetch('/api/birthday-games', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          playerName: playerName,
-          gameType: 'who-picked',
-          song: newSong
-        }),
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        if (result.songs) {
-          setSongs(result.songs)
-          // Also save to localStorage as backup
-          localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(result.songs))
-        } else {
-          // Fallback: update local state if API doesn't return songs
-          const updatedSongs = [...songs, newSong]
-          setSongs(updatedSongs)
-          localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
-        }
-      } else {
-        // Fallback: save to localStorage if API fails
-        const updatedSongs = [...songs, newSong]
-        setSongs(updatedSongs)
-        localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
-        console.error('Failed to save song to API, saved locally instead')
-      }
-    } catch (error) {
-      // Fallback: save to localStorage if API fails
-      const updatedSongs = [...songs, newSong]
-      setSongs(updatedSongs)
-      localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
-      console.error('Error saving song to API, saved locally instead:', error)
-    }
-    
-    setNewSongName('')
-    setNewSongArtist('')
-    setSongError(null)
-  }
-
-  const handleYoutubeSearch = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!youtubeSearchQuery.trim()) {
-      setYoutubeSearchError('Please enter a search query')
-      return
-    }
-    
-    setIsSearchingYoutube(true)
-    setYoutubeSearchError(null)
-    
-    try {
-      const response = await fetch('/api/youtube-search', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: youtubeSearchQuery,
-        }),
-      })
-
-      if (!response.ok) {
-        // Try to parse error response, but handle cases where response isn't JSON
-        let errorMessage = 'Failed to search YouTube'
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.error || errorData.message || errorMessage
-        } catch {
-          // If response isn't JSON, use status text
-          if (response.status === 404) {
-            errorMessage = 'YouTube search API not found. Please restart the dev server or check API configuration.'
-          } else if (response.status === 500) {
-            errorMessage = 'Server error. Please check if YOUTUBE_API_KEY is configured.'
-          } else {
-            errorMessage = `Error: ${response.status} ${response.statusText}`
-          }
-        }
-        throw new Error(errorMessage)
-      }
-
-      const result = await response.json()
-      setYoutubeResults(result.results || [])
-    } catch (error) {
-      console.error('Error searching YouTube:', error)
-      setYoutubeSearchError(error instanceof Error ? error.message : 'Failed to search YouTube')
-      setYoutubeResults([])
-    } finally {
-      setIsSearchingYoutube(false)
-    }
-  }
-
-  const parseSongFromYoutubeTitle = (title: string, channelTitle: string): { songName: string; artist: string } => {
-    // Try to parse "Song Name - Artist" or "Artist - Song Name" format
-    const dashSeparated = title.split(' - ')
-    if (dashSeparated.length >= 2) {
-      // Try "Song - Artist" first
-      const songName = dashSeparated[0].trim()
-      const artist = dashSeparated.slice(1).join(' - ').trim()
-      // Remove common suffixes like "(Official Video)", "[Official Audio]", etc.
-      const cleanSongName = songName.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s*\[[^\]]*\]\s*$/, '').trim()
-      const cleanArtist = artist.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s*\[[^\]]*\]\s*$/, '').trim()
-      return { songName: cleanSongName || title, artist: cleanArtist || channelTitle }
-    }
-    
-    // If no dash, use title as song name and channel as artist
-    const cleanTitle = title.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s*\[[^\]]*\]\s*$/, '').trim()
-    return { songName: cleanTitle || title, artist: channelTitle }
-  }
-
-  const handleSelectYoutubeSong = async (result: { videoId: string; title: string; channelTitle: string; thumbnail: string }) => {
-    const { songName, artist } = parseSongFromYoutubeTitle(result.title, result.channelTitle)
-    
-    // Check if song already exists (by videoId or by name+artist)
-    const songExists = songs.some(song => 
-      song.videoId === result.videoId || 
-      (song.songName.toLowerCase() === songName.toLowerCase() && song.artist.toLowerCase() === artist.toLowerCase())
-    )
-    
-    if (songExists) {
-      setYoutubeSearchError('This song is already in the list!')
-      return
-    }
-    
-    const newSong = {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      songName: songName,
-      artist: artist,
-      addedBy: playerName,
-      addedAt: Date.now(),
-      videoId: result.videoId
-    }
-    
-    // Save to API
-    try {
-      const response = await fetch('/api/birthday-games', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          playerName: playerName,
-          gameType: 'who-picked',
-          song: newSong
-        }),
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        console.log('YouTube song API response:', result)
-        if (result.songs && Array.isArray(result.songs)) {
-          setSongs(result.songs)
-          // Also save to localStorage as backup
-          localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(result.songs))
-          console.log('Songs updated from API (YouTube):', result.songs.length)
-        } else {
-          // Fallback: update local state if API doesn't return songs
-          console.warn('API response missing songs array (YouTube), using fallback')
-          const updatedSongs = [...songs, newSong]
-          setSongs(updatedSongs)
-          localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
-        }
-      } else {
-        // Fallback: save to localStorage if API fails
-        const errorText = await response.text()
-        console.error('API failed with status (YouTube):', response.status, 'Error:', errorText)
-        const updatedSongs = [...songs, newSong]
-        setSongs(updatedSongs)
-        localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
-        alert('Failed to save song to server. Saved locally, but may not be visible to others.')
-      }
-    } catch (error) {
-      // Fallback: save to localStorage if API fails
-      console.error('Error saving song to API (YouTube):', error)
-      const updatedSongs = [...songs, newSong]
-      setSongs(updatedSongs)
-      localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
-      alert('Failed to save song to server. Saved locally, but may not be visible to others.')
-    }
-    
-    // Clear search and show success
-    setYoutubeSearchQuery('')
-    setYoutubeResults([])
-    setYoutubeSearchError(null)
-    
-    // Optional: Show success message briefly
-    // You could add a success state here if desired
-  }
-
-  const handleLongPressStart = (songId: string) => {
-    // Clear any existing timer
-    if (longPressTimer) {
-      clearInterval(longPressTimer)
-    }
-    
-    setLongPressSongId(songId)
-    setLongPressProgress(0)
-    
-    // Update progress every 100ms
-    const progressInterval = setInterval(() => {
-      setLongPressProgress((prev) => {
-        const newProgress = prev + 2 // 100ms * 50 = 5000ms (5 seconds), so 2% per 100ms
-        if (newProgress >= 100) {
-          clearInterval(progressInterval)
-          // Reveal the song
-          setRevealedSongs((prev) => new Set([...prev, songId]))
-          setLongPressSongId(null)
-          setLongPressProgress(0)
-          return 100
-        }
-        return newProgress
-      })
-    }, 100)
-    
-    setLongPressTimer(progressInterval)
-  }
-
-  const handleLongPressEnd = () => {
-    if (longPressTimer) {
-      clearInterval(longPressTimer)
-      setLongPressTimer(null)
-    }
-    setLongPressSongId(null)
-    setLongPressProgress(0)
   }
 
   // Sanitize input without trimming (preserves spaces during typing)
@@ -959,19 +525,6 @@ const BirthdayGames = () => {
 
                   <button
                     className="game-card"
-                    onClick={() => handleGameSelect('Who Picked')}
-                    aria-label="Play Who Picked game"
-                  >
-                    <div className="game-card-content">
-                      <h2 className="game-card-title">Who Picked</h2>
-                      <p className="game-card-description">
-                        Guess which person picked added a song to the list!
-                      </p>
-                    </div>
-                  </button>
-
-                  <button
-                    className="game-card"
                     onClick={() => handleGameSelect('GOAT')}
                     aria-label="Play GOAT game"
                   >
@@ -1106,17 +659,6 @@ const BirthdayGames = () => {
           )}
                 </div>
               )}
-
-              {/* Back to Invite Button */}
-              <div className="back-to-invite-section">
-                <button
-                  className="back-to-invite-button"
-                  onClick={() => navigate('/jda11202025')}
-                  aria-label="Back to birthday invite"
-                >
-                  ← Back to Invite
-                </button>
-              </div>
             </>
           ) : null}
         </div>
@@ -1309,196 +851,6 @@ const BirthdayGames = () => {
                   )}
                 </div>
               )}
-          </div>
-        </div>
-      )}
-
-      {/* Who Picked Game View */}
-      {currentGame === "Who Picked" && (
-        <div className="game-full-page">
-          <div className="game-full-page-header">
-              <button
-              className="game-back-button"
-              onClick={handleBackToGames}
-              aria-label="Back to games"
-              >
-              ← Back to Games
-              </button>
-            <h2 className="game-full-page-title">Who Picked</h2>
-            </div>
-          <div className="game-full-page-content">
-              <p className="game-modal-description">
-                Add songs to the list! Others will try to guess who picked each song.
-              </p>
-              
-              {/* YouTube Search Section */}
-              <div className="youtube-search-section">
-                <h3 className="youtube-search-title">Search on YouTube</h3>
-                <form onSubmit={handleYoutubeSearch} className="youtube-search-form">
-                  <div className="youtube-search-field">
-                    <input
-                      type="text"
-                      value={youtubeSearchQuery}
-                      onChange={handleYoutubeSearchQueryChange}
-                      placeholder="Search for a song on YouTube..."
-                      className="youtube-search-input"
-                      maxLength={100}
-                      aria-label="YouTube search"
-                    />
-                    <button
-                      type="submit"
-                      className="youtube-search-button"
-                      disabled={isSearchingYoutube || !youtubeSearchQuery.trim()}
-                    >
-                      {isSearchingYoutube ? 'Searching...' : 'Search'}
-                    </button>
-                  </div>
-                  {youtubeSearchError && (
-                    <p className="youtube-search-error" role="alert">
-                      {youtubeSearchError}
-                    </p>
-                  )}
-                </form>
-                
-                {/* YouTube Results */}
-                {youtubeResults.length > 0 && (
-                  <div className="youtube-results">
-                    <h4 className="youtube-results-title">Search Results</h4>
-                    <div className="youtube-results-list">
-                      {youtubeResults.map((result) => (
-                        <button
-                          key={result.videoId}
-                          type="button"
-                          className="youtube-result-item"
-                          onClick={() => handleSelectYoutubeSong(result)}
-                        >
-                          <img
-                            src={result.thumbnail}
-                            alt={result.title}
-                            className="youtube-result-thumbnail"
-                          />
-                          <div className="youtube-result-info">
-                            <div className="youtube-result-title">{result.title}</div>
-                            <div className="youtube-result-channel">{result.channelTitle}</div>
-                          </div>
-                          <div className="youtube-result-add">+ Add</div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {/* Add Song Form */}
-              <form onSubmit={handleAddSong} className="add-song-form">
-                <div className="song-form-fields">
-                  <div className="song-field">
-                    <label htmlFor="song-name" className="song-label">
-                      Song Name
-                    </label>
-                    <input
-                      id="song-name"
-                      type="text"
-                      value={newSongName}
-                      onChange={handleSongNameChange}
-                      placeholder="Enter song name..."
-                      className={`song-input ${songError ? 'error' : ''}`}
-                      maxLength={100}
-                      aria-label="Song name"
-                      aria-invalid={songError ? 'true' : 'false'}
-                    />
-                  </div>
-                  <div className="song-field">
-                    <label htmlFor="song-artist" className="song-label">
-                      Artist
-                    </label>
-                    <input
-                      id="song-artist"
-                      type="text"
-                      value={newSongArtist}
-                      onChange={handleSongArtistChange}
-                      placeholder="Enter artist name..."
-                      className={`song-input ${songError ? 'error' : ''}`}
-                      maxLength={100}
-                      aria-label="Artist name"
-                      aria-invalid={songError ? 'true' : 'false'}
-                    />
-                  </div>
-                </div>
-                {songError && (
-                  <p className="song-error" role="alert">
-                    {songError}
-                  </p>
-                )}
-                <button type="submit" className="game-modal-submit add-song-button">
-                  Add Song
-                </button>
-              </form>
-
-              {/* Songs List */}
-              <div className="songs-list-section">
-                <h3 className="songs-list-title">
-                  Songs ({songs.length})
-                </h3>
-                {songs.length === 0 ? (
-                  <p className="no-songs-message">No songs added yet. Be the first to add one!</p>
-                ) : (
-                  <div className="songs-list">
-                    {songs.map((song) => {
-                      const isLongPressing = longPressSongId === song.id
-                      const isRevealed = revealedSongs.has(song.id)
-                      
-                      return (
-                        <div 
-                          key={song.id} 
-                          className={`song-item ${isLongPressing ? 'long-pressing' : ''} ${isRevealed ? 'revealed' : ''}`}
-                          onMouseDown={() => handleLongPressStart(song.id)}
-                          onMouseUp={handleLongPressEnd}
-                          onMouseLeave={handleLongPressEnd}
-                          onTouchStart={() => handleLongPressStart(song.id)}
-                          onTouchEnd={handleLongPressEnd}
-                          onTouchCancel={handleLongPressEnd}
-                        >
-                          {isLongPressing && (
-                            <div className="long-press-progress">
-                              <div 
-                                className="long-press-progress-bar" 
-                                style={{ width: `${longPressProgress}%` }}
-                              />
-                              <span className="long-press-progress-text">
-                                {Math.round(longPressProgress / 20)}s
-                              </span>
-                            </div>
-                          )}
-                        <div className="song-info">
-                          <div className="song-name">{song.songName}</div>
-                          <div className="song-artist">by {song.artist}</div>
-                            {isRevealed && (
-                              <div className="song-added-by">
-                                Added by: {song.addedBy}
-                              </div>
-                            )}
-                        </div>
-                        {song.videoId && (
-                          <a
-                            href={`https://www.youtube.com/watch?v=${song.videoId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="song-youtube-link"
-                            onClick={(e) => e.stopPropagation()}
-                            aria-label={`Open ${song.songName} on YouTube`}
-                          >
-                            <span className="youtube-icon">▶</span>
-                            Watch on YouTube
-                          </a>
-                        )}
-                      </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-
           </div>
         </div>
       )}

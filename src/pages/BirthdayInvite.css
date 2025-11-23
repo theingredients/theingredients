@@ -1,3 +1,150 @@
+/* Password Protection */
+.password-protection-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem 1rem;
+}
+
+.password-protection-form {
+  max-width: 400px;
+  width: 100%;
+  background: var(--card-bg, #ffffff);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.password-protection-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  text-align: center;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.password-protection-description {
+  font-size: 0.95rem;
+  color: var(--text-secondary, #666);
+  text-align: center;
+  margin: 0 0 1.5rem 0;
+}
+
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.password-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.password-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.password-input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 2px solid var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  background: var(--input-bg, #ffffff);
+  color: var(--text-primary, #1a1a1a);
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.password-input:focus {
+  outline: none;
+  border-color: var(--primary-color, #007bff);
+}
+
+.password-input.error {
+  border-color: #dc3545;
+}
+
+.password-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.password-error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.password-submit-button {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--primary-color, #007bff);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.password-submit-button:hover:not(:disabled) {
+  background: var(--primary-hover, #0056b3);
+}
+
+.password-submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.theme-dark .password-protection-form {
+  background: var(--card-bg, #2a2a2a);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark .password-protection-title {
+  color: var(--text-primary, #ffffff);
+}
+
+.theme-dark .password-protection-description {
+  color: var(--text-secondary, #b0b0b0);
+}
+
+.theme-dark .password-label {
+  color: var(--text-primary, #ffffff);
+}
+
+.theme-dark .password-input {
+  background: var(--input-bg, #3a3a3a);
+  border-color: var(--border-color, #4a4a4a);
+  color: var(--text-primary, #ffffff);
+}
+
+.theme-dark .password-input:focus {
+  border-color: var(--primary-color, #4a9eff);
+}
+
+@media (max-width: 768px) {
+  .password-protection-container {
+    min-height: 50vh;
+    padding: 1rem;
+  }
+
+  .password-protection-form {
+    padding: 1.5rem;
+  }
+
+  .password-protection-title {
+    font-size: 1.5rem;
+  }
+}
+
 .birthday-invite {
   max-width: 800px;
   margin: 0 auto;

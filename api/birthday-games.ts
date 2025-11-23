@@ -13,19 +13,9 @@ interface GOATSubmission {
   submittedAt: number
 }
 
-interface Song {
-  id: string
-  songName: string
-  artist: string
-  addedBy: string
-  addedAt: number
-  videoId?: string
-}
-
 // KV keys
 const WHICH_ONES_FALSE_KEY = 'birthday-games:which-ones-false'
 const GOAT_KEY = 'birthday-games:goat'
-const WHO_PICKED_SONGS_KEY = 'birthday-games:who-picked-songs'
 
 // Initialize Redis client (reused across requests)
 let redisClient: ReturnType<typeof createClient> | null = null
@@ -141,50 +131,6 @@ async function saveGOATSubmission(playerName: string, movies: string[]): Promise
   }
 }
 
-async function getSongs(): Promise<Song[]> {
-  try {
-    const redis = await getRedisClient()
-    const data = await redis.get(WHO_PICKED_SONGS_KEY)
-    if (data) {
-      return JSON.parse(data as string) as Song[]
-    }
-    return []
-  } catch (error) {
-    console.error('Error getting songs from Redis:', error)
-    return []
-  }
-}
-
-async function saveSong(song: Song): Promise<void> {
-  try {
-    const redis = await getRedisClient()
-    const songs = await getSongs()
-    
-    // Check if song already exists (by videoId or by name+artist)
-    const songExists = songs.some(s => 
-      (song.videoId && s.videoId === song.videoId) || 
-      (s.songName.toLowerCase() === song.songName.toLowerCase() && 
-       s.artist.toLowerCase() === song.artist.toLowerCase())
-    )
-    
-    if (!songExists) {
-      songs.push({
-        id: song.id,
-        songName: song.songName.trim().substring(0, 100),
-        artist: song.artist.trim().substring(0, 100),
-        addedBy: song.addedBy.trim().substring(0, 50),
-        addedAt: song.addedAt,
-        ...(song.videoId && { videoId: song.videoId })
-      })
-      
-      await redis.set(WHO_PICKED_SONGS_KEY, JSON.stringify(songs))
-    }
-  } catch (error) {
-    console.error('Error saving song to Redis:', error)
-    throw error
-  }
-}
-
 // CORS headers
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -206,43 +152,13 @@ export default async function handler(
     res.setHeader(key, value)
   })
 
-  // POST: Submit statements, movies, or songs
+  // POST: Submit statements or movies
   if (req.method === 'POST') {
     try {
-      const { playerName, statements, movies, gameType, song } = req.body
+      const { playerName, statements, movies, gameType } = req.body
 
       if (!playerName || !playerName.trim()) {
         return res.status(400).json({ error: 'Player name is required' })
-      }
-
-      // Handle Who Picked game (songs)
-      if (gameType === 'who-picked') {
-        if (!song || !song.songName || !song.artist) {
-          return res.status(400).json({ error: 'Song name and artist are required' })
-        }
-
-        const newSong: Song = {
-          id: song.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
-          songName: song.songName.trim().substring(0, 100),
-          artist: song.artist.trim().substring(0, 100),
-          addedBy: playerName.trim().substring(0, 50),
-          addedAt: song.addedAt || Date.now(),
-          ...(song.videoId && { videoId: song.videoId })
-        }
-
-        try {
-          await saveSong(newSong)
-        } catch (error) {
-          console.error('Error saving song:', error)
-          // Continue anyway to return current songs list
-        }
-        const allSongs = await getSongs()
-        console.log('Returning songs after save:', allSongs.length)
-
-        return res.status(200).json({
-          success: true,
-          songs: allSongs
-        })
       }
 
       // Handle GOAT game (movies)
@@ -294,13 +210,6 @@ export default async function handler(
   if (req.method === 'GET') {
     try {
       const { gameType } = req.query
-
-      // Handle Who Picked game (songs)
-      if (gameType === 'who-picked') {
-        const songs = await getSongs()
-        console.log('GET songs request, returning:', songs.length, 'songs')
-        return res.status(200).json({ songs })
-      }
 
       // Handle GOAT game
       if (gameType === 'goat') {
