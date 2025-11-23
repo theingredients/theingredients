@@ -67,15 +67,41 @@ const BirthdayGames = () => {
       setPlayerName(savedPlayerName)
     }
     
-    // Load saved songs from localStorage
-    const savedSongs = localStorage.getItem('birthday-games-who-picked-songs')
-    if (savedSongs) {
+    // Load songs from API (with localStorage fallback)
+    const loadSongs = async () => {
       try {
-        setSongs(JSON.parse(savedSongs))
+        const response = await fetch('/api/birthday-games?gameType=who-picked')
+        if (response.ok) {
+          const data = await response.json()
+          const songs = data.songs || []
+          setSongs(songs)
+          // Also save to localStorage as backup
+          localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(songs))
+        } else {
+          // Fallback to localStorage if API fails
+          const savedSongs = localStorage.getItem('birthday-games-who-picked-songs')
+          if (savedSongs) {
+            try {
+              setSongs(JSON.parse(savedSongs))
+            } catch (error) {
+              console.error('Error loading songs from localStorage:', error)
+            }
+          }
+        }
       } catch (error) {
-        console.error('Error loading songs from localStorage:', error)
+        console.error('Error loading songs from API:', error)
+        // Fallback to localStorage if API fails
+        const savedSongs = localStorage.getItem('birthday-games-who-picked-songs')
+        if (savedSongs) {
+          try {
+            setSongs(JSON.parse(savedSongs))
+          } catch (parseError) {
+            console.error('Error loading songs from localStorage:', parseError)
+          }
+        }
       }
     }
+    loadSongs()
     
     // Load comments from API
     const loadComments = async () => {
@@ -146,6 +172,46 @@ const BirthdayGames = () => {
     }
   }, [commentSaveSuccess])
 
+  const fetchSongs = async () => {
+    try {
+      const response = await fetch('/api/birthday-games?gameType=who-picked')
+      if (response.ok) {
+        const data = await response.json()
+        const songs = data.songs || []
+        setSongs(songs)
+        // Also save to localStorage as backup
+        localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(songs))
+        return songs
+      }
+      // Fallback to localStorage if API fails
+      const savedSongs = localStorage.getItem('birthday-games-who-picked-songs')
+      if (savedSongs) {
+        try {
+          const songs = JSON.parse(savedSongs)
+          setSongs(songs)
+          return songs
+        } catch (error) {
+          console.error('Error loading songs from localStorage:', error)
+        }
+      }
+      return []
+    } catch (error) {
+      console.error('Error fetching songs:', error)
+      // Fallback to localStorage if API fails
+      const savedSongs = localStorage.getItem('birthday-games-who-picked-songs')
+      if (savedSongs) {
+        try {
+          const songs = JSON.parse(savedSongs)
+          setSongs(songs)
+          return songs
+        } catch (error) {
+          console.error('Error loading songs from localStorage:', error)
+        }
+      }
+      return []
+    }
+  }
+
   const handleGameSelect = async (gameName: string) => {
     if (gameName === "Which One's False") {
       // Fetch submissions first before opening game
@@ -155,6 +221,8 @@ const BirthdayGames = () => {
       setShowSubmissionsList(hasSubmissions)
       setCurrentGame(gameName)
     } else if (gameName === "Who Picked") {
+      // Fetch songs from API when opening game
+      await fetchSongs()
       setCurrentGame(gameName)
     } else if (gameName === "GOAT") {
       // Fetch GOAT submissions first before opening game
@@ -351,9 +419,46 @@ const BirthdayGames = () => {
       ...(videoId && { videoId })
     }
     
-    const updatedSongs = [...songs, newSong]
-    setSongs(updatedSongs)
-    localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
+    // Save to API
+    try {
+      const response = await fetch('/api/birthday-games', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          playerName: playerName,
+          gameType: 'who-picked',
+          song: newSong
+        }),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        if (result.songs) {
+          setSongs(result.songs)
+          // Also save to localStorage as backup
+          localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(result.songs))
+        } else {
+          // Fallback: update local state if API doesn't return songs
+          const updatedSongs = [...songs, newSong]
+          setSongs(updatedSongs)
+          localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
+        }
+      } else {
+        // Fallback: save to localStorage if API fails
+        const updatedSongs = [...songs, newSong]
+        setSongs(updatedSongs)
+        localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
+        console.error('Failed to save song to API, saved locally instead')
+      }
+    } catch (error) {
+      // Fallback: save to localStorage if API fails
+      const updatedSongs = [...songs, newSong]
+      setSongs(updatedSongs)
+      localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
+      console.error('Error saving song to API, saved locally instead:', error)
+    }
     
     setNewSongName('')
     setNewSongArtist('')
@@ -430,7 +535,7 @@ const BirthdayGames = () => {
     return { songName: cleanTitle || title, artist: channelTitle }
   }
 
-  const handleSelectYoutubeSong = (result: { videoId: string; title: string; channelTitle: string; thumbnail: string }) => {
+  const handleSelectYoutubeSong = async (result: { videoId: string; title: string; channelTitle: string; thumbnail: string }) => {
     const { songName, artist } = parseSongFromYoutubeTitle(result.title, result.channelTitle)
     
     // Check if song already exists (by videoId or by name+artist)
@@ -453,9 +558,46 @@ const BirthdayGames = () => {
       videoId: result.videoId
     }
     
-    const updatedSongs = [...songs, newSong]
-    setSongs(updatedSongs)
-    localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
+    // Save to API
+    try {
+      const response = await fetch('/api/birthday-games', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          playerName: playerName,
+          gameType: 'who-picked',
+          song: newSong
+        }),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        if (result.songs) {
+          setSongs(result.songs)
+          // Also save to localStorage as backup
+          localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(result.songs))
+        } else {
+          // Fallback: update local state if API doesn't return songs
+          const updatedSongs = [...songs, newSong]
+          setSongs(updatedSongs)
+          localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
+        }
+      } else {
+        // Fallback: save to localStorage if API fails
+        const updatedSongs = [...songs, newSong]
+        setSongs(updatedSongs)
+        localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
+        console.error('Failed to save song to API, saved locally instead')
+      }
+    } catch (error) {
+      // Fallback: save to localStorage if API fails
+      const updatedSongs = [...songs, newSong]
+      setSongs(updatedSongs)
+      localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
+      console.error('Error saving song to API, saved locally instead:', error)
+    }
     
     // Clear search and show success
     setYoutubeSearchQuery('')
@@ -823,36 +965,36 @@ const BirthdayGames = () => {
                   aria-expanded={!isCommentsCollapsed}
                   aria-label={`${isCommentsCollapsed ? 'Expand' : 'Collapse'} messages from everyone`}
                 >
-                  <h3 className={`all-comments-title ${isContentExploding ? 'exploding' : ''}`}>
-                    Messages from Everyone ({Object.values(comments).flat().length})
-                  </h3>
+                <h3 className={`all-comments-title ${isContentExploding ? 'exploding' : ''}`}>
+                  Messages from Everyone ({Object.values(comments).flat().length})
+                </h3>
                   <span className="all-comments-toggle-icon" aria-hidden="true">
                     {isCommentsCollapsed ? '▶' : '▼'}
                   </span>
                 </div>
                 {!isCommentsCollapsed && (
                   <div className="all-comments-content">
-                    {Object.values(comments).flat().length > 0 ? (
-                      <div className="all-comments-list">
-                        {Object.entries(comments)
-                          .flatMap(([name, commentArray]) => 
-                            commentArray.map((comment, index) => ({ name, comment, index }))
-                          )
-                          .map(({ name, comment, index }) => (
-                            <div key={`${name}-${index}`} className={`comment-item ${name === playerName ? 'current-user-comment' : ''}`}>
-                              <div className="comment-item-header">
-                                <span className="comment-author">{name}</span>
-                                {name === playerName && (
-                                  <span className="comment-badge">You</span>
-                                )}
-                              </div>
-                              <div className="comment-item-text">{comment}</div>
-                            </div>
-                          ))}
-                      </div>
-                    ) : (
-                      <div className="no-comments-message">
-                        <p>No messages yet. Be the first to share your thoughts!</p>
+                {Object.values(comments).flat().length > 0 ? (
+                  <div className="all-comments-list">
+                    {Object.entries(comments)
+                      .flatMap(([name, commentArray]) => 
+                        commentArray.map((comment, index) => ({ name, comment, index }))
+                      )
+                      .map(({ name, comment, index }) => (
+                        <div key={`${name}-${index}`} className={`comment-item ${name === playerName ? 'current-user-comment' : ''}`}>
+                          <div className="comment-item-header">
+                            <span className="comment-author">{name}</span>
+                            {name === playerName && (
+                              <span className="comment-badge">You</span>
+                            )}
+                          </div>
+                          <div className="comment-item-text">{comment}</div>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="no-comments-message">
+                    <p>No messages yet. Be the first to share your thoughts!</p>
                       </div>
                     )}
                   </div>
@@ -925,7 +1067,7 @@ const BirthdayGames = () => {
                       </div>
                       <p className="scan-to-share-url">{qrUrl}</p>
                     </div>
-                  )}
+          )}
                 </div>
               )}
 
@@ -948,15 +1090,15 @@ const BirthdayGames = () => {
       {currentGame === "Which One's False" && (
         <div className="game-full-page">
           <div className="game-full-page-header">
-            <button
+              <button
               className="game-back-button"
               onClick={handleBackToGames}
               aria-label="Back to games"
-            >
+              >
               ← Back to Games
-            </button>
+              </button>
             <h2 className="game-full-page-title">Which One's False</h2>
-          </div>
+            </div>
           <div className="game-full-page-content">
               {!showSubmissionsList ? (
                 <>
@@ -1035,98 +1177,98 @@ const BirthdayGames = () => {
                     </div>
                   ) : (
                     <>
-                      <div className="submissions-list-header">
-                        <div>
-                          <h3 className="submissions-list-title">Submitted Players</h3>
-                          <p className="submissions-list-description">
-                            {Object.keys(submittedUsers).length} player{Object.keys(submittedUsers).length !== 1 ? 's' : ''} have submitted their statements!
-                          </p>
-                        </div>
-                        {!showPlayerNames && (
-                          <button
-                            type="button"
-                            className="reveal-names-button"
-                            onClick={() => setShowRevealConfirmation(true)}
-                          >
-                            Reveal Names
-                          </button>
-                        )}
-                      </div>
-                      <div className="submissions-list-items">
-                        {Object.entries(submittedUsers)
-                          .sort(([, a], [, b]) => b.submittedAt - a.submittedAt)
-                          .map(([key, submission], index) => {
-                            const isExpanded = expandedSubmissions.has(key)
-                            return (
-                              <div key={key} className={`submission-item ${isExpanded ? 'expanded' : ''}`}>
-                                <div 
-                                  className="submission-header"
-                                  onClick={() => {
-                                    const newExpanded = new Set(expandedSubmissions)
-                                    if (isExpanded) {
-                                      newExpanded.delete(key)
-                                    } else {
-                                      newExpanded.add(key)
-                                    }
-                                    setExpandedSubmissions(newExpanded)
-                                  }}
-                                  style={{ cursor: 'pointer' }}
-                                >
-                                  <h4 className="submission-player-name">
-                                    {showPlayerNames ? submission.playerName : `Player ${index + 1}`}
-                                  </h4>
-                                  <span className="submission-toggle-icon">
-                                    {isExpanded ? '▼' : '▶'}
-                                  </span>
-                                </div>
-                                {isExpanded && (
-                                  <div className="submission-statements">
-                                    {submission.statements.map((statement, statementIndex) => (
-                                      <div key={statementIndex} className="submission-statement">
-                                        <span className="submission-statement-number">{statementIndex + 1}.</span>
-                                        <span className="submission-statement-text">{statement}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            )
-                          })}
-                      </div>
-                      {showPlayerNames && (
-                        <div className="players-summary">
-                          <h4 className="players-summary-title">Players:</h4>
-                          <div className="players-summary-list">
-                            {Object.entries(submittedUsers)
-                              .sort(([, a], [, b]) => b.submittedAt - a.submittedAt)
-                              .map(([key, submission], index) => (
-                                <span key={key} className="player-summary-item">
-                                  {submission.playerName}
-                                  {index < Object.keys(submittedUsers).length - 1 && ','}
-                                </span>
-                              ))}
-                          </div>
-                        </div>
-                      )}
-                      <div className="submissions-list-actions">
-                        <button
-                          type="button"
-                          className="game-modal-submit"
-                          onClick={() => {
-                            setShowSubmissionsList(false)
-                            setStatements(['', '', ''])
-                          }}
-                        >
-                          Add Another Entry
-                        </button>
+                  <div className="submissions-list-header">
+                    <div>
+                      <h3 className="submissions-list-title">Submitted Players</h3>
+                      <p className="submissions-list-description">
+                        {Object.keys(submittedUsers).length} player{Object.keys(submittedUsers).length !== 1 ? 's' : ''} have submitted their statements!
+                      </p>
+                    </div>
+                    {!showPlayerNames && (
                       <button
                         type="button"
-                        className="game-modal-cancel"
-                        onClick={handleBackToGames}
+                        className="reveal-names-button"
+                        onClick={() => setShowRevealConfirmation(true)}
                       >
-                        Close
+                        Reveal Names
                       </button>
+                    )}
+                  </div>
+                  <div className="submissions-list-items">
+                    {Object.entries(submittedUsers)
+                      .sort(([, a], [, b]) => b.submittedAt - a.submittedAt)
+                      .map(([key, submission], index) => {
+                        const isExpanded = expandedSubmissions.has(key)
+                        return (
+                          <div key={key} className={`submission-item ${isExpanded ? 'expanded' : ''}`}>
+                            <div 
+                              className="submission-header"
+                              onClick={() => {
+                                const newExpanded = new Set(expandedSubmissions)
+                                if (isExpanded) {
+                                  newExpanded.delete(key)
+                                } else {
+                                  newExpanded.add(key)
+                                }
+                                setExpandedSubmissions(newExpanded)
+                              }}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              <h4 className="submission-player-name">
+                                {showPlayerNames ? submission.playerName : `Player ${index + 1}`}
+                              </h4>
+                              <span className="submission-toggle-icon">
+                                {isExpanded ? '▼' : '▶'}
+                              </span>
+                            </div>
+                            {isExpanded && (
+                              <div className="submission-statements">
+                                {submission.statements.map((statement, statementIndex) => (
+                                  <div key={statementIndex} className="submission-statement">
+                                    <span className="submission-statement-number">{statementIndex + 1}.</span>
+                                    <span className="submission-statement-text">{statement}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                  </div>
+                  {showPlayerNames && (
+                    <div className="players-summary">
+                      <h4 className="players-summary-title">Players:</h4>
+                      <div className="players-summary-list">
+                        {Object.entries(submittedUsers)
+                          .sort(([, a], [, b]) => b.submittedAt - a.submittedAt)
+                          .map(([key, submission], index) => (
+                            <span key={key} className="player-summary-item">
+                              {submission.playerName}
+                              {index < Object.keys(submittedUsers).length - 1 && ','}
+                            </span>
+                          ))}
                       </div>
+                    </div>
+                  )}
+                  <div className="submissions-list-actions">
+                    <button
+                      type="button"
+                      className="game-modal-submit"
+                      onClick={() => {
+                        setShowSubmissionsList(false)
+                        setStatements(['', '', ''])
+                      }}
+                    >
+                      Add Another Entry
+                    </button>
+                    <button
+                      type="button"
+                      className="game-modal-cancel"
+                        onClick={handleBackToGames}
+                    >
+                      Close
+                    </button>
+                  </div>
                     </>
                   )}
                 </div>
@@ -1139,15 +1281,15 @@ const BirthdayGames = () => {
       {currentGame === "Who Picked" && (
         <div className="game-full-page">
           <div className="game-full-page-header">
-            <button
+              <button
               className="game-back-button"
               onClick={handleBackToGames}
               aria-label="Back to games"
-            >
+              >
               ← Back to Games
-            </button>
+              </button>
             <h2 className="game-full-page-title">Who Picked</h2>
-          </div>
+            </div>
           <div className="game-full-page-content">
               <p className="game-modal-description">
                 Add songs to the list! Others will try to guess who picked each song.
@@ -1292,29 +1434,29 @@ const BirthdayGames = () => {
                               </span>
                             </div>
                           )}
-                          <div className="song-info">
-                            <div className="song-name">{song.songName}</div>
-                            <div className="song-artist">by {song.artist}</div>
+                        <div className="song-info">
+                          <div className="song-name">{song.songName}</div>
+                          <div className="song-artist">by {song.artist}</div>
                             {isRevealed && (
                               <div className="song-added-by">
                                 Added by: {song.addedBy}
                               </div>
                             )}
-                          </div>
-                          {song.videoId && (
-                            <a
-                              href={`https://www.youtube.com/watch?v=${song.videoId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="song-youtube-link"
-                              onClick={(e) => e.stopPropagation()}
-                              aria-label={`Open ${song.songName} on YouTube`}
-                            >
-                              <span className="youtube-icon">▶</span>
-                              Watch on YouTube
-                            </a>
-                          )}
                         </div>
+                        {song.videoId && (
+                          <a
+                            href={`https://www.youtube.com/watch?v=${song.videoId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="song-youtube-link"
+                            onClick={(e) => e.stopPropagation()}
+                            aria-label={`Open ${song.songName} on YouTube`}
+                          >
+                            <span className="youtube-icon">▶</span>
+                            Watch on YouTube
+                          </a>
+                        )}
+                      </div>
                       )
                     })}
                   </div>
@@ -1329,15 +1471,15 @@ const BirthdayGames = () => {
       {currentGame === "GOAT" && (
         <div className="game-full-page">
           <div className="game-full-page-header">
-            <button
+              <button
               className="game-back-button"
               onClick={handleBackToGames}
               aria-label="Back to games"
-            >
+              >
               ← Back to Games
-            </button>
+              </button>
             <h2 className="game-full-page-title">GOAT</h2>
-          </div>
+            </div>
           <div className="game-full-page-content">
               {!showGOATSubmissionsList ? (
                 <>
@@ -1416,98 +1558,98 @@ const BirthdayGames = () => {
                     </div>
                   ) : (
                     <>
-                      <div className="submissions-list-header">
-                        <div>
-                          <h3 className="submissions-list-title">Submitted Players</h3>
-                          <p className="submissions-list-description">
-                            {Object.keys(goatSubmissions).length} player{Object.keys(goatSubmissions).length !== 1 ? 's' : ''} have submitted their movies!
-                          </p>
-                        </div>
-                        {!showGOATPlayerNames && (
-                          <button
-                            type="button"
-                            className="reveal-names-button"
-                            onClick={() => setShowGOATRevealConfirmation(true)}
-                          >
-                            Reveal Names
-                          </button>
-                        )}
-                      </div>
-                      <div className="submissions-list-items">
+                  <div className="submissions-list-header">
+                    <div>
+                      <h3 className="submissions-list-title">Submitted Players</h3>
+                      <p className="submissions-list-description">
+                        {Object.keys(goatSubmissions).length} player{Object.keys(goatSubmissions).length !== 1 ? 's' : ''} have submitted their movies!
+                      </p>
+                    </div>
+                    {!showGOATPlayerNames && (
+                      <button
+                        type="button"
+                        className="reveal-names-button"
+                        onClick={() => setShowGOATRevealConfirmation(true)}
+                      >
+                        Reveal Names
+                      </button>
+                    )}
+                  </div>
+                  <div className="submissions-list-items">
+                    {Object.entries(goatSubmissions)
+                      .sort(([, a], [, b]) => b.submittedAt - a.submittedAt)
+                      .map(([key, submission], index) => {
+                        const isExpanded = expandedGOATSubmissions.has(key)
+                        return (
+                          <div key={key} className={`submission-item ${isExpanded ? 'expanded' : ''}`}>
+                            <div 
+                              className="submission-header"
+                              onClick={() => {
+                                const newExpanded = new Set(expandedGOATSubmissions)
+                                if (isExpanded) {
+                                  newExpanded.delete(key)
+                                } else {
+                                  newExpanded.add(key)
+                                }
+                                setExpandedGOATSubmissions(newExpanded)
+                              }}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              <h4 className="submission-player-name">
+                                {showGOATPlayerNames ? submission.playerName : `Player ${index + 1}`}
+                              </h4>
+                              <span className="submission-toggle-icon">
+                                {isExpanded ? '▼' : '▶'}
+                              </span>
+                            </div>
+                            {isExpanded && (
+                              <div className="submission-statements">
+                                {submission.movies.map((movie, movieIndex) => (
+                                  <div key={movieIndex} className="submission-statement">
+                                    <span className="submission-statement-number">{movieIndex + 1}.</span>
+                                    <span className="submission-statement-text">{movie}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                  </div>
+                  {showGOATPlayerNames && (
+                    <div className="players-summary">
+                      <h4 className="players-summary-title">Players:</h4>
+                      <div className="players-summary-list">
                         {Object.entries(goatSubmissions)
                           .sort(([, a], [, b]) => b.submittedAt - a.submittedAt)
-                          .map(([key, submission], index) => {
-                            const isExpanded = expandedGOATSubmissions.has(key)
-                            return (
-                              <div key={key} className={`submission-item ${isExpanded ? 'expanded' : ''}`}>
-                                <div 
-                                  className="submission-header"
-                                  onClick={() => {
-                                    const newExpanded = new Set(expandedGOATSubmissions)
-                                    if (isExpanded) {
-                                      newExpanded.delete(key)
-                                    } else {
-                                      newExpanded.add(key)
-                                    }
-                                    setExpandedGOATSubmissions(newExpanded)
-                                  }}
-                                  style={{ cursor: 'pointer' }}
-                                >
-                                  <h4 className="submission-player-name">
-                                    {showGOATPlayerNames ? submission.playerName : `Player ${index + 1}`}
-                                  </h4>
-                                  <span className="submission-toggle-icon">
-                                    {isExpanded ? '▼' : '▶'}
-                                  </span>
-                                </div>
-                                {isExpanded && (
-                                  <div className="submission-statements">
-                                    {submission.movies.map((movie, movieIndex) => (
-                                      <div key={movieIndex} className="submission-statement">
-                                        <span className="submission-statement-number">{movieIndex + 1}.</span>
-                                        <span className="submission-statement-text">{movie}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            )
-                          })}
+                          .map(([key, submission], index) => (
+                            <span key={key} className="player-summary-item">
+                              {submission.playerName}
+                              {index < Object.keys(goatSubmissions).length - 1 && ','}
+                            </span>
+                          ))}
                       </div>
-                      {showGOATPlayerNames && (
-                        <div className="players-summary">
-                          <h4 className="players-summary-title">Players:</h4>
-                          <div className="players-summary-list">
-                            {Object.entries(goatSubmissions)
-                              .sort(([, a], [, b]) => b.submittedAt - a.submittedAt)
-                              .map(([key, submission], index) => (
-                                <span key={key} className="player-summary-item">
-                                  {submission.playerName}
-                                  {index < Object.keys(goatSubmissions).length - 1 && ','}
-                                </span>
-                              ))}
-                          </div>
-                        </div>
-                      )}
-                      <div className="submissions-list-actions">
-                        <button
-                          type="button"
-                          className="game-modal-submit"
-                          onClick={() => {
-                            setShowGOATSubmissionsList(false)
-                            setMovies(['', '', ''])
-                          }}
-                        >
-                          Add Another Entry
-                        </button>
-                        <button
-                          type="button"
-                          className="game-modal-cancel"
+                    </div>
+                  )}
+                  <div className="submissions-list-actions">
+                    <button
+                      type="button"
+                      className="game-modal-submit"
+                      onClick={() => {
+                        setShowGOATSubmissionsList(false)
+                        setMovies(['', '', ''])
+                      }}
+                    >
+                      Add Another Entry
+                    </button>
+                    <button
+                      type="button"
+                      className="game-modal-cancel"
                           onClick={handleBackToGames}
-                        >
-                          Close
-                        </button>
-                      </div>
+                    >
+                      Close
+                    </button>
+                  </div>
                     </>
                   )}
                 </div>

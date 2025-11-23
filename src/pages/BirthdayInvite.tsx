@@ -538,7 +538,7 @@ const BirthdayInvite = () => {
             {menuCategories.map((category) => {
               const isExpanded = expandedCategories.has(category.name)
               return (
-                <div key={category.name} className={`menu-category ${isContentExploding ? 'exploding' : ''}`}>
+              <div key={category.name} className={`menu-category ${isContentExploding ? 'exploding' : ''}`}>
                   <div 
                     className={`category-header ${isExpanded ? 'expanded' : ''}`}
                     onClick={() => {
@@ -567,27 +567,27 @@ const BirthdayInvite = () => {
                     aria-expanded={isExpanded}
                     aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${category.name} menu`}
                   >
-                    <h3 className={`category-title ${isContentExploding ? 'exploding' : ''}`}>{category.name}</h3>
+                <h3 className={`category-title ${isContentExploding ? 'exploding' : ''}`}>{category.name}</h3>
                     <span className="category-toggle-icon" aria-hidden="true">
                       {isExpanded ? '▼' : '▶'}
                     </span>
                   </div>
                   {isExpanded && (
-                    <div className="menu-items-list">
-                      {category.items.map((item, index) => (
-                        <div key={`${category.name}-${index}`} className={`menu-item ${isContentExploding ? 'exploding' : ''}`}>
-                          <div className="menu-item-header">
-                            <h4 className="menu-item-name">{item.name}</h4>
-                            <span className="menu-item-price">{item.price}</span>
-                          </div>
-                          {item.description && (
-                            <p className="menu-item-description">{item.description}</p>
-                          )}
-                        </div>
-                      ))}
+                <div className="menu-items-list">
+                  {category.items.map((item, index) => (
+                    <div key={`${category.name}-${index}`} className={`menu-item ${isContentExploding ? 'exploding' : ''}`}>
+                      <div className="menu-item-header">
+                        <h4 className="menu-item-name">{item.name}</h4>
+                        <span className="menu-item-price">{item.price}</span>
+                      </div>
+                      {item.description && (
+                        <p className="menu-item-description">{item.description}</p>
+                      )}
                     </div>
-                  )}
+                  ))}
                 </div>
+                  )}
+              </div>
               )
             })}
             
@@ -603,7 +603,7 @@ const BirthdayInvite = () => {
                 </a>
               </p>
             </div>
-          </div>
+                      </div>
 
           {/* Help Pay Bill Button */}
           <div className={`help-pay-bill-section ${isContentExploding ? 'exploding' : ''}`}>

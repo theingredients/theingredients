@@ -1609,21 +1609,21 @@
 
 /* Dark theme support for menu */
 .theme-dark .menu-container {
-  background: var(--card-bg-dark, #2a2a2a);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
+    background: var(--card-bg-dark, #2a2a2a);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
 
 .theme-dark .menu-title {
-  color: var(--text-primary-dark, #ffffff);
-}
+    color: var(--text-primary-dark, #ffffff);
+  }
 
 .theme-dark .menu-description {
-  color: var(--text-secondary-dark, #b0b0b0);
-}
+    color: var(--text-secondary-dark, #b0b0b0);
+  }
 
 .theme-dark .category-header {
-  border-bottom-color: var(--border-color-dark, #444);
-}
+    border-bottom-color: var(--border-color-dark, #444);
+  }
 
 .theme-dark .category-header:hover {
   border-bottom-color: var(--accent-color-dark, #6ba3f5);
@@ -1642,29 +1642,29 @@
 }
 
 .theme-dark .menu-item {
-  background: var(--item-bg-dark, #333);
-  border-color: var(--border-color-dark, #444);
-}
+    background: var(--item-bg-dark, #333);
+    border-color: var(--border-color-dark, #444);
+  }
 
 .theme-dark .menu-item-name {
-  color: var(--text-primary-dark, #ffffff);
-}
+    color: var(--text-primary-dark, #ffffff);
+  }
 
 .theme-dark .menu-item-price {
-  color: var(--accent-color-dark, #6ba3f5);
-}
+    color: var(--accent-color-dark, #6ba3f5);
+  }
 
 .theme-dark .menu-item-description {
-  color: var(--text-secondary-dark, #b0b0b0);
-}
+    color: var(--text-secondary-dark, #b0b0b0);
+  }
 
 
 .theme-dark .menu-link {
-  color: var(--accent-color-dark, #6ba3f5);
-}
+    color: var(--accent-color-dark, #6ba3f5);
+  }
 
 .theme-dark .menu-link:hover {
-  color: var(--accent-hover-dark, #8bb5ff);
+    color: var(--accent-hover-dark, #8bb5ff);
 }
 
 /* Responsive menu styles */

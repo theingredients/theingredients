@@ -383,34 +383,34 @@
 
 /* Dark theme support */
 .theme-dark .games-container {
-  background: var(--card-bg-dark, #2a2a2a);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
+    background: var(--card-bg-dark, #2a2a2a);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
 
 .theme-dark .games-subtitle {
-  color: var(--text-secondary-dark, #b0b0b0);
-}
+    color: var(--text-secondary-dark, #b0b0b0);
+  }
 
 .theme-dark .game-card {
-  background: var(--item-bg-dark, #333);
-  border-color: var(--border-color-dark, #444);
-}
+    background: var(--item-bg-dark, #333);
+    border-color: var(--border-color-dark, #444);
+  }
 
 .theme-dark .game-card:hover {
-  border-color: var(--accent-color-dark, #6ba3f5);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-}
+    border-color: var(--accent-color-dark, #6ba3f5);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  }
 
 .theme-dark .game-card:focus {
-  outline-color: var(--accent-color-dark, #6ba3f5);
-}
+    outline-color: var(--accent-color-dark, #6ba3f5);
+  }
 
 .theme-dark .game-card-title {
-  color: var(--text-primary-dark, #ffffff);
-}
+    color: var(--text-primary-dark, #ffffff);
+  }
 
 .theme-dark .game-card-description {
-  color: var(--text-secondary-dark, #b0b0b0);
+    color: var(--text-secondary-dark, #b0b0b0);
 }
 
 /* Responsive styles */
