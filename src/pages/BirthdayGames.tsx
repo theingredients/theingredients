@@ -70,34 +70,48 @@ const BirthdayGames = () => {
     // Load songs from API (with localStorage fallback)
     const loadSongs = async () => {
       try {
+        console.log('🔄 [INITIAL LOAD] Fetching songs from API...')
         const response = await fetch('/api/birthday-games?gameType=who-picked')
         if (response.ok) {
           const data = await response.json()
           const songs = data.songs || []
+          console.log('✅ [INITIAL LOAD] Fetched songs from API:', songs.length, 'songs')
+          console.log('📋 [INITIAL LOAD] All songs:', JSON.stringify(songs, null, 2))
           setSongs(songs)
           // Also save to localStorage as backup
           localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(songs))
         } else {
+          console.warn('⚠️ [INITIAL LOAD] API failed, falling back to localStorage')
           // Fallback to localStorage if API fails
           const savedSongs = localStorage.getItem('birthday-games-who-picked-songs')
           if (savedSongs) {
             try {
-              setSongs(JSON.parse(savedSongs))
+              const songs = JSON.parse(savedSongs)
+              console.log('📦 [INITIAL LOAD] Loaded songs from localStorage:', songs.length, 'songs')
+              console.log('📋 [INITIAL LOAD] All songs from localStorage:', JSON.stringify(songs, null, 2))
+              setSongs(songs)
             } catch (error) {
-              console.error('Error loading songs from localStorage:', error)
+              console.error('❌ [INITIAL LOAD] Error loading songs from localStorage:', error)
             }
+          } else {
+            console.log('📭 [INITIAL LOAD] No songs found in localStorage')
           }
         }
       } catch (error) {
-        console.error('Error loading songs from API:', error)
+        console.error('❌ [INITIAL LOAD] Error loading songs from API:', error)
         // Fallback to localStorage if API fails
         const savedSongs = localStorage.getItem('birthday-games-who-picked-songs')
         if (savedSongs) {
           try {
-            setSongs(JSON.parse(savedSongs))
+            const songs = JSON.parse(savedSongs)
+            console.log('📦 [INITIAL LOAD] Fallback: Loaded songs from localStorage:', songs.length, 'songs')
+            console.log('📋 [INITIAL LOAD] Fallback: All songs from localStorage:', JSON.stringify(songs, null, 2))
+            setSongs(songs)
           } catch (parseError) {
-            console.error('Error loading songs from localStorage:', parseError)
+            console.error('❌ [INITIAL LOAD] Error loading songs from localStorage:', parseError)
           }
+        } else {
+          console.log('📭 [INITIAL LOAD] No songs found in localStorage (fallback)')
         }
       }
     }
@@ -174,39 +188,55 @@ const BirthdayGames = () => {
 
   const fetchSongs = async () => {
     try {
+      console.log('🔄 [GAME OPEN] Fetching songs from API...')
       const response = await fetch('/api/birthday-games?gameType=who-picked')
+      console.log('📡 [GAME OPEN] Fetch response status:', response.status)
       if (response.ok) {
         const data = await response.json()
+        console.log('📦 [GAME OPEN] Fetched songs data:', data)
         const songs = data.songs || []
+        console.log('✅ [GAME OPEN] Setting songs:', songs.length, 'songs')
+        console.log('📋 [GAME OPEN] All songs:', JSON.stringify(songs, null, 2))
         setSongs(songs)
         // Also save to localStorage as backup
         localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(songs))
         return songs
+      } else {
+        const errorText = await response.text()
+        console.error('❌ [GAME OPEN] API fetch failed with status:', response.status, 'Error:', errorText)
       }
       // Fallback to localStorage if API fails
       const savedSongs = localStorage.getItem('birthday-games-who-picked-songs')
       if (savedSongs) {
         try {
           const songs = JSON.parse(savedSongs)
+          console.log('📦 [GAME OPEN] Loaded songs from localStorage:', songs.length, 'songs')
+          console.log('📋 [GAME OPEN] All songs from localStorage:', JSON.stringify(songs, null, 2))
           setSongs(songs)
           return songs
         } catch (error) {
-          console.error('Error loading songs from localStorage:', error)
+          console.error('❌ [GAME OPEN] Error loading songs from localStorage:', error)
         }
+      } else {
+        console.log('📭 [GAME OPEN] No songs found in localStorage')
       }
       return []
     } catch (error) {
-      console.error('Error fetching songs:', error)
+      console.error('❌ [GAME OPEN] Error fetching songs:', error)
       // Fallback to localStorage if API fails
       const savedSongs = localStorage.getItem('birthday-games-who-picked-songs')
       if (savedSongs) {
         try {
           const songs = JSON.parse(savedSongs)
+          console.log('📦 [GAME OPEN] Fallback: Loaded songs from localStorage:', songs.length, 'songs')
+          console.log('📋 [GAME OPEN] Fallback: All songs from localStorage:', JSON.stringify(songs, null, 2))
           setSongs(songs)
           return songs
         } catch (error) {
-          console.error('Error loading songs from localStorage:', error)
+          console.error('❌ [GAME OPEN] Error loading songs from localStorage:', error)
         }
+      } else {
+        console.log('📭 [GAME OPEN] No songs found in localStorage (fallback)')
       }
       return []
     }
@@ -574,29 +604,35 @@ const BirthdayGames = () => {
 
       if (response.ok) {
         const result = await response.json()
-        if (result.songs) {
+        console.log('YouTube song API response:', result)
+        if (result.songs && Array.isArray(result.songs)) {
           setSongs(result.songs)
           // Also save to localStorage as backup
           localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(result.songs))
+          console.log('Songs updated from API (YouTube):', result.songs.length)
         } else {
           // Fallback: update local state if API doesn't return songs
+          console.warn('API response missing songs array (YouTube), using fallback')
           const updatedSongs = [...songs, newSong]
           setSongs(updatedSongs)
           localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
         }
       } else {
         // Fallback: save to localStorage if API fails
+        const errorText = await response.text()
+        console.error('API failed with status (YouTube):', response.status, 'Error:', errorText)
         const updatedSongs = [...songs, newSong]
         setSongs(updatedSongs)
         localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
-        console.error('Failed to save song to API, saved locally instead')
+        alert('Failed to save song to server. Saved locally, but may not be visible to others.')
       }
     } catch (error) {
       // Fallback: save to localStorage if API fails
+      console.error('Error saving song to API (YouTube):', error)
       const updatedSongs = [...songs, newSong]
       setSongs(updatedSongs)
       localStorage.setItem('birthday-games-who-picked-songs', JSON.stringify(updatedSongs))
-      console.error('Error saving song to API, saved locally instead:', error)
+      alert('Failed to save song to server. Saved locally, but may not be visible to others.')
     }
     
     // Clear search and show success

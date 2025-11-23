@@ -230,8 +230,14 @@ export default async function handler(
           ...(song.videoId && { videoId: song.videoId })
         }
 
-        await saveSong(newSong)
+        try {
+          await saveSong(newSong)
+        } catch (error) {
+          console.error('Error saving song:', error)
+          // Continue anyway to return current songs list
+        }
         const allSongs = await getSongs()
+        console.log('Returning songs after save:', allSongs.length)
 
         return res.status(200).json({
           success: true,
@@ -292,6 +298,7 @@ export default async function handler(
       // Handle Who Picked game (songs)
       if (gameType === 'who-picked') {
         const songs = await getSongs()
+        console.log('GET songs request, returning:', songs.length, 'songs')
         return res.status(200).json({ songs })
       }
 
