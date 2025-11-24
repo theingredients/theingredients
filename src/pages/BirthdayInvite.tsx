@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import Layout from '../components/Layout'
+import Icon from '../components/Icon'
 import { sanitizeInput } from '../utils/inputSanitizer'
 import { useTheme } from '../contexts/ThemeContext'
 import './PageStyles.css'
@@ -669,7 +670,7 @@ const BirthdayInvite = () => {
                   >
                 <h3 className={`category-title ${isContentExploding ? 'exploding' : ''}`}>{category.name}</h3>
                     <span className="category-toggle-icon" aria-hidden="true">
-                      {isExpanded ? '▼' : '▶'}
+                      <Icon name={isExpanded ? 'chevron-down' : 'chevron-right'} size={16} />
                     </span>
                   </div>
                   {isExpanded && (
@@ -908,7 +909,7 @@ const BirthdayInvite = () => {
                 onClick={() => setIsPaymentModalOpen(false)}
                 aria-label="Close payment modal"
               >
-                ×
+                <Icon name="x" size={24} ariaHidden={true} />
               </button>
             </div>
             <div className="payment-modal-content">

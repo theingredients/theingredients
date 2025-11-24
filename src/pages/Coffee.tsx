@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Layout from '../components/Layout'
+import Icon from '../components/Icon'
 import BuyMeACoffee from '../components/BuyMeACoffee'
 import { isValidCoordinates, sanitizeApiResponse } from '../utils/inputSanitizer'
 import './PageStyles.css'
@@ -1448,7 +1449,7 @@ const Coffee = () => {
               onClick={handleCloseModal}
               aria-label="Close modal"
             >
-              ×
+              <Icon name="x" size={24} ariaHidden={true} />
             </button>
             <div className="coffee-modal-header">
               <div>
@@ -1462,7 +1463,7 @@ const Coffee = () => {
                 onClick={handleCloseModal}
                 aria-label="Close modal"
               >
-                ×
+                <Icon name="x" size={24} ariaHidden={true} />
               </button>
             </div>
             <div className="coffee-modal-content">
@@ -1592,7 +1593,7 @@ const Coffee = () => {
                 <h2 className="coffee-modal-title">Buy Me Coffee</h2>
                 <p className="coffee-modal-subtitle">
                   If you enjoy The Ingredients designs and want to support its development, 
-                  consider buying us a coffee! ☕
+                  consider buying us a coffee! <Icon name="coffee" size={16} style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: '0.25rem' }} ariaHidden={true} />
                 </p>
               </div>
               <button 
@@ -1600,7 +1601,7 @@ const Coffee = () => {
                 onClick={handleCloseBuyCoffeeModal}
                 aria-label="Close modal"
               >
-                ×
+                <Icon name="x" size={24} ariaHidden={true} />
               </button>
             </div>
             <div className="coffee-modal-content">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import Layout from '../components/Layout'
+import Icon from '../components/Icon'
 import { sanitizeInput } from '../utils/inputSanitizer'
 import { useTheme } from '../contexts/ThemeContext'
 import './PageStyles.css'
@@ -558,7 +559,7 @@ const BirthdayGames = () => {
                   Messages from Everyone ({Object.values(comments).flat().length})
                 </h3>
                   <span className="all-comments-toggle-icon" aria-hidden="true">
-                    {isCommentsCollapsed ? '▶' : '▼'}
+                    <Icon name={isCommentsCollapsed ? 'chevron-right' : 'chevron-down'} size={16} />
                   </span>
                 </div>
                 {!isCommentsCollapsed && (
@@ -640,7 +641,8 @@ const BirthdayGames = () => {
                     aria-label={isQrCollapsed ? 'Show QR code' : 'Hide QR code'}
                     aria-expanded={!isQrCollapsed}
                   >
-                    {isQrCollapsed ? '▶ Scan to Share' : '▼ Scan to Share'}
+                    <Icon name={isQrCollapsed ? 'chevron-right' : 'chevron-down'} size={16} style={{ marginRight: '0.5rem', display: 'inline-block', verticalAlign: 'middle' }} />
+                    Scan to Share
                   </button>
                   {!isQrCollapsed && (
                     <div className="scan-to-share-content">
@@ -796,7 +798,7 @@ const BirthdayGames = () => {
                                 {showPlayerNames ? submission.playerName : `Player ${index + 1}`}
                               </h4>
                               <span className="submission-toggle-icon">
-                                {isExpanded ? '▼' : '▶'}
+                                <Icon name={isExpanded ? 'chevron-down' : 'chevron-right'} size={16} />
                               </span>
                             </div>
                             {isExpanded && (
@@ -987,7 +989,7 @@ const BirthdayGames = () => {
                                 {showGOATPlayerNames ? submission.playerName : `Player ${index + 1}`}
                               </h4>
                               <span className="submission-toggle-icon">
-                                {isExpanded ? '▼' : '▶'}
+                                <Icon name={isExpanded ? 'chevron-down' : 'chevron-right'} size={16} />
                               </span>
                             </div>
                             {isExpanded && (
@@ -1057,7 +1059,7 @@ const BirthdayGames = () => {
                 onClick={() => setShowGOATRevealConfirmation(false)}
                 aria-label="Close modal"
               >
-                ×
+                <Icon name="x" size={24} ariaHidden={true} />
               </button>
             </div>
             <div className="game-modal-content">
@@ -1099,7 +1101,7 @@ const BirthdayGames = () => {
                 onClick={() => setShowRevealConfirmation(false)}
                 aria-label="Close modal"
               >
-                ×
+                <Icon name="x" size={24} ariaHidden={true} />
               </button>
             </div>
             <div className="game-modal-content">

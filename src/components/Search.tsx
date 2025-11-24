@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { sanitizeInput } from '../utils/inputSanitizer'
+import Icon from './Icon'
 import './Search.css'
 
 interface SearchProps {
@@ -57,7 +58,7 @@ const Search = ({ isOpen, onClose }: SearchProps) => {
             onClick={handleClose}
             aria-label="Close modal"
           >
-            ×
+            <Icon name="x" size={24} ariaHidden={true} />
           </button>
           <input
             type="text"

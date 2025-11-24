@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
+import Icon from '../components/Icon'
 import { isValidCoordinates, sanitizeApiResponse } from '../utils/inputSanitizer'
 import './Home.css'
 
@@ -645,22 +646,22 @@ const Home = () => {
     return 'weather-cursor-default'
   }
 
-  const getWeatherIcon = (description: string): string => {
+  const getWeatherIcon = (description: string): React.ReactNode => {
     const desc = description.toLowerCase()
     if (desc.includes('clear') || desc.includes('sunny')) {
-      return '☀️'
+      return <Icon name="sun" size={24} ariaHidden={true} />
     } else if (desc.includes('thunder') || desc.includes('storm')) {
-      return '⛈️'
+      return <Icon name="cloud-lightning" size={24} ariaHidden={true} />
     } else if (desc.includes('rain') || desc.includes('drizzle') || desc.includes('shower')) {
-      return '🌧️'
+      return <Icon name="cloud-rain" size={24} ariaHidden={true} />
     } else if (desc.includes('snow')) {
-      return '❄️'
+      return <Icon name="cloud-snow" size={24} ariaHidden={true} />
     } else if (desc.includes('fog') || desc.includes('mist')) {
-      return '🌫️'
+      return <Icon name="cloud-fog" size={24} ariaHidden={true} />
     } else if (desc.includes('cloud') || desc.includes('overcast')) {
-      return '☁️'
+      return <Icon name="cloud" size={24} ariaHidden={true} />
     }
-    return '🌤️' // Default to partly cloudy
+    return <Icon name="cloud" size={24} ariaHidden={true} /> // Default to cloud
   }
 
   const handleIngredientsClick = () => {

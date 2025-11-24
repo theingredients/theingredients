@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from '../contexts/ThemeContext'
 import Search from './Search'
+import Icon from './Icon'
 import './Layout.css'
 
 interface LayoutProps {
@@ -544,7 +545,7 @@ const Layout = ({ children }: LayoutProps) => {
             className="footer-button footer-button-icon" 
             aria-label="Coffee"
           >
-            ☕
+            <Icon name="coffee" size={20} ariaHidden={true} />
           </button>
           {/* Recipe Button - ALPHA: DO NOT SHIP - Hidden until ready for production */}
           {/* <button onClick={() => {
