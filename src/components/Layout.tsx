@@ -542,11 +542,11 @@ const Layout = ({ children }: LayoutProps) => {
             // In dev, go to live site; in production, use /or which gets rewritten
             if (import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
               // In development, redirect to live site
-              window.location.href = 'https://theingredients.io/or/'
+              window.location.href = 'https://theingredients.io/or'
             } else {
               // In production, use /or which Vercel rewrites to or-six.vercel.app
               // Using window.location.href ensures the rewrite happens (React Router navigate won't trigger it)
-              window.location.href = '/or/'
+              window.location.href = '/or'
             }
           }} className="footer-button">
             O.R.
