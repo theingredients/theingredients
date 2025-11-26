@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import Layout from '../components/Layout'
 import { apiRateLimiter } from '../utils/rateLimiter'
 import { validateWhitelist, sanitizeApiResponse, sanitizeUrl } from '../utils/inputSanitizer'
+import { logApiError } from '../utils/logger'
 import './PageStyles.css'
 import './Bored.css'
 
@@ -121,9 +122,10 @@ const Bored = () => {
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      if (import.meta.env.DEV) {
-      console.error('Error fetching activity:', err)
-      }
+      logApiError('/api/bored', err, {
+        type: filterType,
+        participants: filterParticipants,
+      })
       setError(`Failed to fetch activity: ${errorMessage}. Please try again.`)
       setActivity(null)
     } finally {

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import Icon from '../components/Icon'
 import { isValidCoordinates, sanitizeApiResponse } from '../utils/inputSanitizer'
+import { logApiError } from '../utils/logger'
 import './Home.css'
 
 interface WeatherData {
@@ -547,12 +548,16 @@ const Home = () => {
       // Handle all error types with better messages
       if (err instanceof Error) {
         setError(err.message)
-        // Log for debugging on mobile
-        if (import.meta.env.DEV) {
-          console.error('[Weather] Error:', err)
-        }
+        logApiError('Weather API', err, {
+          errorMessage: err.message,
+          errorName: err.name,
+        })
       } else {
-        setError('Unable to fetch weather. Please try again.')
+        const errorMessage = 'Unable to fetch weather. Please try again.'
+        setError(errorMessage)
+        logApiError('Weather API', new Error(errorMessage), {
+          errorMessage,
+        })
       }
     } finally {
       clearTimeout(overallTimeoutId)

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import Layout from '../components/Layout'
 import { apiRateLimiter } from '../utils/rateLimiter'
 import { validateWhitelist, sanitizeApiResponse } from '../utils/inputSanitizer'
+import { logApiError } from '../utils/logger'
 import './PageStyles.css'
 import './Jokes.css'
 
@@ -109,9 +110,11 @@ const Jokes = () => {
       setError(null)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      if (import.meta.env.DEV) {
-        console.error('Error fetching joke:', err)
-      }
+      logApiError('/api/jokeapi', err, {
+        category: filterCategory,
+        type: filterType,
+        blacklistFlags,
+      })
       setError(`Failed to fetch joke: ${errorMessage}. Please try again.`)
       setJoke(null)
     } finally {

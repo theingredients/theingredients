@@ -1,5 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from 'react'
 import Layout from './Layout'
+import { logComponentError } from '../utils/logger'
 import './Layout.css'
 
 interface Props {
@@ -22,9 +23,10 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    if (import.meta.env.DEV) {
-      console.error('ErrorBoundary caught an error:', error, errorInfo)
-    }
+    logComponentError('ErrorBoundary', error, {
+      componentStack: errorInfo.componentStack,
+      errorBoundary: true,
+    })
   }
 
   render() {
