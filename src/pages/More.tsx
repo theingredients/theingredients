@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
-import { isValidExternalUrl } from '../utils/urlValidator'
 import './PageStyles.css'
 import './Contact.css'
 
@@ -86,16 +85,6 @@ const More = () => {
     const subject = encodeURIComponent('Let\'s talk!')
     const body = encodeURIComponent('Hello Ingredients!\n\nI would like to talk about...')
     window.location.href = `mailto:theingredientscollective@gmail.com?subject=${subject}&body=${body}`
-  }
-
-  const handleAudioClick = () => {
-    const url = 'https://or-six.vercel.app/'
-    // Validate URL before opening to prevent open redirect vulnerabilities
-    if (isValidExternalUrl(url)) {
-      window.open(url, '_blank', 'noopener,noreferrer')
-    } else {
-      console.warn('External URL blocked:', url)
-    }
   }
 
   // Contact handlers
@@ -194,9 +183,6 @@ const More = () => {
         <p className="page-content">Get in touch with us and let's build!</p>
         <button onClick={handleEmailClick} className="email-button">
           Email Us
-        </button>
-        <button onClick={handleAudioClick} className="email-button">
-          Create Audio With Us (beta)
         </button>
       </div>
     </Layout>
