@@ -170,6 +170,21 @@
   transform: translateY(0);
 }
 
+.footer-button-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: auto;
+}
+
+.footer-button-disabled:hover {
+  opacity: 0.7;
+  transform: none;
+}
+
+.footer-button-disabled:active {
+  transform: none;
+}
+
 .footer-button-icon {
   font-size: 1.3rem;
   padding: 0.5rem;

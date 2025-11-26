@@ -16,6 +16,7 @@ const Layout = ({ children }: LayoutProps) => {
   const [isFlipping, setIsFlipping] = useState(false)
   const [isInDragZone, setIsInDragZone] = useState(false)
   const [flipProgress, setFlipProgress] = useState(0) // 0 to 1, represents rotation from 0 to 90 degrees
+  const [showWaitingLegal, setShowWaitingLegal] = useState(false)
   const dragStartRef = useRef<{ x: number; y: number } | null>(null)
   const isDraggingRef = useRef(false)
   const touchStartTimeRef = useRef<number | null>(null)
@@ -537,19 +538,24 @@ const Layout = ({ children }: LayoutProps) => {
           <button onClick={() => handleNavigation('/')} className="footer-button">
             Home
           </button>
-          <button onClick={() => {
-            // Always use window.location.href to ensure Vercel rewrite works
-            // In dev, go to live site; in production, use /or which gets rewritten
-            if (import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-              // In development, redirect to live site
-              window.location.href = 'https://theingredients.io/or'
-            } else {
-              // In production, use /or which Vercel rewrites to or-six.vercel.app
-              // Using window.location.href ensures the rewrite happens (React Router navigate won't trigger it)
-              window.location.href = '/or'
-            }
-          }} className="footer-button">
-            O.R.
+          <button 
+            onClick={(e) => {
+              e.preventDefault()
+              // Disabled - show "Waiting Legal" message
+              setShowWaitingLegal(true)
+              setTimeout(() => setShowWaitingLegal(false), 2000)
+            }}
+            onMouseEnter={() => setShowWaitingLegal(true)}
+            onMouseLeave={() => setShowWaitingLegal(false)}
+            onTouchStart={() => setShowWaitingLegal(true)}
+            onTouchEnd={() => {
+              setTimeout(() => setShowWaitingLegal(false), 2000)
+            }}
+            className="footer-button footer-button-disabled"
+            disabled
+            aria-label="O.R. - Waiting Legal"
+          >
+            {showWaitingLegal ? 'Waiting Legal' : 'O.R.'}
           </button>
           <button 
             onClick={() => handleNavigation('/coffee')} 
