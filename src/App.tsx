@@ -35,10 +35,10 @@ function App() {
       </Router>
       <Analytics
         beforeSend={(event) => {
-          // Exclude /go route and any paths starting with /go from analytics
-          if (event.url.includes('/go')) {
+          // Exclude /go and /or routes and any paths starting with /go or /or from analytics
+          if (event.url.includes('/go') || event.url.includes('/or')) {
             if (import.meta.env.DEV) {
-              console.log('[Analytics] Excluding /go route:', event.url)
+              console.log('[Analytics] Excluding route:', event.url)
             }
             return null // Don't send this event
           }
