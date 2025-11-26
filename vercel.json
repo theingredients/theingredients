@@ -13,14 +13,6 @@
       "destination": "https://thego-navy.vercel.app/:path*"
     },
     {
-      "source": "/or/:path*",
-      "destination": "https://or-six.vercel.app/or/:path*"
-    },
-    {
-      "source": "/or",
-      "destination": "https://or-six.vercel.app/or/"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
